@@ -23,6 +23,7 @@ from time import sleep
 from random import choice
 import numpy as np
 from vizdoom import DoomGame, Mode, ScreenResolution
+from VisualDoomAI import VisualDoomAI
 
 def cmd_line_args(argv):
     '''
@@ -33,13 +34,13 @@ def cmd_line_args(argv):
 
     doom_map = "map01"
     try:
-        opts, args = getopt.getopt(argv[1:], "hm:p:")
+        opts, args = getopt.getopt(argv[1:], "hm:")
     except getopt.GetoptError:
         print("Error: DoomAIPlay.py -m <doom_map>")
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print("DoomSpectatorPlay.py -m <doom_map>")
+            print("DoomAIPlay.py -m <doom_map>")
             sys.exit()
         elif opt in ('-m'):
             doom_map = arg
@@ -70,22 +71,23 @@ if __name__ == '__main__':
     game.set_episode_timeout(iterations)
     game.init()
 
+    ai = VisualDoomAI()
+
     sleep_time = 1.0 / 60.0
     action_history = []
     actions = get_actions(game.get_available_buttons_size())
 
     game.new_episode("../data/doom_ai_run/" + filename)
     while not game.is_episode_finished():
-
         state = game.get_state()
         action_history.append(game.get_last_action())
 
-        n = state.number
         screen_buf = state.screen_buffer
         depth_buf = state.depth_buffer
+        ai_action = ai.act(screen_buf, depth_buf, actions)
 
         tics = 1
-        game.set_action(choice(actions))
+        game.set_action(ai_action)
         game.advance_action(tics)
 
         if sleep_time > 0: sleep(sleep_time)

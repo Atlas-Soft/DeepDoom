@@ -46,18 +46,18 @@ def cmd_line_args(argv):
     args = [filename, verbose]
     return args
 
-def b64encode_state_data(state):
+def b64encode_state_data(state, action):
     state_data = {}
-    state_data['screen_buffer'] = [str(state.screen_buffer.dtype),str(base64.b64encode(state.screen_buffer)),state.screen_buffer.shape]
-    state_data['depth_buffer'] = [str(state.depth_buffer.dtype),str(base64.b64encode(state.depth_buffer)),state.depth_buffer.shape]
-    state_data['action'] = [str(action_history.dtype),str(base64.b64encode(action_history)),action_history.shape]
+    state_data['screen_buffer'] = [str(state.screen_buffer.dtype),base64.b64encode(state.screen_buffer).decode('utf-8'),state.screen_buffer.shape]
+    state_data['depth_buffer'] = [str(state.depth_buffer.dtype),base64.b64encode(state.depth_buffer).decode('utf-8'),state.depth_buffer.shape]
+    state_data['action'] = [str(action.dtype),base64.b64encode(action).decode('utf-8'),action.shape]
     return json.dumps(state_data)
 
 def b64decode_state_data(json_dump):
-    state_data = json.loads(jsonDump)
-    state_data['screen_buffer'] = np.frombuffer(base64.decodestring(state_data['screen_buffer'][1]),np.dtype(state_data['screen_buffer'][0])).reshape(state_data['screen_buffer'][2])
-    state_data['depth_buffer'] = np.frombuffer(base64.decodestring(state_data['depth_buffer'][1]),np.dtype(state_data['depth_buffer'][0])).reshape(state_data['depth_buffer'][2])
-    state_data['action'] = np.frombuffer(base64.decodestring(state_data['action'][1]),np.dtype(state_data['action'][0])).reshape(state_data['action'][2])
+    state_data = json.loads(json_dump)
+    state_data['screen_buffer'] = np.frombuffer(base64.b64decode(state_data['screen_buffer'][1]),np.dtype(state_data['screen_buffer'][0])).reshape(state_data['screen_buffer'][2])
+    state_data['depth_buffer'] = np.frombuffer(base64.b64decode(state_data['depth_buffer'][1]),np.dtype(state_data['depth_buffer'][0])).reshape(state_data['depth_buffer'][2])
+    state_data['action'] = np.frombuffer(base64.b64decode(state_data['action'][1]),np.dtype(state_data['action'][0])).reshape(state_data['action'][2])
     return state_data
 
 if __name__ == '__main__':
@@ -81,7 +81,7 @@ if __name__ == '__main__':
         while not game.is_episode_finished():
             state = game.get_state()
             if state.number < len(action_history):
-                f.write(b64encode_state_data(state) + "\n")
+                f.write(b64encode_state_data(state,action_history[state.number-1]) + "\n")
             game.advance_action()
         game.close()
-    print("Replay Filename: ", filename[:-3] + "json")
+    print("State Data Filename: ", filename[:-3] + "json")

@@ -42,6 +42,9 @@ def cmd_line_args(argv):
             filename = arg
         elif opt in ('-v'):
             verbose = True
+    if filename == '':
+        print("Error: DoomReplay.py -f <replay_filename>")
+        sys.exit(2)
     args = [filename, verbose]
     return args
 
@@ -58,6 +61,7 @@ if __name__ == '__main__':
     game.init()
 
     action_history = np.genfromtxt(path + filename[:-3] + "csv", delimiter=',')
+    action_history = action_history.astype(int)
 
     game.replay_episode(path + filename)
     while not game.is_episode_finished():

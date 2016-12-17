@@ -16,6 +16,8 @@ Requires the following Python Packages:
 
 -[VizDoom](https://github.com/Marqt/ViZDoom)
 
+-[Keras](https://github.com/fchollet/keras)
+
 #### Setup and Installation:
 
 Download or clone repository and install required packages.
@@ -31,7 +33,7 @@ $Python3 DoomSpectatorPlay.py -m <doom_map> -p <player_name>
 ```
 $Python3 DoomAIPlay.py -m <doom_map>
 ```
-- [DoomReplay.py](src/DoomReplay.py) - Replays .lmp replay file.
+- [DoomReplay.py](src/DoomReplay.py) - Replays .lmp replay files from [data/doom_ai_run/](data/doom_ai_run) or [data/doom_spectator_run/](data/doom_spectator_run).
 ```
 $Python3 DoomReplay.py -f <replay_file>
 ```
