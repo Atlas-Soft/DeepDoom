@@ -8,21 +8,22 @@ CHANGE-LOG:
 '''
 
 """
-This script runs a Spectator episode of VizDoom. The Vizdoom replay file is
-stored in /data/doom_spectator_run.
+This script runs AI episode of VizDoom. The Vizdoom replay file is
+stored in /data/doom_ai_run.
 
 Command line arguments:
 -h ;help command
 -m <doom_map> default=map01 ;sets Doom level
--p <player_name> default=player ;sets player name used to denote replay file
+-i <iterations> default=1000 ;sets number of cycles
+-d default=False ;sets display visible
 
 """
 
-import sys, getopt, datetime
+import sys, getopt, datetime, itertools
 from time import sleep
 from random import choice
 import numpy as np
-from vizdoom import DoomGame, Mode, ScreenResolution
+from vizdoom import DoomGame, Mode, ScreenResolution, GameVariable
 from VisualDoomAI import VisualDoomAI
 
 def cmd_line_args(argv):
@@ -33,34 +34,35 @@ def cmd_line_args(argv):
     '''
 
     doom_map = "map01"
+    iterations = 1000
+    display = False
     try:
-        opts, args = getopt.getopt(argv[1:], "hm:")
+        opts, args = getopt.getopt(argv[1:], "dhm:i:")
     except getopt.GetoptError:
-        print("Error: DoomAIPlay.py -m <doom_map>")
+        print("Error: DoomAIPlay.py -m <doom_map;sets Doom map> -i <iterations;sets number of cycles> -d <;sets display visible>")
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print("DoomAIPlay.py -m <doom_map>")
+            print("DoomAIPlay.py -m <doom_map;sets Doom map> -i <iterations;sets number of cycles> -d <;sets display visible>")
             sys.exit()
         elif opt in ('-m'):
             doom_map = arg
-    args = [doom_map]
+        elif opt in ('-d'):
+            display = True
+        elif opt in ('-i'):
+            iterations = int(arg)
+    args = [doom_map, display, iterations]
     return args
 
 def get_actions(num_of_actions):
-    actions = []
-    for i in range(num_of_actions):
-        action = []
-        for j in range(num_of_actions):
-            if i == j: action.append(1)
-            else: action.append(0)
-        actions.append(action)
+    actions = list(itertools.product(range(2), repeat=num_of_actions))
     return actions
 
 if __name__ == '__main__':
     args = cmd_line_args(sys.argv)
     doom_map = args[0]
-    iterations = 1000
+    display = args[1]
+    iterations = args[2]
     date = '{:%Y-%m-%d_%H:%M:%S}'.format(datetime.datetime.now())
     filename = "ai" + "_" + doom_map + "_" + date + ".lmp"
 
@@ -68,7 +70,11 @@ if __name__ == '__main__':
     game.load_config("configs/doom2_singleplayer.cfg")
     game.set_doom_map(doom_map)
     game.set_screen_resolution(ScreenResolution.RES_160X120)
+    game.set_window_visible(display)
     game.set_episode_timeout(iterations)
+    game.add_available_game_variable(GameVariable.POSITION_X)
+    game.add_available_game_variable(GameVariable.POSITION_Y)
+    game.add_available_game_variable(GameVariable.POSITION_Z)
     game.init()
 
     ai = VisualDoomAI()
@@ -82,12 +88,11 @@ if __name__ == '__main__':
         state = game.get_state()
         action_history.append(game.get_last_action())
 
-        screen_buf = state.screen_buffer
-        depth_buf = state.depth_buffer
-        ai_action = ai.act(screen_buf, depth_buf, actions)
+        buffers = np.asarray(np.dstack((np.transpose(state.screen_buffer, (1, 2, 0)),state.depth_buffer)), order='C')
+        ai_action = ai.act(buffers, actions)
 
         tics = 1
-        game.set_action(ai_action)
+        game.set_action(list(ai_action))
         game.advance_action(tics)
 
         if sleep_time > 0: sleep(sleep_time)

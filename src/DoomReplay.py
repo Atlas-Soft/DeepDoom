@@ -9,7 +9,7 @@ CHANGE-LOG:
 
 """
 This script replays an episode of VizDoom. By default looks for replay file
-stored in /data/doom_spectator_run.
+stored in /data/doom_spectator_run or /data/doom_ai_run.
 
 Command line arguments:
 -h ;help command
@@ -58,6 +58,7 @@ if __name__ == '__main__':
     game = DoomGame()
     game.load_config("configs/doom2_singleplayer.cfg")
     game.set_screen_resolution(ScreenResolution.RES_800X600)
+    game.set_labels_buffer_enabled(True)
     game.init()
 
     action_history = np.genfromtxt(path + filename[:-3] + "csv", delimiter=',')
