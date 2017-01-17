@@ -84,7 +84,7 @@ if __name__ == '__main__':
         while not game.is_episode_finished():
             state = game.get_state()
             if state.number < len(action_history):
-                f.write(b64encode_state_data(state,action_history[state.number-1]) + "\n")
+                f.write(b64encode_state_data(state, action_history[state.number-1]) + "\n")
             game.advance_action()
         game.close()
     print("State Buffer_Action-Data Filename: ", filename[:-3] + "json")

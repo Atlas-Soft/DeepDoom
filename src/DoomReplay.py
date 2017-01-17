@@ -67,7 +67,8 @@ if __name__ == '__main__':
     game.replay_episode(path + filename)
     while not game.is_episode_finished():
         state = game.get_state()
-        if verbose and state.number < len(action_history):
-            print(state.number-1, "Actions: ", action_history[state.number-1])
+        if state.number < len(action_history):
+            if verbose: print(state.number-1, "Actions: ", action_history[state.number-1])
+        else: break
         game.advance_action()
     game.close()
