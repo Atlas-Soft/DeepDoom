@@ -17,9 +17,10 @@ import numpy as np
 
 class DoomAI():
 
-    def __init__(self):
+    def __init__(self, actions):
+        self.actions = actions
         np.random.seed(123)
 
-    def act(self, buffer_, actions):
-        action = choice(actions)
+    def act(self, buffer_):
+        action = choice(self.actions)
         return action

@@ -25,7 +25,7 @@ class DoomSim():
         self.sim.load_config("configs/doom2_singleplayer.cfg")
         self.sim.set_doom_map(self.doom_map)
 
-    def human_play(self):
+    def human_play(self, save=True):
         '''
 
         '''
@@ -38,42 +38,49 @@ class DoomSim():
 
         actions = []
 
-        self.sim.new_episode("../data/doom_replay_data/" + filename)
+        if save: self.sim.new_episode("../data/doom_replay_data/" + filename)
+        else: self.sim.new_episode
         while not self.sim.is_episode_finished():
             actions.append(self.sim.get_last_action())
             self.sim.advance_action()
         actions.append(self.sim.get_last_action())
+        if self.sim.is_player_dead(): actions.append([3 for i in range(10)])
+        else: actions.append([2 for i in range(10)])
         self.sim.close()
 
-        actions = np.array(actions)
+        actions = np.array(actions[1:])
         np.savetxt("../data/doom_replay_data/" + filename[:-3] + "csv", actions, fmt='%i', delimiter=",")
 
-    def ai_play(self):
+    def ai_play(self, save=True):
         '''
 
         '''
         date = '{:%Y-%m-%d_%H:%M:%S}'.format(datetime.datetime.now())
         filename = "ai" + "_" + self.doom_map + "_" + date + ".lmp"
 
-        self.sim.set_episode_timeout(50)
+        cycles = 1000
         self.sim.set_screen_resolution(ScreenResolution.RES_160X120)
         self.sim.init()
 
-        ai = DoomAI()
         actions = []
         action_list = self.get_actions(self.sim.get_available_buttons_size())
+        ai = DoomAI(action_list)
 
-        self.sim.new_episode("../data/doom_replay_data/" + filename)
+        if save: self.sim.new_episode("../data/doom_replay_data/" + filename)
+        else: self.sim.new_episode
         while not self.sim.is_episode_finished():
             actions.append(self.sim.get_last_action())
             state = self.sim.get_state()
-            ai_action = ai.act(process_buffer(state.screen_buffer, state.depth_buffer), action_list)
+            if state.number == cycles: self.sim.send_game_command('kill')
+            ai_action = ai.act(process_buffer(state.screen_buffer, state.depth_buffer))
             self.sim.set_action(list(ai_action))
             self.sim.advance_action()
         actions.append(self.sim.get_last_action())
+        if self.sim.is_player_dead(): actions.append([3 for i in range(10)])
+        else: actions.append([2 for i in range(10)])
         self.sim.close()
 
-        actions = np.array(actions)
+        actions = np.array(actions[1:])
         np.savetxt("../data/doom_replay_data/" + filename[:-3] + "csv", actions, fmt='%i', delimiter=",")
 
     def replay(self, filename):
