@@ -54,8 +54,9 @@ def train_models():
     buffers, actions, rewards = load_data("player_map01_2016-12-23_11:22:23.json")
     spm = StatePredictionModel()
     x0, x1, y0 = spm.prepare_data_sets(buffers, actions)
+    #spm.load_weights("spm_0_0.h5")
     spm.train(x0, x1, y0)
-    spm.save_weights("spm_0_1.h5")
+    spm.save_weights("spm_0_0.h5")
     '''
     #Policy Model training
     buffers, actions, rewards = load_data("player_map01_2016-12-23_11:22:23.json")
@@ -70,14 +71,17 @@ def train_models():
     sem = StateEvaluationModel()
     x0, y0 = sem.prepare_data_sets(buffers[:101], rewards[:101])
     print(x0.shape, y0.shape)
+
     #sem.train(x0, y0)
     #sem.save_weights("sem_0_0.h5")
     '''
 
-    x0, x1, y0 = spm.prepare_data_sets(buffers[:101], actions[:101])
+    x0, x1, y0 = spm.prepare_data_sets(buffers, actions)
     result = spm.predict(x0, x1)
 
     plt.imshow(result[0].reshape(120,160), interpolation='nearest', cmap='gray')
+    plt.figure()
+    plt.imshow(y0[0].reshape(120,160), interpolation='nearest', cmap='gray')
     plt.show()
 
 def test_models():
@@ -85,19 +89,10 @@ def test_models():
 
     '''
     #State Prediction Model evaluation
-    buffers, actions, rewards = load_data("player_map01_2016-12-23_11:22:23.json")
-    spm = StatePredictionModel()
-    spm.load_weights("spm_0_1.h5")
-    x0, x1, y0 = spm.prepare_data_sets(buffers[:26], actions[:26])
-    result = spm.predict(x0, x1)
-
-    plt.imshow(result[0].reshape(120,160), interpolation='nearest', cmap='gray')
-    plt.show()
 
 if __name__ == '__main__':
     '''
 
     '''
-    #human_play()
     process_data()
     train_models()
