@@ -27,16 +27,16 @@ class StatePredictionModel():
         self.optimizer = 'rmsprop'
         self.loss_fun = self.vae_loss
         self.batch_size = 25
-        self.epochs = 2
+        self.epochs = 10
 
         #Input Layers
-        x0 = Input(shape=(10, 1, 120, 160), name='image_input')
+        x0 = Input(shape=(5, 120, 160), name='image_input')
         x1 = Input(shape=(10,), name='action_input')
 
         #LSTM Convolutional Layers
-        m = ConvLSTM2D(64, 5, 5, subsample = (2,2), border_mode='same', activation='relu', return_sequences=True, name='conv_1')(x0)
-        m = ConvLSTM2D(32, 5, 5, subsample = (2,2), border_mode='same', activation='relu', return_sequences=True, name='conv_2')(m)
-        m = ConvLSTM2D(8, 5, 5, subsample = (2,2), border_mode='same', activation='relu', return_sequences=False, name='conv_3')(m)
+        m = Convolution2D(64, 5, 5, subsample = (2,2), border_mode='same', activation='relu', name='conv_1')(x0)
+        m = Convolution2D(32, 5, 5, subsample = (2,2), border_mode='same', activation='relu', name='conv_2')(m)
+        m = Convolution2D(8, 5, 5, subsample = (2,2), border_mode='same', activation='relu', name='conv_3')(m)
         m = Flatten()(m)
 
         #Variational Encoder Layers
@@ -63,7 +63,7 @@ class StatePredictionModel():
         '''
         z_mean, z_log_sigma = args
         epsilon = K.random_normal(shape=(25, 2400), mean=0., std=1.0)
-        return z_mean + (K.exp(z_log_sigma) * epsilon)
+        return z_mean + ((z_log_sigma) * epsilon)
 
     def vae_loss(self, pred, true):
         '''
@@ -105,7 +105,7 @@ class StatePredictionModel():
         '''
 
         '''
-        return self.model.predict({'image_input': x0, 'action_input': x1}, batch_size=1)
+        return self.model.predict({'image_input': x0, 'action_input': x1}, batch_size=25)
 
     def prepare_data_sets(self, buffers, actions):
         '''
@@ -122,12 +122,12 @@ class StatePredictionModel():
         x0_prime = []
         for i in range(len(x0)):
             temp = []
-            for j in range(10):
+            for j in range(5):
                 k = i - j
                 if k > 0: temp.append(x0[k])
                 else: temp.append(x0[0])
             x0_prime.append(temp)
-        x0 = np.array(x0_prime)
+        x0 = np.array(x0_prime).reshape(x0.shape[0], 5, 120, 160)
 
         return x0, x1, y0
 
@@ -289,6 +289,9 @@ class StateEvaluationModel():
 def MonteCarloModel():
 
     def __init__(self, spm, pm, sem, actions):
+        '''
+
+        '''
         self.state_prediction_model = spm
         self.policy_model = pm
         self.state_evaluation_model = sem
@@ -296,33 +299,84 @@ def MonteCarloModel():
         self.root = None
 
     def run(self, buffer_, cycles):
+        '''
+
+        '''
         self.root = MonteCarloNode(buffer_)
         for i in range(cycles):
             node = self.select()
             node_prime = self.expand(node)
             reward = self.simulate(node_prime)
             self.back_progate(node_prime, reward)
-
-        return self.select().action
-
+        return self.root.select().action
 
     def select(self):
-        pass
+        '''
+
+        '''
+        node = self.root
+        while len(node.childs) != 0: node = node.select()
+        return node
 
     def expand(self, node):
-        pass
+        '''
 
-    def simulate(self):
-        pass
+        '''
+        action = self.policy_model.predict(node.buffer_)
+
+        node_prime = MonteCarloNode(self.state_prediction_model.predict(node.buffer_, action), action)
+        node_prime.parent = node
+        node.childs.append(node_prime)
+
+        return node_prime
+
+    def simulate(self, node):
+        '''
+
+        '''
+        buffer_ = node.buffer_
+        for i in range(100):
+            action = self.policy_model.predict(node.buffer_)
+            buffer_ = self.state_prediction_model.predict(buffer_, action)
+
+        reward = self.state_evaluation_model.predict(buffer_)
+        return reward
 
     def back_progate(self, node, reward):
-        pass
+        '''
+
+        '''
+        while node != self.root:
+            node.visits += 1
+            node.value += reward
+            node = node.parent
 
 def MonteCarloNode():
 
     def __init__(self, buffer_, action):
+        '''
+
+        '''
         self.buffer_ = buffer_
         self.action = action
         self.parent = None
+        self.childs = []
         self.value = 0
-        self.visits = 0
+        self.visits = 1
+
+    def select(self):
+        '''
+
+        '''
+        node = self.childs[0]
+        for i in range(len(self.childs)):
+            node_value = node.value
+            node_visits = node.visits
+            child_value = self.childs[i].value
+            child_visits = self.childs[i].visits
+            if self.UCT(node_value, node_visits) < self.UCT(child_value, child_visits):
+                node = self.childs[i]
+        return node
+
+    def UCT(self, value, visits):
+        return value * np.sqrt([np.log([self.visits])[0]/visits])[0]

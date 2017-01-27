@@ -20,7 +20,7 @@ from DataProcessor import process_buffer
 class DoomSim():
 
     def __init__(self):
-        self.doom_map = 'map01'
+        self.doom_map = 'map04'
         self.sim = DoomGame()
         self.sim.load_config("configs/doom2_singleplayer.cfg")
         self.sim.set_doom_map(self.doom_map)
@@ -44,8 +44,8 @@ class DoomSim():
             actions.append(self.sim.get_last_action())
             self.sim.advance_action()
         actions.append(self.sim.get_last_action())
-        if self.sim.is_player_dead(): actions.append([3 for i in range(10)])
-        else: actions.append([2 for i in range(10)])
+        if self.sim.is_player_dead(): actions.append([3 for i in range(8)])
+        else: actions.append([2 for i in range(8)])
         self.sim.close()
 
         actions = np.array(actions[1:])
@@ -76,8 +76,8 @@ class DoomSim():
             self.sim.set_action(list(ai_action))
             self.sim.advance_action()
         actions.append(self.sim.get_last_action())
-        if self.sim.is_player_dead(): actions.append([3 for i in range(10)])
-        else: actions.append([2 for i in range(10)])
+        if self.sim.is_player_dead(): actions.append([3 for i in range(8)])
+        else: actions.append([2 for i in range(8)])
         self.sim.close()
 
         actions = np.array(actions[1:])
