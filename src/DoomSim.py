@@ -35,9 +35,9 @@ class DoomSim():
         Note: Doom level run by the sim is currently hardcoded in the self.doom_map variable
 
         '''
-        self.doom_map = 'map04'
+        self.doom_map = 'map01'
         self.sim = DoomGame()
-        self.sim.load_config("configs/doom2_singleplayer.cfg")
+        self.sim.load_config("configs/doom1_singleplayer.cfg")
         self.sim.set_doom_map(self.doom_map)
 
     def human_play(self, save=True):

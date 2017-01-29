@@ -90,5 +90,6 @@ if __name__ == '__main__':
     ***Currently set to process replay data and train models.
 
     '''
-    process_data()
-    train_models()
+    #process_data()
+    #train_models()
+    human_play()

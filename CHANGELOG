@@ -1,0 +1,7 @@
+CHANGE-LOG:
+
+  1/29/17 Update 10
+    - ADDED Comments to various files
+    - REMOVED un-needed lines of code from [train_data() Driver.py]
+    - ADDED support for Doom1.wad
+    - FIXEDBUG from [ai_play() DoomSim.py] and [human_play() DoomSim.py]
