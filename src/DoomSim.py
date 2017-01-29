@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 '''
 Visual-Doom-AI: DoomSim.py
-Authors: Rafael Zamora, Lauren Ann
-Last Updated: 1/27/17
+Authors: Rafael Zamora, Lauren An, William Steele, Joshua Hidayat
+Last Updated: 1/29/17
 CHANGE-LOG:
-
--ADDED Comments
+    1/27/17
+        - ADDED Comments
+    1/29/17
+        - BUGFIXED replay .csv saved when save set to false on human_play and ai_play.
 
 '''
 
@@ -13,7 +15,8 @@ CHANGE-LOG:
 DoomSim is used to run various simulations of the VizDoom engine.
 It allows for simulations controlled by both human and AI players
 as well as running replay simulations.
-Gameplay data is stored in /data/doom_replay_data/ as .lmp and .csv(action history)
+
+Note: Gameplay data is stored in /data/doom_replay_data/ as .lmp and .csv(action history)
 
 """
 
@@ -28,9 +31,9 @@ class DoomSim():
     def __init__(self):
         '''
         Method initializes Vizdoom engine used for simulation.
-        
+
         Note: Doom level run by the sim is currently hardcoded in the self.doom_map variable
-        
+
         '''
         self.doom_map = 'map04'
         self.sim = DoomGame()
@@ -43,7 +46,7 @@ class DoomSim():
         Gameplay data is saved (if save == True) with filename formatted as:
         player_{doom_map}_{timestamp}.lmp - Vizdoom Replay File
         player_{doom_map}_{timestamp}.csv - Action History (Vizdoom Replay does not store this data natively)
-        
+
         '''
         date = '{:%Y-%m-%d_%H:%M:%S}'.format(datetime.datetime.now())
         filename = "player" + "_" + self.doom_map + "_" + date + ".lmp"
@@ -65,7 +68,7 @@ class DoomSim():
         self.sim.close()
 
         actions = np.array(actions[1:])
-        np.savetxt("../data/doom_replay_data/" + filename[:-3] + "csv", actions, fmt='%i', delimiter=",")
+        if save: np.savetxt("../data/doom_replay_data/" + filename[:-3] + "csv", actions, fmt='%i', delimiter=",")
 
     def ai_play(self, save=True):
         '''
@@ -73,10 +76,10 @@ class DoomSim():
         Gameplay data is saved (if save == True) with filename formatted as:
         ai_{doom_map}_{timestamp}.lmp - Vizdoom Replay File
         ai_{doom_map}_{timestamp}.csv - Action History (Vizdoom Replay does not store this data natively)
-        
+
         Note: Number of frames simulation runs for is hard code in the cycles variable
               AI behavior is programmed in DoomAI.py
-        
+
         '''
         date = '{:%Y-%m-%d_%H:%M:%S}'.format(datetime.datetime.now())
         filename = "ai" + "_" + self.doom_map + "_" + date + ".lmp"
@@ -104,12 +107,12 @@ class DoomSim():
         self.sim.close()
 
         actions = np.array(actions[1:])
-        np.savetxt("../data/doom_replay_data/" + filename[:-3] + "csv", actions, fmt='%i', delimiter=",")
+        if save: np.savetxt("../data/doom_replay_data/" + filename[:-3] + "csv", actions, fmt='%i', delimiter=",")
 
     def replay(self, filename):
         '''
         Method runs a replay of the simulations at 800 x 600 simulation.
-        
+
         '''
         self.sim.set_screen_resolution(ScreenResolution.RES_800X600)
         self.sim.init()
@@ -127,7 +130,7 @@ class DoomSim():
     def get_actions(self, num_of_actions):
         '''
         Method returns all possible permutaitons of action vectors.
-        
+
         '''
         actions = list(itertools.product(range(2), repeat=num_of_actions))
         return actions

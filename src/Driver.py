@@ -1,13 +1,18 @@
 #!/usr/bin/python3
 '''
-Visual-Doom-AI:
-Authors:
-Last Updated:
+Visual-Doom-AI: Driver.py
+Authors: Rafael Zamora, Lauren An, William Steele, Joshua Hidayat
+Last Updated: 1/29/17
 CHANGE-LOG:
+    1/29/17
+        - ADDED Comments
 
 '''
 
 """
+Script used as the driver for the project.
+
+Note: Different use-cases should be seperated by method.
 
 """
 
@@ -19,6 +24,7 @@ from matplotlib import pyplot as plt
 
 def human_play():
     '''
+    Method used to run a human-played simulation of Vizdoom.
 
     '''
     sim = DoomSim()
@@ -27,6 +33,7 @@ def human_play():
 
 def ai_play():
     '''
+    Method used to run an ai-played simulation of Vizdoom.
 
     '''
     sim = DoomSim()
@@ -34,13 +41,17 @@ def ai_play():
 
 def replay():
     '''
+    Method used to run a replay simulation of Vizdoom.
 
     '''
+
     sim = DoomSim()
     sim.replay("player_map01_2016-12-23_11:22:23.lmp")
 
 def process_data():
     '''
+    Method used to process replay data in /data/doom_replay_data/.
+    Processed data saved in /data/doom_processed_data
 
     '''
     dp = DataProcessor()
@@ -48,6 +59,9 @@ def process_data():
 
 def train_models():
     '''
+    Method used to train models of ai.
+
+    ***Currently set to train State Prediction Model.
 
     '''
     #State Prediction Model training
@@ -57,28 +71,8 @@ def train_models():
     #spm.load_weights("spm_0_0.h5")
     spm.train(x0, x1, y0)
     spm.save_weights("spm_0_0.h5")
-    '''
-    #Policy Model training
-    buffers, actions, rewards = load_data("player_map01_2016-12-23_11:22:23.json")
-    pm = PolicyModel()
-    x0, y0 = pm.prepare_data_sets(buffers[:101], actions[:101])
-    print(x0.shape, y0.shape)
-    #pm.train(x0, y0)
-    #pm.save_weights("pm_0_0.h5")
 
-    #State Evaluation Model training
-    buffers, actions, rewards = load_data("player_map01_2016-12-23_11:22:23.json")
-    sem = StateEvaluationModel()
-    x0, y0 = sem.prepare_data_sets(buffers[:101], rewards[:101])
-    print(x0.shape, y0.shape)
-
-    #sem.train(x0, y0)
-    #sem.save_weights("sem_0_0.h5")
-    '''
-
-    x0, x1, y0 = spm.prepare_data_sets(buffers, actions)
     result = spm.predict(x0, x1)
-
     plt.imshow(result[0].reshape(120,160), interpolation='nearest', cmap='gray')
     plt.figure()
     plt.imshow(y0[0].reshape(120,160), interpolation='nearest', cmap='gray')
@@ -86,12 +80,14 @@ def train_models():
 
 def test_models():
     '''
+    Method used to evaluate accuracy of models.
 
     '''
-    #State Prediction Model evaluation
+    pass
 
 if __name__ == '__main__':
     '''
+    ***Currently set to process replay data and train models.
 
     '''
     process_data()

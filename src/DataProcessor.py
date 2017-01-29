@@ -1,17 +1,20 @@
 #!/usr/bin/python3
 '''
-Visual-Doom-AI:
-Authors:
+Visual-Doom-AI: DataProcessor.py
+Authors: Rafael Zamora, Lauren An, William Steele, Joshua Hidayat
 Last Updated: 1/27/17
 CHANGE-LOG:
     1/27/17
-        - Added class/method comments with Rafael Zamora.
+        - ADDED class/method comments with Rafael Zamora.
+    1/29/17
+        - EDITED comments
 
 '''
 
 """
 DataProcessor processes and loads buffer, action, and reward data for running replays. Data files are encoded in a json format
 in the '/data/doom_processed_data'. Resulting black screens signify death, while resulting white screens signify a level complete.
+
 """
 import os, sys, getopt, datetime, json, base64
 import numpy as np
@@ -23,6 +26,7 @@ class DataProcessor():
         '''
         Method initializes the game configuration settings, such as enemy skill level and available buttons
         from 'configs/doom2_singleplayer.cfg', as well as the smaller screen resolution for replays.
+
         '''
         self.sim = DoomGame()
         self.sim.load_config("configs/doom2_singleplayer.cfg")
@@ -34,6 +38,7 @@ class DataProcessor():
         '''
         Method processes the specified replay file from '/data/doom_replay_data/'
         and produces a file stored in '/data/doom_processed_data' for training.
+
         '''
         for filename in os.listdir("../data/doom_replay_data/"):
             if filename.endswith(".lmp"):
@@ -87,10 +92,11 @@ def process_buffer(screen_buffer, depth_buffer):
     '''
     Method recieves three channels from the screen buffer (rgb) and one channel from the depth buffer. Normalizing the screen buffers
     and applying the depth buffer onto it creates a single, filtered, gray-scaled channel that gets returned for training purposes.
+
     '''
     depth_buffer_float = depth_buffer.astype('float32')/255
     screen_buffer_float = screen_buffer.astype('float32')/255
-    grey_buffer = np.dot(np.transpose(screen_buffer_float, (1, 2, 0)), [0.21, 0.72, 0.07])
+    grey_buffer = np.dot(np.transpose(screen_buffer_float, (1, 2, 0)), [0.21, 0.72, 0.07])#Greyscaling
     depth_buffer_float[(depth_buffer_float > .25)] = .25 #Effects depth radius
     depth_buffer_filtered = (depth_buffer_float - np.amin(depth_buffer_float))/ (np.amax(depth_buffer_float) - np.amin(depth_buffer_float))
     processed_buffer = grey_buffer + (.75* (1- depth_buffer_filtered))
@@ -101,6 +107,8 @@ def process_buffer(screen_buffer, depth_buffer):
 
 def b64encode_data(buffer_, action, reward):
     '''
+    Method encodes buffer, action and reward data using base64 encoding.
+    Encoded data is stored as JSON.
 
     '''
     data = {}
@@ -111,6 +119,8 @@ def b64encode_data(buffer_, action, reward):
 
 def b64decode_data(json_dump):
     '''
+    Method decodes buffer, action and reward data from JSON.
+    Uses base64 decoding.
 
     '''
     data = json.loads(json_dump)
@@ -121,7 +131,9 @@ def b64decode_data(json_dump):
 
 def load_data(filename):
     '''
-
+    Method loads processed data stored in designated file.
+    Returns buffer, action and reward data.
+    
     '''
     buffers = []
     actions = []
