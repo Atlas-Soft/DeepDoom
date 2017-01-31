@@ -2,10 +2,12 @@
 '''
 Visual-Doom-AI: Models.py
 Authors: Rafael Zamora, Lauren An, William Steele, Joshua Hidayat
-Last Updated: 1/29/17
+Last Updated: 1/31/17
 CHANGE-LOG:
     1/29/17
         - ADDED Comments
+    1/31/17
+        - ADDED mode varaible on StatePredictionModel
 
 '''
 
@@ -23,21 +25,26 @@ import numpy as np
 
 from keras.models import Model
 from keras.layers import *
+from keras.optimizers import RMSProp
 
 class StatePredictionModel():
 
-    def __init__(self):
+    def __init__(self, mode='train'):
         '''
         Method initializes the State Prediction Model used to predict future states
         of the Doom environment.
+
+        Mode variable sets how model will be used. Default set to be trained.
 
         For more information on this model go to: /doc/models/StatePredictionModel.png
 
         '''
         #Parameters
-        self.optimizer = 'rmsprop'
+        self.optimizer = RMSprop(lr=0.0005)
         self.loss_fun = 'mse'
-        self.batch_size = 25
+        if mode == 'train': self.batch_size = 75
+        elif mode == 'predict': self.batch_size = 1
+        else: self.batch_size = 75
         self.epochs = 100
 
         #Input Layers
@@ -105,7 +112,7 @@ class StatePredictionModel():
         Method used to predict y0 from x0 and x1 datasets
 
         '''
-        return self.model.predict({'image_input': x0, 'action_input': x1}, batch_size=25)
+        return self.model.predict({'image_input': x0, 'action_input': x1}, batch_size=self.batch_size)
 
     def prepare_data_sets(self, buffers, actions):
         '''
@@ -194,7 +201,7 @@ class PolicyModel():
         '''
 
         '''
-        return self.model.predict({'image_input': x0}, batch_size=1)
+        return self.model.predict({'image_input': x0}, batch_size=self.batch_size)
 
     def prepare_data_sets(self, buffers, actions):
         '''

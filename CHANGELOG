@@ -5,3 +5,8 @@ CHANGE-LOG:
     - REMOVED un-needed lines of code from [train_data() Driver.py]
     - ADDED support for Doom1.wad
     - FIXEDBUG from [ai_play() DoomSim.py] and [human_play() DoomSim.py]
+
+  1/31/17 Update 11
+    - FIXEDBUG in configs and DataProcessor.py
+    - ADDED feature to StatePredictionModel in Models.py
+    - ADDED test case in Driver.py

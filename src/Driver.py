@@ -2,10 +2,12 @@
 '''
 Visual-Doom-AI: Driver.py
 Authors: Rafael Zamora, Lauren An, William Steele, Joshua Hidayat
-Last Updated: 1/29/17
+Last Updated: 1/31/17
 CHANGE-LOG:
     1/29/17
         - ADDED Comments
+    1/31/17
+        - ADDED test case in test_models()
 
 '''
 
@@ -21,6 +23,7 @@ from DoomSim import *
 from Models import *
 import numpy as np
 from matplotlib import pyplot as plt
+import time
 
 def human_play():
     '''
@@ -68,28 +71,39 @@ def train_models():
     buffers, actions, rewards = load_data("player_map01_2016-12-23_11:22:23.json")
     spm = StatePredictionModel()
     x0, x1, y0 = spm.prepare_data_sets(buffers, actions)
-    #spm.load_weights("spm_0_0.h5")
+    spm.load_weights("spm_0_3.h5")
     spm.train(x0, x1, y0)
     spm.save_weights("spm_0_0.h5")
-
-    result = spm.predict(x0, x1)
-    plt.imshow(result[0].reshape(120,160), interpolation='nearest', cmap='gray')
-    plt.figure()
-    plt.imshow(y0[0].reshape(120,160), interpolation='nearest', cmap='gray')
-    plt.show()
 
 def test_models():
     '''
     Method used to evaluate accuracy of models.
 
     '''
-    pass
+    #State Prediction Model training
+    buffers, actions, rewards = load_data("player_map01_2016-12-23_11:22:23.json")
+    spm = StatePredictionModel(mode='predict')
+    x0, x1, y0 = spm.prepare_data_sets(buffers[600:700], actions[600:700])
+    spm.load_weights("spm_0_3.h5")
+
+    result = spm.predict(x0[5].reshape(1,5,120, 160), x1[5].reshape(1,10))
+    x0_prime = x0[5]
+    for i in range(25):
+        x0_prime = np.insert(x0_prime, 0, result, axis=0)
+        x0_prime = np.delete(x0_prime, -1, 0)
+        result = spm.predict(x0_prime.reshape(1,5,120, 160), x1[6+i].reshape(1,10))
+        spm.test(x0_prime.reshape(1,5,120, 160), x1[6+i].reshape(1,10), y0[6+i].reshape(1,1,120,160))
+        plt.imshow(y0[6+i].reshape(120,160), interpolation='nearest', cmap='gray')
+        plt.savefig("../doc/figures/true_"+ str(i)+".png")
+        plt.figure()
+        plt.imshow(result[0].reshape(120,160), interpolation='nearest', cmap='gray')
+        plt.savefig("../doc/figures/pred_"+ str(i)+".png")
+        plt.figure()
 
 if __name__ == '__main__':
     '''
     ***Currently set to process replay data and train models.
 
     '''
-    #process_data()
-    #train_models()
-    human_play()
+    process_data()
+    train_models()

@@ -2,12 +2,14 @@
 '''
 Visual-Doom-AI: DataProcessor.py
 Authors: Rafael Zamora, Lauren An, William Steele, Joshua Hidayat
-Last Updated: 1/27/17
+Last Updated: 1/31/17
 CHANGE-LOG:
     1/27/17
         - ADDED class/method comments with Rafael Zamora.
     1/29/17
         - EDITED comments
+    1/31/17
+        - BUGFIXED Could not load map 01
 
 '''
 
@@ -133,7 +135,7 @@ def load_data(filename):
     '''
     Method loads processed data stored in designated file.
     Returns buffer, action and reward data.
-    
+
     '''
     buffers = []
     actions = []

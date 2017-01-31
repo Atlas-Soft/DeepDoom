@@ -37,7 +37,7 @@ class DoomSim():
         '''
         self.doom_map = 'map01'
         self.sim = DoomGame()
-        self.sim.load_config("configs/doom1_singleplayer.cfg")
+        self.sim.load_config("configs/doom2_singleplayer.cfg")
         self.sim.set_doom_map(self.doom_map)
 
     def human_play(self, save=True):
