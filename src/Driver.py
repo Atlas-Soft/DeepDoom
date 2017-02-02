@@ -31,7 +31,7 @@ def human_play():
 
     '''
     sim = DoomSim()
-    sim.human_play(save=False)
+    sim.human_play(save=True)
     pass
 
 def ai_play():
@@ -40,7 +40,7 @@ def ai_play():
 
     '''
     sim = DoomSim()
-    sim.ai_play()
+    sim.ai_play(save=False)
 
 def replay():
     '''
@@ -49,7 +49,7 @@ def replay():
     '''
 
     sim = DoomSim()
-    sim.replay("player_map01_2016-12-23_11:22:23.lmp")
+    sim.replay("player_map01_2017-02-02_17:34:13.lmp")
 
 def process_data():
     '''
@@ -71,9 +71,9 @@ def train_models():
     buffers, actions, rewards = load_data("player_map01_2016-12-23_11:22:23.json")
     spm = StatePredictionModel()
     x0, x1, y0 = spm.prepare_data_sets(buffers, actions)
-    spm.load_weights("spm_0_3.h5")
+    spm.load_weights("spm_1_0.h5")
     spm.train(x0, x1, y0)
-    spm.save_weights("spm_0_0.h5")
+    spm.save_weights("spm_1_0.h5")
 
 def test_models():
     '''
@@ -83,16 +83,16 @@ def test_models():
     #State Prediction Model training
     buffers, actions, rewards = load_data("player_map01_2016-12-23_11:22:23.json")
     spm = StatePredictionModel(mode='predict')
-    x0, x1, y0 = spm.prepare_data_sets(buffers[600:700], actions[600:700])
-    spm.load_weights("spm_0_3.h5")
+    x0, x1, y0 = spm.prepare_data_sets(buffers[1600:1800], actions[1600:1800])
+    spm.load_weights("spm_1_0.h5")
 
     result = spm.predict(x0[5].reshape(1,5,120, 160), x1[5].reshape(1,10))
     x0_prime = x0[5]
-    for i in range(25):
+    for i in range(100):
         x0_prime = np.insert(x0_prime, 0, result, axis=0)
         x0_prime = np.delete(x0_prime, -1, 0)
         result = spm.predict(x0_prime.reshape(1,5,120, 160), x1[6+i].reshape(1,10))
-        spm.test(x0_prime.reshape(1,5,120, 160), x1[6+i].reshape(1,10), y0[6+i].reshape(1,1,120,160))
+        print(spm.test(x0_prime.reshape(1,5,120, 160), x1[6+i].reshape(1,10), y0[6+i].reshape(1,1,120,160)))
         plt.imshow(y0[6+i].reshape(120,160), interpolation='nearest', cmap='gray')
         plt.savefig("../doc/figures/true_"+ str(i)+".png")
         plt.figure()

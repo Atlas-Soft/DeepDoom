@@ -8,6 +8,8 @@ CHANGE-LOG:
         - ADDED Comments
     1/29/17
         - BUGFIXED replay .csv saved when save set to false on human_play and ai_play.
+    2/2/17
+        - BUGFIXED action input size bug
 
 '''
 
@@ -63,8 +65,8 @@ class DoomSim():
             actions.append(self.sim.get_last_action())
             self.sim.advance_action()
         actions.append(self.sim.get_last_action())
-        if self.sim.is_player_dead(): actions.append([3 for i in range(8)])
-        else: actions.append([2 for i in range(8)])
+        if self.sim.is_player_dead(): actions.append([3 for i in range(self.sim.get_available_buttons_size())])
+        else: actions.append([2 for i in range(self.sim.get_available_buttons_size())])
         self.sim.close()
 
         actions = np.array(actions[1:])
@@ -102,8 +104,8 @@ class DoomSim():
             self.sim.set_action(list(ai_action))
             self.sim.advance_action()
         actions.append(self.sim.get_last_action())
-        if self.sim.is_player_dead(): actions.append([3 for i in range(8)])
-        else: actions.append([2 for i in range(8)])
+        if self.sim.is_player_dead(): actions.append([3 for i in range(self.sim.get_available_buttons_size())])
+        else: actions.append([2 for i in range(self.sim.get_available_buttons_size())])
         self.sim.close()
 
         actions = np.array(actions[1:])

@@ -2,12 +2,14 @@
 '''
 Visual-Doom-AI: Models.py
 Authors: Rafael Zamora, Lauren An, William Steele, Joshua Hidayat
-Last Updated: 1/31/17
+Last Updated: 2/2/17
 CHANGE-LOG:
     1/29/17
         - ADDED Comments
     1/31/17
         - ADDED mode varaible on StatePredictionModel
+    2/1/17
+        - EDITED StatePredictionModel, change layer parameters
 
 '''
 
@@ -25,7 +27,7 @@ import numpy as np
 
 from keras.models import Model
 from keras.layers import *
-from keras.optimizers import RMSProp
+from keras.optimizers import RMSprop
 
 class StatePredictionModel():
 
@@ -40,7 +42,7 @@ class StatePredictionModel():
 
         '''
         #Parameters
-        self.optimizer = RMSprop(lr=0.0005)
+        self.optimizer = RMSprop(lr=0.0001)
         self.loss_fun = 'mse'
         if mode == 'train': self.batch_size = 75
         elif mode == 'predict': self.batch_size = 1
@@ -52,21 +54,23 @@ class StatePredictionModel():
         x1 = Input(shape=(10,), name='action_input')
 
         #Convolutional Layers
-        m = Convolution2D(96, 5, 5, subsample = (2,2), border_mode='same', activation='relu', name='conv_1')(x0)
-        m = Convolution2D(32, 5, 5, subsample = (2,2), border_mode='same', activation='relu', name='conv_2')(m)
-        m = Convolution2D(8, 5, 5, subsample = (2,2), border_mode='same', activation='relu', name='conv_3')(m)
+        m = Convolution2D(32, 5, 5, subsample = (2,2), border_mode='same', activation='relu', name='conv_1')(x0)
+        m = Convolution2D(64, 5, 5, subsample = (2,2), border_mode='same', activation='relu', name='conv_2')(m)
+        m = Convolution2D(64, 5, 5, subsample = (2,2), border_mode='same', activation='relu', name='conv_3')(m)
+        m = Convolution2D(64, 5, 5, subsample = (2,2), border_mode='same', activation='relu', name='conv_4')(m)
         m = Flatten()(m)
 
         #Tranformation Layers
-        z= Dense(2400, name='h_layer')(m)
-        t = Dense(2400, name='a_layer')(x1)
+        z= Dense(5120, name='h_layer')(m)
+        t = Dense(5120, name='a_layer')(x1)
         m = merge([z, t], mode='mul')
 
         #Deconvolution Layers
-        m = Dense(2400, activation='relu', name='deconv_1')(m)
-        m = Reshape((8, 15, 20))(m)
-        m = Deconvolution2D(32, 5, 5, activation='relu', border_mode='same', subsample=(2,2), output_shape=(self.batch_size, 32, 30, 40), name='deconv_2')(m)
-        m = Deconvolution2D(96, 5, 5, activation='relu', border_mode='same', subsample=(2,2), output_shape=(self.batch_size, 96, 60, 80), name='deconv_3')(m)
+        m = Dense(5120, activation='relu', name='deconv_1')(m)
+        m = Reshape((64, 8, 10))(m)
+        m = Deconvolution2D(64, 5, 5, activation='relu', border_mode='same', subsample=(2,2), output_shape=(self.batch_size, 64, 15, 20), name='deconv_2')(m)
+        m = Deconvolution2D(64, 5, 5, activation='relu', border_mode='same', subsample=(2,2), output_shape=(self.batch_size, 64, 30, 40), name='deconv_3')(m)
+        m = Deconvolution2D(32, 5, 5, activation='relu', border_mode='same', subsample=(2,2), output_shape=(self.batch_size, 32, 60, 80), name='deconv_4')(m)
         y0 = Deconvolution2D(1, 5, 5, activation='sigmoid', border_mode='same', subsample=(2,2), output_shape=(self.batch_size, 1, 120, 160), name='image_output')(m)
 
         self.model = Model(input=[x0, x1], output=[y0,])
@@ -99,20 +103,20 @@ class StatePredictionModel():
         '''
         self.model.fit({'image_input': x0, 'action_input': x1}, {'image_output': y0}, batch_size=self.batch_size, nb_epoch=self.epochs, verbose=1)
 
-    def test(self, x0, x1, y0):
-        '''
-        Method used to evaulate model accuracy using x0, x1, y0 validation datasets
-
-        '''
-        results = self.model.evaluate({'image_input': x0, 'action_input': x1}, {'image_output': y0}, batch_size=self.batch_size, verbose=1)
-        print(results)
-
     def predict(self, x0, x1):
         '''
         Method used to predict y0 from x0 and x1 datasets
 
         '''
         return self.model.predict({'image_input': x0, 'action_input': x1}, batch_size=self.batch_size)
+
+    def test(self, x0, x1, y0):
+        '''
+        Method used to evaulate model accuracy using x0, x1, y0 validation datasets
+
+        '''
+        results = self.model.evaluate({'image_input': x0, 'action_input': x1}, {'image_output': y0}, batch_size=self.batch_size, verbose=1)
+        return results
 
     def prepare_data_sets(self, buffers, actions):
         '''
