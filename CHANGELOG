@@ -16,3 +16,7 @@ CHANGE-LOG:
     - FIXEDBUG in DoomSim.py
     - UPDATED StatePredictionModel
     - ADDED DataVisualizer.py
+
+  2/11/17 v.0.0.0
+    - REVISED project scope
+    - IMPLEMENTED Q-learn training for vizDoom with qlearning4k modules
