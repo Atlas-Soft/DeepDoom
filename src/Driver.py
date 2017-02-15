@@ -1,12 +1,12 @@
-from qlearning4k import Agent
-from DoomGame import DGame
+from Qlearning4k import QLearn
+from Doom import Doom
 from Models import PolicyModel
 
 model = PolicyModel()
 
-doom = DGame('configs/basic.cfg')
+doom = Doom('configs/basic.cfg', frame_tics=4)
 
-agent = Agent(model=model.model, memory_size=-1, nb_frames=1)
-agent.train(doom, batch_size=75, nb_epoch=1000, gamma=0.8)
+qlearn = QLearn(model=model.model, memory_size=-1)
+qlearn.train(doom, batch_size=100, nb_epoch=1000, gamma=0.9, checkpoint=100, filename='w_0.h5')
 
 model.save_weights("w_0.h5")
