@@ -7,6 +7,7 @@ from tqdm import tqdm
 class Doom(Game):
 
     def __init__(self, config, frame_tics = 1):
+        self.config = config
         self.game = DoomGame()
         self.game.load_config(config)
         self.game.set_screen_resolution(ScreenResolution.RES_160X120)
@@ -28,7 +29,7 @@ class Doom(Game):
         for i in range(self.frame_tics):
             if not self.is_over():
                 self.game.advance_action()
-                self.pbar.update(1)
+        self.pbar.update(self.frame_tics)
 
     def get_state(self):
         state = self.game.get_state()
@@ -57,23 +58,28 @@ class Doom(Game):
 
     def run(self, agent, save_replay=''):
         '''
+        Method runs a instance of Doom.
+
         '''
         self.game.close()
         self.game.set_screen_resolution(ScreenResolution.RES_160X120)
-        self.game.set_window_visible(True)
+        self.game.set_window_visible(False)
         self.game.add_game_args("+vid_forcesurface 1")
         self.game.init()
-        print("Running Simulation:")
+        print("\nRunning Simulation:", self.config)
 
-        if save_replay == '': self.game.new_episode("../data/replay_data/" + filename)
+        if save_replay != '': self.game.new_episode("../data/replay_data/" + save_replay)
         else: self.game.new_episode()
+        self.pbar = tqdm(total=self.game.get_episode_timeout())
         while not self.is_over():
-            q = model.predict(S.reshape(1, 1, 120, 160))
+            S = agent.get_game_data(self)
+            q = agent.model.predict(S.reshape(1, agent.nb_frames, 120, 160))
             a = int(np.argmax(q[0]))
             self.play(a)
 
         score = self.game.get_total_reward()
         print("Total Score:", score)
+        self.pbar.close()
         self.game.close()
 
     def replay(self, filename):
@@ -84,10 +90,11 @@ class Doom(Game):
         self.game.close()
         self.game.set_screen_resolution(ScreenResolution.RES_800X600)
         self.game.set_window_visible(True)
+        self.game.set_ticrate(60)
         self.game.add_game_args("+vid_forcesurface 1")
 
         self.game.init()
-        print("Running Replay:")
+        print("\nRunning Replay:", filename)
         self.game.replay_episode("../data/replay_data/" + filename)
         while not self.game.is_episode_finished():
             self.game.advance_action()

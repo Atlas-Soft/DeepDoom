@@ -51,6 +51,13 @@ class PolicyModel():
         self.model.compile(optimizer=self.optimizer, loss=self.loss_fun, metrics=['accuracy'])
         #self.model.summary()
 
+    def predict(self, S):
+        '''
+        '''
+        q = self.model.predict(S)
+        a = int(np.argmax(q[0]))
+        return a
+
     def load_weights(self, filename):
         '''
 
@@ -62,4 +69,4 @@ class PolicyModel():
         '''
 
         '''
-        self.model.save_weights('../data/model_weights/' + filename, )
+        self.model.save_weights('../data/model_weights/' + filename, overwrite=True)

@@ -19,7 +19,7 @@ from keras import backend as K
 import matplotlib.pyplot as plt
 import os
 
-class QLearn:
+class QLearnAgent:
 	"""
 	"""
 
@@ -67,8 +67,7 @@ class QLearn:
 				if np.random.random() < epsilon or epoch < observe:
 					a = int(np.random.randint(game.nb_actions))
 				else:
-					q = model.predict(S.reshape(1, self.nb_frames, 120, 160))
-					a = int(np.argmax(q[0]))
+					a = model.predict(S.reshape(1, self.nb_frames, 120, 160))
 				game.play(a)
 				r = game.get_score()
 				S_prime = self.get_game_data(game)
@@ -80,9 +79,9 @@ class QLearn:
 					batch = self.memory.get_batch(model=model, batch_size=batch_size, gamma=gamma)
 					if batch:
 						inputs, targets = batch
-						loss += float(model.train_on_batch(inputs, targets)[0])
+						loss += float(model.model.train_on_batch(inputs, targets)[0])
 				if checkpoint and ((epoch + 1 - observe) % checkpoint == 0 or epoch + 1 == nb_epoch):
-					model.save_weights('../data/model_weights/' + filename, overwrite=True)
+					model.save_weights('../data/model_weights/' + filename)
 			total_reward = game.get_total_score()
 			if epsilon > final_epsilon and epoch >= observe: epsilon -= delta
 			print("Epoch {:03d}/{:03d} | Loss {:.4f} | Epsilon {:.2f} | Total Reward {}".format(epoch + 1, nb_epoch, loss, epsilon, total_reward))
@@ -94,7 +93,7 @@ class QLearn:
 		plt.title('Total Reward')
 		plt.ylabel('reward')
 		plt.xlabel('epoch')
-		plt.savefig("../doc/figures/total_reward.png")
+		plt.savefig("../doc/figures/" + filename[:-3] + "total_reward.png")
 		plt.figure()
 
 		# summarize history for loss
@@ -103,51 +102,49 @@ class QLearn:
 		plt.ylabel('loss')
 		plt.xlabel('epoch')
 		plt.legend(['train', 'test'], loc='upper left')
-		plt.savefig("../doc/figures/loss.png")
+		plt.savefig("../doc/figures/" + filename[:-3] + "loss.png")
 		plt.show()
 
 class Memory():
-    """
-    """
+	"""
+	"""
+	def __init__(self, memory_size=100):
+		'''
+		'''
+		self.memory = []
+		self._memory_size = memory_size
 
-    def __init__(self, memory_size=100):
-        '''
-        '''
-        self.memory = []
-        self._memory_size = memory_size
+	def remember(self, s, a, r, s_prime, game_over):
+		'''
+		'''
+		self.input_shape = s.shape[2:]
+		self.memory.append(np.concatenate([s.flatten(), np.array(a).flatten(), np.array(r).flatten(), s_prime.flatten(), 1 * np.array(game_over).flatten()]))
+		if self._memory_size > 0 and len(self.memory) > self._memory_size: self.memory.pop(0)
 
-    def remember(self, s, a, r, s_prime, game_over):
-        '''
-        '''
-        self.input_shape = s.shape[2:]
-        self.memory.append(np.concatenate([s.flatten(), np.array(a).flatten(), np.array(r).flatten(), s_prime.flatten(), 1 * np.array(game_over).flatten()]))
-        if self._memory_size > 0 and len(self.memory) > self._memory_size: self.memory.pop(0)
-
-    def get_batch(self, model, batch_size, gamma=0.9):
-        '''
-        '''
-        if len(self.memory) < batch_size:
-            batch_size = len(self.memory)
-        nb_actions = model.output_shape[-1]
-        samples = np.array(sample(self.memory, batch_size))
-        input_dim = np.prod(self.input_shape)
-        S = samples[:, 0 : input_dim]
-        a = samples[:, input_dim]
-        r = samples[:, input_dim + 1]
-        S_prime = samples[:, input_dim + 2 : 2 * input_dim + 2]
-        game_over = samples[:, 2 * input_dim + 2]
-        r = r.repeat(nb_actions).reshape((batch_size, nb_actions))
-        game_over = game_over.repeat(nb_actions).reshape((batch_size, nb_actions))
-        S = S.reshape((batch_size, ) + self.input_shape)
-        S_prime = S_prime.reshape((batch_size, ) + self.input_shape)
-        X = np.concatenate([S, S_prime], axis=0)
-        Y = model.predict(X)
-        Qsa = np.max(Y[batch_size:], axis=1).repeat(nb_actions).reshape((batch_size, nb_actions))
-        delta = np.zeros((batch_size, nb_actions))
-        a = np.cast['int'](a)
-        delta[np.arange(batch_size), a] = 1
-        targets = (1 - delta) * Y[:batch_size] + delta * (r + gamma * (1 - game_over) * Qsa)
-        return S, targets
+	def get_batch(self, model, batch_size, gamma=0.9):
+		model = model.model
+		if len(self.memory) < batch_size:
+			batch_size = len(self.memory)
+		nb_actions = model.output_shape[-1]
+		samples = np.array(sample(self.memory, batch_size))
+		input_dim = np.prod(self.input_shape)
+		S = samples[:, 0 : input_dim]
+		a = samples[:, input_dim]
+		r = samples[:, input_dim + 1]
+		S_prime = samples[:, input_dim + 2 : 2 * input_dim + 2]
+		game_over = samples[:, 2 * input_dim + 2]
+		r = r.repeat(nb_actions).reshape((batch_size, nb_actions))
+		game_over = game_over.repeat(nb_actions).reshape((batch_size, nb_actions))
+		S = S.reshape((batch_size, ) + self.input_shape)
+		S_prime = S_prime.reshape((batch_size, ) + self.input_shape)
+		X = np.concatenate([S, S_prime], axis=0)
+		Y = model.predict(X)
+		Qsa = np.max(Y[batch_size:], axis=1).repeat(nb_actions).reshape((batch_size, nb_actions))
+		delta = np.zeros((batch_size, nb_actions))
+		a = np.cast['int'](a)
+		delta[np.arange(batch_size), a] = 1
+		targets = (1 - delta) * Y[:batch_size] + delta * (r + gamma * (1 - game_over) * Qsa)
+		return S, targets
 
 class Game(object):
 
