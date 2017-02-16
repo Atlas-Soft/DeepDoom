@@ -16,20 +16,19 @@ class Doom(Game):
 
         button_count = self.game.get_available_buttons_size()
         self.actions = [list(a) for a in it.product([0, 1], repeat=button_count)]
-        self.nb_actions = len(self.actions)
         self.frame_tics = frame_tics
+        self.pbar = None
         self.game.new_episode()
 
     def reset(self):
         self.game.new_episode()
-        self.pbar = tqdm(total=self.game.get_episode_timeout())
 
     def play(self, action):
         self.game.set_action(self.actions[action])
         for i in range(self.frame_tics):
             if not self.is_over():
                 self.game.advance_action()
-        self.pbar.update(self.frame_tics)
+        if self.pbar: self.pbar.update(self.frame_tics)
 
     def get_state(self):
         state = self.game.get_state()
@@ -42,9 +41,9 @@ class Doom(Game):
             processed_buffer = grey_buffer + (.75* (1- depth_buffer_filtered))
             processed_buffer = (processed_buffer - np.amin(processed_buffer))/ (np.amax(processed_buffer) - np.amin(processed_buffer))
             processed_buffer = np.round(processed_buffer, 6)
-            processed_buffer = processed_buffer.reshape(1, 120, 160)
+            processed_buffer = processed_buffer.reshape(120, 160)
         except:
-            processed_buffer = np.zeros((1, 120, 160))
+            processed_buffer = np.zeros((120, 160))
         return processed_buffer
 
     def get_score(self):
@@ -56,7 +55,7 @@ class Doom(Game):
     def get_total_score(self):
         return self.game.get_total_reward()
 
-    def run(self, agent, save_replay=''):
+    def run(self, agent, save_replay='', verbose=False):
         '''
         Method runs a instance of Doom.
 
@@ -66,21 +65,23 @@ class Doom(Game):
         self.game.set_window_visible(False)
         self.game.add_game_args("+vid_forcesurface 1")
         self.game.init()
-        print("\nRunning Simulation:", self.config)
+        if verbose: print("\nRunning Simulation:", self.config)
 
         if save_replay != '': self.game.new_episode("../data/replay_data/" + save_replay)
         else: self.game.new_episode()
-        self.pbar = tqdm(total=self.game.get_episode_timeout())
+        if verbose: self.pbar = tqdm(total=self.game.get_episode_timeout())
         while not self.is_over():
             S = agent.get_game_data(self)
-            q = agent.model.predict(S.reshape(1, agent.nb_frames, 120, 160))
-            a = int(np.argmax(q[0]))
+            q = agent.model.model.predict(S.reshape(1, agent.nb_frames, 120, 160))
+            q = int(np.argmax(q[0]))
+            a = agent.model.predict(S.reshape(1, agent.nb_frames, 120, 160), q)
             self.play(a)
 
         score = self.game.get_total_reward()
-        print("Total Score:", score)
-        self.pbar.close()
-        self.game.close()
+        if verbose:
+            print("Total Score:", score)
+            self.pbar.close()
+        return score
 
     def replay(self, filename):
         '''

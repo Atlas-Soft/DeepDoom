@@ -17,6 +17,7 @@ import numpy as np
 from random import sample
 from keras import backend as K
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 import os
 
 class QLearnAgent:
@@ -44,10 +45,10 @@ class QLearnAgent:
 			self.frames.pop(0)
 		return np.expand_dims(self.frames, 0)
 
-	def train(self, game, nb_epoch=1000, batch_size=50, gamma=0.9, epsilon=[1., .1], epsilon_rate=0.5, observe=0, checkpoint=None, filename='w_.h5'):
+	def train(self, game, nb_epoch=1000, steps=1000, batch_size=50, gamma=0.9, epsilon=[1., .1], epsilon_rate=1.0, observe=0, checkpoint=None, filename='w_.h5'):
 		'''
 		'''
-		print("\nQ-Learn Training:\n")
+		print("\nQ-Learn Training:", game.config, "\n")
 		model = self.model
 		if type(epsilon)  in {tuple, list}:
 			delta =  ((epsilon[0] - epsilon[1]) / (nb_epoch * epsilon_rate))
@@ -57,35 +58,50 @@ class QLearnAgent:
 		loss_history = []
 		reward_history = []
 		for epoch in range(nb_epoch):
+			self.pbar = tqdm(total=steps)
 			total_reward = 0
 			loss = 0.
+			step = 0
 			game.reset()
 			self.frames = None
-			game_over = False
 			S = self.get_game_data(game)
-			while not game_over:
+			while step < steps:
 				if np.random.random() < epsilon or epoch < observe:
-					a = int(np.random.randint(game.nb_actions))
+					q = int(np.random.randint(model.nb_actions))
+					a = model.predict(S, q)
 				else:
-					a = model.predict(S.reshape(1, self.nb_frames, 120, 160))
+					q = model.model.predict(S)
+					q = int(np.argmax(q[0]))
+					a = model.predict(S, q)
 				game.play(a)
 				r = game.get_score()
 				S_prime = self.get_game_data(game)
 				game_over = game.is_over()
-				transition = [S, a, r, S_prime, game_over]
+				transition = [S, q, r, S_prime, game_over]
 				self.memory.remember(*transition)
 				S = S_prime
-				if epoch >= observe:
-					batch = self.memory.get_batch(model=model, batch_size=batch_size, gamma=gamma)
-					if batch:
-						inputs, targets = batch
-						loss += float(model.model.train_on_batch(inputs, targets)[0])
-				if checkpoint and ((epoch + 1 - observe) % checkpoint == 0 or epoch + 1 == nb_epoch):
-					model.save_weights('../data/model_weights/' + filename)
-			total_reward = game.get_total_score()
+				batch = self.memory.get_batch(model=model, batch_size=batch_size, gamma=gamma)
+				if batch:
+					inputs, targets = batch
+					loss += float(model.model.train_on_batch(inputs, targets)[0])
+				if game_over:
+					game.reset()
+					self.frames = None
+					S = self.get_game_data(game)
+				step += 1
+				self.pbar.update(1)
+			if checkpoint and ((epoch + 1 - observe) % checkpoint == 0 or epoch + 1 == nb_epoch):
+				model.save_weights(filename)
 			if epsilon > final_epsilon and epoch >= observe: epsilon -= delta
-			print("Epoch {:03d}/{:03d} | Loss {:.4f} | Epsilon {:.2f} | Total Reward {}".format(epoch + 1, nb_epoch, loss, epsilon, total_reward))
-			reward_history.append(game.get_total_score())
+			print("Testing:")
+			self.pbar.close()
+			self.pbar = tqdm(total=100)
+			for i in range(100):
+				total_reward += game.run(self)
+				self.pbar.update(1)
+			total_reward /= 100
+			print("Epoch {:03d}/{:03d} | Loss {:.4f} | Epsilon {:.2f} | Average Reward {}".format(epoch + 1, nb_epoch, loss, epsilon, total_reward))
+			reward_history.append(total_reward)
 			loss_history.append(loss)
 
 		# summarize history for reward
@@ -117,7 +133,7 @@ class Memory():
 	def remember(self, s, a, r, s_prime, game_over):
 		'''
 		'''
-		self.input_shape = s.shape[2:]
+		self.input_shape = s.shape[1:]
 		self.memory.append(np.concatenate([s.flatten(), np.array(a).flatten(), np.array(r).flatten(), s_prime.flatten(), 1 * np.array(game_over).flatten()]))
 		if self._memory_size > 0 and len(self.memory) > self._memory_size: self.memory.pop(0)
 
@@ -143,14 +159,13 @@ class Memory():
 		delta = np.zeros((batch_size, nb_actions))
 		a = np.cast['int'](a)
 		delta[np.arange(batch_size), a] = 1
-		targets = (1 - delta) * Y[:batch_size] + delta * (r + gamma * (1 - game_over) * Qsa)
+		targets = (1 - delta) * Y[:batch_size] + delta * (r + (gamma * Qsa))
 		return S, targets
 
 class Game(object):
 
 	def __init__(self):
 		self.reset()
-		self.nb_actions = 0
 
 	def reset(self):
 		pass

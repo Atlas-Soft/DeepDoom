@@ -30,43 +30,40 @@ class PolicyModel():
 
         '''
         #Parameters
-        self.optimizer = RMSprop(lr=0.001)
-        self.loss_fun = 'categorical_crossentropy'
+        self.nb_actions = 8
+        self.optimizer = RMSprop(lr=0.00025)
+        self.loss_fun = 'mse'
 
         #Input Layers
-        x0 = Input(shape=(1, 120, 160), name='image_input')
+        x0 = Input(shape=(4, 120, 160))
 
         #Convolutional Layers
-        m = Convolution2D(32, 8, 8, subsample = (2,2), border_mode='same', activation='relu', name='conv_1')(x0)
-        m = Convolution2D(64, 6, 6, subsample = (2,2), border_mode='same', activation='relu', name='conv_2')(m)
-        m = Convolution2D(64, 6, 6, subsample = (2,2), border_mode='same', activation='relu', name='conv_3')(m)
-        m = Convolution2D(64, 4, 4, subsample = (2,2), border_mode='same', activation='relu', name='conv_4')(m)
+        m = Convolution2D(16, 5, 5, subsample = (2,2), activation='relu')(x0)
+        m = Convolution2D(32, 5, 5, subsample = (2,2), activation='relu')(m)
+        m = Convolution2D(64, 5, 5, subsample = (2,2), activation='relu')(m)
         m = Flatten()(m)
 
         #Output Layer
-        m = Dense(2048, name='h_layer')(m)
-        y0 = Dense(8, activation='softmax', name='action_output')(m)
+        m = Dense(512, activation='relu', init='uniform')(m)
+        y0 = Dense(8, init='uniform')(m)
 
         self.model = Model(input=[x0,], output=[y0,])
         self.model.compile(optimizer=self.optimizer, loss=self.loss_fun, metrics=['accuracy'])
         #self.model.summary()
 
-    def predict(self, S):
+    def predict(self, S, q):
         '''
         '''
-        q = self.model.predict(S)
-        a = int(np.argmax(q[0]))
+        a = q
         return a
 
     def load_weights(self, filename):
         '''
-
         '''
         self.model.load_weights('../data/model_weights/' + filename)
         self.model.compile(optimizer=self.optimizer, loss=self.loss_fun, metrics=['accuracy'])
 
     def save_weights(self, filename):
         '''
-
         '''
         self.model.save_weights('../data/model_weights/' + filename, overwrite=True)

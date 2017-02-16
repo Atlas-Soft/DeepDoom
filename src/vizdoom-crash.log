@@ -1,0 +1,230 @@
+*** Fatal Error ***
+Address not mapped to object (signal 11)
+Address: 0x8
+
+System: Linux Senior-Project 4.4.0-62-generic #83-Ubuntu SMP Wed Jan 18 14:10:15 UTC 2017 x86_64 x86_64 x86_64 GNU/Linux
+
+ViZDoom version 1.1.0 (ZDOOM 2.8.1) ()
+Compiler version: 5.4.0 20160609
+
+Command line: /home/rz4/.local/lib/python3.5/site-packages/vizdoom/vizdoom -iwad wads/Doom2.wad -config _vizdoom.ini -skill 1 -width 160 -height 120 +vid_aspect 0 +fullscreen 0 +viz_controlled 1 +viz_instance_id UxpyzTBA9u +use_mouse 0 -rngseed 3049321165 +viz_depth 1 +viz_render_mode 2059 +viz_noconsole 1 +viz_screen_format 0 +viz_window_hidden 0 +viz_noxserver 0 -noidle -nojoy -nosound +viz_nosound 1 -ticrate 30 -file wads/Doom2.wad
+
+Wad 0: vizdoom.pk3
+Wad 1: Doom2.wad
+Wad 2: Doom2.wad
+
+Not in a level.
+
+Executing: gdb --quiet --batch --command=gdb-respfile-3OxgfP
+[New LWP 4995]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+0x00007f81ea9f7f7b in __waitpid (pid=5002, stat_loc=0xbe7dec, options=0) at ../sysdeps/unix/sysv/linux/waitpid.c:29
+
+* Loaded Libraries
+From                To                  Syms Read   Shared Object Library
+0x00007f81eb4e4f80  0x00007f81eb73dfae  Yes (*)     /usr/lib/x86_64-linux-gnu/libgtk-x11-2.0.so.0
+0x00007f81eb232f00  0x00007f81eb2638f6  Yes (*)     /usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0
+0x00007f81eaf31860  0x00007f81eafa87b9  Yes (*)     /lib/x86_64-linux-gnu/libglib-2.0.so.0
+0x00007f81eac1d110  0x00007f81eacd32e0  Yes (*)     /usr/lib/x86_64-linux-gnu/libSDL2-2.0.so.0
+0x00007f81ea9eca30  0x00007f81ea9f9a51  Yes         /lib/x86_64-linux-gnu/libpthread.so.0
+0x00007f81ea7e1100  0x00007f81ea7e41df  Yes         /lib/x86_64-linux-gnu/librt.so.1
+0x00007f81ea5c6df0  0x00007f81ea5d7870  Yes (*)     /lib/x86_64-linux-gnu/libz.so.1
+0x00007f81ea36fd50  0x00007f81ea3a9e80  Yes (*)     /usr/lib/x86_64-linux-gnu/libjpeg.so.8
+0x00007f81ea15d3c0  0x00007f81ea169092  Yes (*)     /lib/x86_64-linux-gnu/libbz2.so.1.0
+0x00007f81e9f45cf0  0x00007f81e9f549bf  Yes (*)     /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.58.0
+0x00007f81e9d32ff0  0x00007f81e9d33c66  Yes (*)     /usr/lib/x86_64-linux-gnu/libboost_system.so.1.58.0
+0x00007f81e9b2eda0  0x00007f81e9b2f98e  Yes         /lib/x86_64-linux-gnu/libdl.so.2
+0x00007f81e9835d20  0x00007f81e98e1cc9  Yes (*)     /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+0x00007f81e94a8600  0x00007f81e9519d0a  Yes         /lib/x86_64-linux-gnu/libm.so.6
+0x00007f81e928fa70  0x00007f81e929f8b5  Yes (*)     /lib/x86_64-linux-gnu/libgcc_s.so.1
+0x00007f81e8ee38b0  0x00007f81e9035f14  Yes         /lib/x86_64-linux-gnu/libc.so.6
+0x00007f81e8c2c950  0x00007f81e8c8371b  Yes (*)     /usr/lib/x86_64-linux-gnu/libgdk-x11-2.0.so.0
+0x00007f81e8a0c170  0x00007f81e8a0d075  Yes (*)     /usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0
+0x00007f81e8802980  0x00007f81e8807746  Yes (*)     /usr/lib/x86_64-linux-gnu/libpangocairo-1.0.so.0
+0x00007f81e84dc870  0x00007f81e85642e4  Yes (*)     /usr/lib/x86_64-linux-gnu/libX11.so.6
+0x00007f81e82bf530  0x00007f81e82c1756  Yes (*)     /usr/lib/x86_64-linux-gnu/libXfixes.so.3
+0x00007f81e80a3780  0x00007f81e80afbc3  Yes (*)     /usr/lib/x86_64-linux-gnu/libatk-1.0.so.0
+0x00007f81e7d96c40  0x00007f81e7e58897  Yes (*)     /usr/lib/x86_64-linux-gnu/libcairo.so.2
+0x00007f81e7b690b0  0x00007f81e7b7b9f9  Yes (*)     /usr/lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0
+0x00007f81e7810880  0x00007f81e78e3e9b  Yes (*)     /usr/lib/x86_64-linux-gnu/libgio-2.0.so.0
+0x00007f81e75cc1f0  0x00007f81e75d487d  Yes (*)     /usr/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0
+0x00007f81e7385ff0  0x00007f81e73a5396  Yes (*)     /usr/lib/x86_64-linux-gnu/libpango-1.0.so.0
+0x00007f81e713cd60  0x00007f81e715c02a  Yes (*)     /usr/lib/x86_64-linux-gnu/libfontconfig.so.1
+0x00007f81e6f2f7f0  0x00007f81e6f3409c  Yes (*)     /usr/lib/x86_64-linux-gnu/libffi.so.6
+0x00007f81e6cbf530  0x00007f81e6d0e623  Yes (*)     /lib/x86_64-linux-gnu/libpcre.so.3
+0x00007f81e69e8aa0  0x00007f81e6a78b02  Yes (*)     /usr/lib/x86_64-linux-gnu/libasound.so.2
+0x00007f81e6779b20  0x00007f81e67a6b59  Yes (*)     /usr/lib/x86_64-linux-gnu/libpulse.so.0
+0x00007f81e6560be0  0x00007f81e6567347  Yes (*)     /usr/lib/x86_64-linux-gnu/libsndio.so.6.1
+0x00007f81e634f590  0x00007f81e635939f  Yes (*)     /usr/lib/x86_64-linux-gnu/libXext.so.6
+0x00007f81e6144420  0x00007f81e6148e20  Yes (*)     /usr/lib/x86_64-linux-gnu/libXcursor.so.1
+0x00007f81e5f3faf0  0x00007f81e5f403ec  Yes (*)     /usr/lib/x86_64-linux-gnu/libXinerama.so.1
+0x00007f81e5d311a0  0x00007f81e5d3b6f7  Yes (*)     /usr/lib/x86_64-linux-gnu/libXi.so.6
+0x00007f81e5b25c70  0x00007f81e5b2ba82  Yes (*)     /usr/lib/x86_64-linux-gnu/libXrandr.so.2
+0x00007f81e5920cd0  0x00007f81e5921a8c  Yes (*)     /usr/lib/x86_64-linux-gnu/libXss.so.1
+0x00007f81e571afc0  0x00007f81e571d8c8  Yes (*)     /usr/lib/x86_64-linux-gnu/libXxf86vm.so.1
+0x00007f81e55186a0  0x00007f81e5518896  Yes (*)     /usr/lib/x86_64-linux-gnu/libwayland-egl.so.1
+0x00007f81e530e120  0x00007f81e531299f  Yes (*)     /usr/lib/x86_64-linux-gnu/libwayland-client.so.0
+0x00007f81e5102200  0x00007f81e5103d71  Yes (*)     /usr/lib/x86_64-linux-gnu/libwayland-cursor.so.0
+0x00007f81e4ec5e70  0x00007f81e4ee0895  Yes (*)     /usr/lib/x86_64-linux-gnu/libxkbcommon.so.0
+0x00007f81ebac6ac0  0x00007f81ebae4640  Yes         /lib64/ld-linux-x86-64.so.2
+0x00007f81e4cb9ad0  0x00007f81e4cbf9e5  Yes (*)     /usr/lib/x86_64-linux-gnu/libXrender.so.1
+0x00007f81e4ab5c40  0x00007f81e4ab6618  Yes (*)     /usr/lib/x86_64-linux-gnu/libXcomposite.so.1
+0x00007f81e48b2b90  0x00007f81e48b349b  Yes (*)     /usr/lib/x86_64-linux-gnu/libXdamage.so.1
+0x00007f81e4615c60  0x00007f81e4685212  Yes (*)     /usr/lib/x86_64-linux-gnu/libfreetype.so.6
+0x00007f81e43ef6b0  0x00007f81e43fe1a5  Yes (*)     /usr/lib/x86_64-linux-gnu/libxcb.so.1
+0x00007f81e4147be0  0x00007f81e41ccb30  Yes (*)     /usr/lib/x86_64-linux-gnu/libpixman-1.so.0
+0x00007f81e3f1ca70  0x00007f81e3f35373  Yes (*)     /lib/x86_64-linux-gnu/libpng12.so.0
+0x00007f81e3d15db0  0x00007f81e3d168c3  Yes (*)     /usr/lib/x86_64-linux-gnu/libxcb-shm.so.0
+0x00007f81e3b0e460  0x00007f81e3b118da  Yes (*)     /usr/lib/x86_64-linux-gnu/libxcb-render.so.0
+0x00007f81e38eeab0  0x00007f81e390129b  Yes (*)     /lib/x86_64-linux-gnu/libselinux.so.1
+0x00007f81e36d1950  0x00007f81e36e12b8  Yes         /lib/x86_64-linux-gnu/libresolv.so.2
+0x00007f81e3476650  0x00007f81e34b1519  Yes (*)     /usr/lib/x86_64-linux-gnu/libharfbuzz.so.0
+0x00007f81e3268b90  0x00007f81e326c455  Yes (*)     /usr/lib/x86_64-linux-gnu/libthai.so.0
+0x00007f81e3041b00  0x00007f81e3059c19  Yes (*)     /lib/x86_64-linux-gnu/libexpat.so.1
+0x00007f81e2e35800  0x00007f81e2e3a612  Yes (*)     /lib/x86_64-linux-gnu/libjson-c.so.2
+0x00007f81e2bc9e70  0x00007f81e2c0c899  Yes (*)     /usr/lib/x86_64-linux-gnu/pulseaudio/libpulsecommon-8.0.so
+0x00007f81e2976460  0x00007f81e29a11e4  Yes (*)     /lib/x86_64-linux-gnu/libdbus-1.so.3
+0x00007f81e275a400  0x00007f81e276761f  Yes (*)     /lib/x86_64-linux-gnu/libbsd.so.0
+0x00007f81e2553e50  0x00007f81e2554acc  Yes (*)     /usr/lib/x86_64-linux-gnu/libXau.so.6
+0x00007f81e234e1d0  0x00007f81e234fb38  Yes (*)     /usr/lib/x86_64-linux-gnu/libXdmcp.so.6
+0x00007f81e212a4b0  0x00007f81e2145765  Yes (*)     /usr/lib/x86_64-linux-gnu/libgraphite2.so.3
+0x00007f81e1f21130  0x00007f81e1f245bd  Yes (*)     /usr/lib/x86_64-linux-gnu/libdatrie.so.1
+0x00007f81ebc31810  0x00007f81ebc88b4f  Yes (*)     /lib/x86_64-linux-gnu/libsystemd.so.0
+0x00007f81e1d18d70  0x00007f81e1d1c798  Yes (*)     /lib/x86_64-linux-gnu/libwrap.so.0
+0x00007f81e1ab3070  0x00007f81e1af535c  Yes (*)     /usr/lib/x86_64-linux-gnu/libsndfile.so.1
+0x00007f81e18a8300  0x00007f81e18aa988  Yes (*)     /usr/lib/x86_64-linux-gnu/libasyncns.so.0
+0x00007f81e16870d0  0x00007f81e169b24d  Yes (*)     /lib/x86_64-linux-gnu/liblzma.so.5
+0x00007f81e13acd00  0x00007f81e144d648  Yes (*)     /lib/x86_64-linux-gnu/libgcrypt.so.20
+0x00007f81e118eff0  0x00007f81e119c1e1  Yes         /lib/x86_64-linux-gnu/libnsl.so.1
+0x00007f81e0f1e420  0x00007f81e0f7fcfd  Yes (*)     /usr/lib/x86_64-linux-gnu/libFLAC.so.8
+0x00007f81e0c80a60  0x00007f81e0c831a7  Yes (*)     /usr/lib/x86_64-linux-gnu/libvorbisenc.so.2
+0x00007f81e0a5b8d0  0x00007f81e0a64db9  Yes (*)     /lib/x86_64-linux-gnu/libgpg-error.so.0
+0x00007f81e0851a70  0x00007f81e0855c05  Yes (*)     /usr/lib/x86_64-linux-gnu/libogg.so.0
+0x00007f81e0626da0  0x00007f81e063d00d  Yes (*)     /usr/lib/x86_64-linux-gnu/libvorbis.so.0
+0x00007f81e013c1b0  0x00007f81e01422a1  Yes         /lib/x86_64-linux-gnu/libnss_files.so.2
+0x00007f81ebbfb720  0x00007f81ebc0ce9a  Yes (*)     /lib/x86_64-linux-gnu/libudev.so.1
+0x00007f81df6d3ee0  0x00007f81df715825  Yes (*)     /usr/lib/x86_64-linux-gnu/libopenal.so
+0x00007f81dec65710  0x00007f81dec6993b  Yes (*)     /usr/lib/nvidia-367/libGL.so.1
+0x00007f81dea0b770  0x00007f81dea15a2d  Yes (*)     /usr/lib/nvidia-367/libGLX.so.0
+0x00007f81de74acc0  0x00007f81de76c1b1  Yes (*)     /usr/lib/nvidia-367/libGLdispatch.so.0
+0x00007f81de30fde0  0x00007f81de311174  Yes (*)     /usr/lib/nvidia-367/libEGL.so.1
+0x00007f81de0289b0  0x00007f81de0b9b38  Yes (*)     /usr/lib/nvidia-367/libEGL_nvidia.so.0
+0x00007f81ddd7f4e0  0x00007f81ddde7c98  Yes (*)     /usr/lib/nvidia-367/libnvidia-glsi.so.367.57
+0x00007f81ddb78ce0  0x00007f81ddb7ae98  Yes (*)     /usr/lib/nvidia-367/libnvidia-egl-wayland.so.367.57
+0x00007f81dd96b070  0x00007f81dd970c1f  Yes (*)     /usr/lib/x86_64-linux-gnu/libwayland-server.so.0
+0x00007f81dd757380  0x00007f81dd75e648  Yes (*)     /usr/lib/nvidia-367/libGLESv2_nvidia.so.2
+0x00007f81d67631c0  0x00007f81d76c8a47  Yes (*)     /usr/lib/nvidia-367/libnvidia-eglcore.so.367.57
+(*): Shared library is missing debugging information.
+
+* Threads
+  Id   Target Id         Frame 
+* 1    Thread 0x7f81ebc19a40 (LWP 4994) "vizdoom" 0x00007f81ea9f7f7b in __waitpid (pid=5002, stat_loc=0xbe7dec, options=0) at ../sysdeps/unix/sysv/linux/waitpid.c:29
+  2    Thread 0x7f81e0139700 (LWP 4995) "SDLTimer" 0x00007f81ea9f6827 in futex_abstimed_wait_cancelable (private=0, abstime=0x0, expected=0, futex_word=0x1d2f520) at ../sysdeps/unix/sysv/linux/futex-internal.h:205
+
+* FPU Status
+  R7: Empty   0x00000000000000000000
+  R6: Empty   0x00000000000000000000
+  R5: Empty   0x00000000000000000000
+  R4: Empty   0x00000000000000000000
+  R3: Empty   0x00000000000000000000
+  R2: Empty   0x00000000000000000000
+  R1: Empty   0x00000000000000000000
+=>R0: Empty   0x00000000000000000000
+
+Status Word:         0x0000                                            
+                       TOP: 0
+Control Word:        0x037f   IM DM ZM OM UM PM
+                       PC: Extended Precision (64-bits)
+                       RC: Round to nearest
+Tag Word:            0xffff
+Instruction Pointer: 0x00:0x00000000
+Operand Pointer:     0x00:0x00000000
+Opcode:              0x0000
+
+* Registers
+rax            0xfffffffffffffe00	-512
+rbx            0x138a	5002
+rcx            0x7f81ea9f7f7b	140195963830139
+rdx            0x0	0
+rsi            0xbe7dec	12484076
+rdi            0x138a	5002
+rbp            0xbe7dec	0xbe7dec
+rsp            0xbe7db0	0xbe7db0
+r8             0x0	0
+r9             0x7f81ebc19a40	140195982842432
+r10            0x0	0
+r11            0x246	582
+r12            0x0	0
+r13            0x1090	4240
+r14            0xbe5180	12472704
+r15            0xd	13
+rip            0x7f81ea9f7f7b	0x7f81ea9f7f7b <__waitpid+107>
+eflags         0x246	[ PF ZF IF ]
+cs             0x33	51
+ss             0x2b	43
+ds             0x0	0
+es             0x0	0
+fs             0x0	0
+gs             0x0	0
+
+* Backtrace
+
+Thread 2 (Thread 0x7f81e0139700 (LWP 4995)):
+#0  0x00007f81ea9f6827 in futex_abstimed_wait_cancelable (private=0, abstime=0x0, expected=0, futex_word=0x1d2f520) at ../sysdeps/unix/sysv/linux/futex-internal.h:205
+        __ret = -512
+        oldtype = 2
+        err = <optimized out>
+#1  do_futex_wait (sem=sem@entry=0x1d2f520, abstime=0x0) at sem_waitcommon.c:111
+No locals.
+#2  0x00007f81ea9f68d4 in __new_sem_wait_slow (sem=0x1d2f520, abstime=0x0) at sem_waitcommon.c:181
+        _buffer = {__routine = 0x7f81ea9f67e0 <__sem_wait_cleanup>, __arg = 0x1d2f520, __canceltype = 0, __prev = 0x0}
+        err = <optimized out>
+        d = 0
+#3  0x00007f81ea9f697a in __new_sem_wait (sem=<optimized out>) at sem_wait.c:29
+No locals.
+#4  0x00007f81eaccd6ce in ?? () from /usr/lib/x86_64-linux-gnu/libSDL2-2.0.so.0
+No symbol table info available.
+#5  0x00007f81eaccd825 in ?? () from /usr/lib/x86_64-linux-gnu/libSDL2-2.0.so.0
+No symbol table info available.
+#6  0x00007f81eac7f503 in ?? () from /usr/lib/x86_64-linux-gnu/libSDL2-2.0.so.0
+No symbol table info available.
+#7  0x00007f81eac7f09c in ?? () from /usr/lib/x86_64-linux-gnu/libSDL2-2.0.so.0
+No symbol table info available.
+#8  0x00007f81eaccd399 in ?? () from /usr/lib/x86_64-linux-gnu/libSDL2-2.0.so.0
+No symbol table info available.
+#9  0x00007f81ea9ee6ba in start_thread (arg=0x7f81e0139700) at pthread_create.c:333
+        __res = <optimized out>
+        pd = 0x7f81e0139700
+        now = <optimized out>
+        unwind_buf = {cancel_jmp_buf = {{jmp_buf = {140195786888960, -3392082124049091081, 0, 140723991987471, 140195786889664, 140723991988128, 3454022735227385335, 3454034940795287031}, mask_was_saved = 0}}, priv = {pad = {0x0, 0x0, 0x0, 0x0}, data = {prev = 0x0, cleanup = 0x0, canceltype = 0}}}
+        not_first_call = <optimized out>
+        pagesize_m1 = <optimized out>
+        sp = <optimized out>
+        freesize = <optimized out>
+        __PRETTY_FUNCTION__ = "start_thread"
+#10 0x00007f81e8fca82d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
+No locals.
+
+Thread 1 (Thread 0x7f81ebc19a40 (LWP 4994)):
+#0  0x00007f81ea9f7f7b in __waitpid (pid=5002, stat_loc=0xbe7dec, options=0) at ../sysdeps/unix/sysv/linux/waitpid.c:29
+        resultvar = 18446744073709551104
+        sc_cancel_oldtype = 0
+#1  0x000000000051c6e4 in ?? ()
+No symbol table info available.
+#2  <signal handler called>
+No locals.
+#3  0x0000000000522e4d in SDLFB::UpdateColors() ()
+No symbol table info available.
+#4  0x00000000005244d1 in SDLFB::SDLFB(int, int, bool, SDL_Window*) ()
+No symbol table info available.
+#5  0x00000000005247e4 in SDLVideo::CreateFrameBuffer(int, int, bool, DFrameBuffer*) ()
+No symbol table info available.
+#6  0x00000000006cba1e in V_DoModeSetup(int, int, int) ()
+No symbol table info available.
+#7  0x00000000006cbe3e in V_Init2() ()
+No symbol table info available.
+#8  0x0000000000556e4a in D_DoomMain() ()
+No symbol table info available.
+#9  0x0000000000504158 in main ()
+No symbol table info available.
