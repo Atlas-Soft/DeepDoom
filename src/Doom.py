@@ -35,15 +35,9 @@ class Doom(Game):
         try:
             screen_buffer = np.array(state.screen_buffer).astype('float32')/255
             depth_buffer = np.array(state.depth_buffer).astype('float32')/255
-            grey_buffer = np.dot(np.transpose(screen_buffer, (1, 2, 0)), [0.21, 0.72, 0.07])#Greyscaling
-            depth_buffer[(depth_buffer > .25)] = .25 #Effects depth radius
-            depth_buffer_filtered = (depth_buffer - np.amin(depth_buffer))/ (np.amax(depth_buffer) - np.amin(depth_buffer))
-            processed_buffer = grey_buffer + (.75* (1- depth_buffer_filtered))
-            processed_buffer = (processed_buffer - np.amin(processed_buffer))/ (np.amax(processed_buffer) - np.amin(processed_buffer))
-            processed_buffer = np.round(processed_buffer, 6)
-            processed_buffer = processed_buffer.reshape(120, 160)
+            processed_buffer = np.concatenate([screen_buffer, depth_buffer], 0)
         except:
-            processed_buffer = np.zeros((120, 160))
+            processed_buffer = np.zeros((4, 120, 160))
         return processed_buffer
 
     def get_score(self):

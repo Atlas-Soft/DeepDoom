@@ -154,12 +154,14 @@ class Memory():
 		S = S.reshape((batch_size, ) + self.input_shape)
 		S_prime = S_prime.reshape((batch_size, ) + self.input_shape)
 		X = np.concatenate([S, S_prime], axis=0)
+		X = X.reshape(X.shape[0], X.shape[2], X.shape[3], X.shape[4])
 		Y = model.predict(X)
 		Qsa = np.max(Y[batch_size:], axis=1).repeat(nb_actions).reshape((batch_size, nb_actions))
 		delta = np.zeros((batch_size, nb_actions))
 		a = np.cast['int'](a)
 		delta[np.arange(batch_size), a] = 1
 		targets = ((1 - delta) * Y[:batch_size]) + ((alpha * ((delta * (r + (gamma * (1 - game_over) * Qsa))) - (delta * Y[:batch_size]))) + (delta * Y[:batch_size]))
+		S = S.reshape(S.shape[0], S.shape[2], S.shape[3], S.shape[4])
 		return S, targets
 
 class Game(object):

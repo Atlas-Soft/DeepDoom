@@ -13,7 +13,7 @@ def train():
     doom = Doom('configs/basic.cfg', frame_tics=5)
 
     agent = QLearnAgent(model=model, memory_size=10000, nb_frames=1)
-    agent.train(doom, batch_size=10, nb_epoch=100, steps=5000, alpha=0.01, gamma=0.99, observe = 10, epsilon=[1., .1], epsilon_rate=0.25, checkpoint=5, filename='basic_0.h5')
+    agent.train(doom, batch_size=10, nb_epoch=100, steps=5000, alpha=1.0, gamma=0.99, observe = 20, epsilon=[1., .1], epsilon_rate=0.25, checkpoint=5, filename='basic_0.h5')
 
     model.save_weights("basic_0.h5")
 

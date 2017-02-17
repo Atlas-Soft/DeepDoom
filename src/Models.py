@@ -22,6 +22,7 @@ import numpy as np
 from keras.models import Model
 from keras.layers import *
 from keras.optimizers import RMSprop
+from keras.layers.advanced_activations import LeakyReLU
 
 class PolicyModel():
 
@@ -31,21 +32,20 @@ class PolicyModel():
         '''
         #Parameters
         self.nb_actions = 8
-        self.optimizer = RMSprop(lr=0.00025)
+        self.optimizer = 'sgd'
         self.loss_fun = 'mse'
 
         #Input Layers
-        x0 = Input(shape=(1, 120, 160))
+        x0 = Input(shape=(4, 120, 160))
 
         #Convolutional Layers
-        m = Convolution2D(16, 5, 5, subsample = (2,2), activation='relu')(x0)
-        m = Convolution2D(32, 5, 5, subsample = (2,2), activation='relu')(m)
-        m = Convolution2D(64, 5, 5, subsample = (2,2), activation='relu')(m)
+        m = Convolution2D(32, 3, 7, subsample = (1,1), activation='relu')(x0)
+        m = Convolution2D(32, 4, 4, subsample = (2,2), activation='relu')(m)
         m = Flatten()(m)
 
         #Output Layer
-        m = Dense(512, activation='relu', init='uniform')(m)
-        y0 = Dense(8, init='uniform')(m)
+        m = Dense(800, activation=LeakyReLU())(m)
+        y0 = Dense(8)(m)
 
         self.model = Model(input=[x0,], output=[y0,])
         self.model.compile(optimizer=self.optimizer, loss=self.loss_fun, metrics=['accuracy'])
