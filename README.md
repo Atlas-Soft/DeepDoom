@@ -40,7 +40,7 @@ The purpose of this scenario is to train the AI on walking. Map is a straight co
 - **-10** hitting walls
 - **-1** living reward
 
-###### Files:
+##### Files:
 - [corridors.wad](src/wads/corridors.wad)
 - [corridors.cfg](src/configs/corridors.cfg)
 
@@ -51,6 +51,8 @@ The purpose of this scenario is to train the AI on walking. Map is a straight co
 ##### Description:
 The purpose of this scenario is to train the AI on turning, specifically via rigid turns. Map is a rigid M-shape with grey walls, ceilings, and floors. Player gets rewarded for navigating from one end of the M-shape to the other end and gets penalized for hitting walls.
 
+*Available Actions* : [MOVE_FORWARD, MOVE_BACKWARD, MOVE_LEFT, MOVE_RIGHT, TURN_LEFT, TURN_RIGHT]
+
 ##### Goal Function:
 
 - **+50** reward checkpoints
@@ -58,7 +60,7 @@ The purpose of this scenario is to train the AI on turning, specifically via rig
 - **-10** hitting walls
 - **-1** living reward
 
-###### Files:
+##### Files:
 - [rigid_turning.wad](src/wads/rigid_turning.wad)
 - [rigid_turning.cfg](src/configs/rigid_turning.cfg)
 
@@ -69,6 +71,8 @@ The purpose of this scenario is to train the AI on turning, specifically via rig
 ##### Description:
 The purpose of this scenario is to train the AI on turning, specifically via curved turns. Map is a sine graph with grey walls, ceilings, and floors. Player gets rewarded for navigating from one end of the sine graph to the other end and gets penalized for hitting walls.
 
+*Available Actions* : [MOVE_FORWARD, MOVE_BACKWARD, MOVE_LEFT, MOVE_RIGHT, TURN_LEFT, TURN_RIGHT]
+
 ##### Goal Function:
 
 - **+50** reward checkpoints
@@ -76,7 +80,7 @@ The purpose of this scenario is to train the AI on turning, specifically via cur
 - **-10** hitting walls
 - **-1** living reward
 
-###### Files:
+##### Files:
 - [curved_turning.wad](src/wads/curved_turning.wad)
 - [curved_turning.cfg](src/configs/curved_turning.cfg)
 
