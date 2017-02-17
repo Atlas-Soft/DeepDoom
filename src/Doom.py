@@ -103,3 +103,19 @@ class Doom(Game):
         score = self.game.get_total_reward()
         print("Total Score:", score)
         self.game.close()
+
+    def human_play(self):
+        '''
+        '''
+        self.game.close()
+        self.game.set_mode(Mode.SPECTATOR)
+        self.game.set_screen_resolution(ScreenResolution.RES_800X600)
+        self.game.set_window_visible(True)
+        self.game.set_ticrate(30)
+        self.game.init()
+
+        self.game.new_episode()
+        while not self.game.is_episode_finished():
+            print(self.game.get_total_reward())
+            self.game.advance_action()
+        self.game.close()

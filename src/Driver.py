@@ -31,6 +31,13 @@ def play():
 
     doom.replay('basic.lmp')
 
+
+def test():
+
+    doom = Doom('configs/curved_turning.cfg', frame_tics=4)
+    doom.human_play()
+
 if __name__ == '__main__':
-    train()
+    #train()
+    test()
     #play()

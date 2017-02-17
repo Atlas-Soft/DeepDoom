@@ -1,4 +1,4 @@
-# Visual-Doom-AI
+# DeepDoom
 ![Current Version](https://img.shields.io/badge/version-0.0.2-red.svg)
 
 Last Updated: **February 16, 2016**
@@ -24,11 +24,33 @@ We designed a set of scenarios where the agent will learn specific behaviors. Th
 scenarios where created using Doom Builder and VizDoom. The following are descriptions of
 the scenarios:
 
-### Scenario 1
+##  
 
-###### Description:
+### Scenario 1 : Corridor
 
-###### Goal Function:
+#### Description:
+A straight corrider. Player gets rewarded for navigating deeper and gets penalized
+for hitting walls.
+*Available Actions* : [FORWARD, BACKWARD, LEFT, RIGHT, TURN_LEFT, TURN_RIGHT]
+
+#### Goal Function:
+
+- **+50** reward checkpoints
+- **+100** level exit
+- **-10** hitting walls
+- **-1** living reward
+
+###### Files:
+- [corridors.wad](src/wads/corridors.wad)
+- [corridors.cfg](src/configs/corridors.cfg)
+
+##  
+
+### Scenario 1 : Corridor
+
+##### Description:
+
+##### Goal Function:
 
 ###### Files:
 
