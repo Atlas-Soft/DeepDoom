@@ -35,7 +35,7 @@ class PolicyModel():
         self.loss_fun = 'mse'
 
         #Input Layers
-        x0 = Input(shape=(4, 120, 160))
+        x0 = Input(shape=(1, 120, 160))
 
         #Convolutional Layers
         m = Convolution2D(16, 5, 5, subsample = (2,2), activation='relu')(x0)

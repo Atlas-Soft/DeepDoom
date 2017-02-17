@@ -45,7 +45,7 @@ class QLearnAgent:
 			self.frames.pop(0)
 		return np.expand_dims(self.frames, 0)
 
-	def train(self, game, nb_epoch=1000, steps=1000, batch_size=50, gamma=0.9, epsilon=[1., .1], epsilon_rate=1.0, observe=0, checkpoint=None, filename='w_.h5'):
+	def train(self, game, nb_epoch=1000, steps=1000, batch_size=50, alpha = 0.01, gamma=0.9, epsilon=[1., .1], epsilon_rate=1.0, observe=0, checkpoint=None, filename='w_.h5'):
 		'''
 		'''
 		print("\nQ-Learn Training:", game.config, "\n")
@@ -80,7 +80,7 @@ class QLearnAgent:
 				transition = [S, q, r, S_prime, game_over]
 				self.memory.remember(*transition)
 				S = S_prime
-				batch = self.memory.get_batch(model=model, batch_size=batch_size, gamma=gamma)
+				batch = self.memory.get_batch(model=model, batch_size=batch_size, alpha=alpha, gamma=gamma)
 				if batch:
 					inputs, targets = batch
 					loss += float(model.model.train_on_batch(inputs, targets)[0])
@@ -137,7 +137,7 @@ class Memory():
 		self.memory.append(np.concatenate([s.flatten(), np.array(a).flatten(), np.array(r).flatten(), s_prime.flatten(), 1 * np.array(game_over).flatten()]))
 		if self._memory_size > 0 and len(self.memory) > self._memory_size: self.memory.pop(0)
 
-	def get_batch(self, model, batch_size, gamma=0.9):
+	def get_batch(self, model, batch_size, alpha=0.01, gamma=0.9):
 		model = model.model
 		if len(self.memory) < batch_size:
 			batch_size = len(self.memory)
@@ -159,7 +159,7 @@ class Memory():
 		delta = np.zeros((batch_size, nb_actions))
 		a = np.cast['int'](a)
 		delta[np.arange(batch_size), a] = 1
-		targets = (1 - delta) * Y[:batch_size] + delta * (r + (gamma * Qsa))
+		targets = ((1 - delta) * Y[:batch_size]) + ((alpha * ((delta * (r + (gamma * (1 - game_over) * Qsa))) - (delta * Y[:batch_size]))) + (delta * Y[:batch_size]))
 		return S, targets
 
 class Game(object):

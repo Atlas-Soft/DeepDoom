@@ -10,10 +10,10 @@ def train():
     '''
     model = PolicyModel()
 
-    doom = Doom('configs/basic.cfg', frame_tics=4)
+    doom = Doom('configs/basic.cfg', frame_tics=5)
 
-    agent = QLearnAgent(model=model, memory_size=10000, nb_frames=4)
-    agent.train(doom, batch_size=40, nb_epoch=100, steps=5000, gamma=0.99, observe = 20, epsilon=[1., .1], epsilon_rate=0.25, checkpoint=10, filename='basic_0.h5')
+    agent = QLearnAgent(model=model, memory_size=10000, nb_frames=1)
+    agent.train(doom, batch_size=10, nb_epoch=100, steps=5000, alpha=0.01, gamma=0.99, observe = 10, epsilon=[1., .1], epsilon_rate=0.25, checkpoint=5, filename='basic_0.h5')
 
     model.save_weights("basic_0.h5")
 
@@ -23,7 +23,7 @@ def play():
     model = PolicyModel()
     model.load_weights("basic_0.h5")
 
-    doom = Doom('configs/basic.cfg', frame_tics=4)
+    doom = Doom('configs/basic.cfg', frame_tics=5)
 
     agent = QLearnAgent(model=model, nb_frames=4)
 
@@ -34,10 +34,10 @@ def play():
 
 def test():
 
-    doom = Doom('configs/curved_turning.cfg', frame_tics=4)
+    doom = Doom('configs/curved_turning.cfg', frame_tics=5)
     doom.human_play()
 
 if __name__ == '__main__':
-    #train()
-    test()
+    train()
+    #test()
     #play()
