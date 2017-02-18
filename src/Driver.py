@@ -19,7 +19,7 @@ def train():
     scenario = 'configs/basic.cfg'
     frame_skips = 6
     qlearn_param = {
-        'nb_epoch' : 10,
+        'nb_epoch' : 1,
         'steps' : 100,
         'batch_size' : 10,
         'memory_size' : 10000,
@@ -51,8 +51,7 @@ def play():
     doom = Doom('configs/basic.cfg', frame_skips=0)
 
     # Run Scenario and play replay
-    model = PolicyModel()
-    model.load_weights("basic.h5")
+    model = DoomQModel(resolution=doom.get_state().shape[-2:], nb_frames=qlearn_param['nb_frames'], nb_actions=len(doom.actions))
     agent = QLearnAgent(model)
     doom.run(agent, save_replay='basic.lmp', verbose=True)
     doom.replay('basic.lmp')
@@ -64,7 +63,7 @@ def test():
 
     '''
     #Initiates VizDoom Scenario and play
-    doom = Doom('configs/curved_turning.cfg')
+    doom = Doom('configs/rigid_turning.cfg')
     doom.human_play()
 
 if __name__ == '__main__':

@@ -133,7 +133,7 @@ class QLearnAgent:
 		plt.title('Total Reward')
 		plt.ylabel('reward')
 		plt.xlabel('epoch')
-		plt.savefig("../doc/figures/" + filename[:-3] + "_total_reward.png")
+		plt.savefig("../doc/figures/" + self.filename[:-3] + "_total_reward.png")
 		plt.figure()
 
 		# summarize history for loss
@@ -141,7 +141,7 @@ class QLearnAgent:
 		plt.title('Model Loss')
 		plt.ylabel('loss')
 		plt.xlabel('epoch')
-		plt.savefig("../doc/figures/" + filename[:-3] + "_loss.png")
+		plt.savefig("../doc/figures/" + self.filename[:-3] + "_loss.png")
 		plt.show()
 
 class Memory():
