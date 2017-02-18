@@ -16,31 +16,31 @@ def train():
     '''
     '''
     # Parameters
-    scenario = 'configs/basic.cfg'
+    scenario = 'configs/rigid_turning.cfg'
     frame_skips = 6
     qlearn_param = {
-        'nb_epoch' : 1,
-        'steps' : 100,
-        'batch_size' : 10,
+        'nb_epoch' : 100,
+        'steps' : 5000,
+        'batch_size' : 50,
         'memory_size' : 10000,
-        'nb_frames' : 1,
+        'nb_frames' : 3,
         'alpha' : 1.0,
         'gamma' : 0.9,
         'epsilon' : [1.0, 0.1],
-        'epsilon_rate' : 1.0,
-        'observe' : 1,
+        'epsilon_rate' : 0.5,
+        'observe' : 10,
         'checkpoint' : 5,
-        'filename' : 'basic_.h5'
+        'filename' : 'rigid_turning_.h5'
     }
 
     #Initiates VizDoom Scenario
-    doom = Doom('configs/basic.cfg', frame_skips=6)
+    doom = Doom('configs/rigid_turning.cfg', frame_skips=6)
 
     # Preform Q Learning on Scenario
     model = DoomQModel(resolution=doom.get_state().shape[-2:], nb_frames=qlearn_param['nb_frames'], nb_actions=len(doom.actions))
     agent = QLearnAgent(model, **qlearn_param)
     agent.train(doom)
-    model.save_weights("basic.h5")
+    model.save_weights("rigid_turning.h5")
 
 def play():
     '''

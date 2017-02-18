@@ -46,7 +46,7 @@ class DoomQModel(QModel):
         #Parameters
         self.loss_fun = 'mse'
         self.optimizer = RMSprop(lr=0.00025)
-        
+
         #Input Layers
         x0 = Input(shape=(nb_frames, resolution[0], resolution[1]))
 
@@ -59,11 +59,11 @@ class DoomQModel(QModel):
         m = Dense(800, activation='relu')(m)
 
         #Output Layer
-        y0 = Dense(8)(m)
+        y0 = Dense(nb_actions)(m)
 
         self.q_net = Model(input=x0, output=y0)
         self.q_net.compile(optimizer=self.optimizer, loss=self.loss_fun)
-        #self.q_net.summary()
+        self.q_net.summary()
 
     def predict(self, S, q):
         '''
