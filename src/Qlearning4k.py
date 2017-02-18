@@ -121,7 +121,8 @@ class QLearnAgent:
 			pbar.close()
 			pbar = tqdm(total=100)
 			for i in range(100):
-				total_reward += game.run(self)
+				if i == 50: total_reward += game.run(self, save_replay=self.filename[:-3] + ".lmp")
+				else: total_reward += game.run(self)
 				pbar.update(1)
 			total_reward /= 100
 			print("Epoch {:03d}/{:03d} | Loss {:.4f} | Epsilon {:.2f} | Average Reward {}".format(epoch + 1, self.nb_epoch, loss, self.epsilon, total_reward))

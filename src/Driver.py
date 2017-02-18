@@ -64,9 +64,9 @@ def test():
     '''
     #Initiates VizDoom Scenario and play
     doom = Doom('configs/rigid_turning.cfg')
-    doom.human_play()
+    doom.replay('rigid_turning_.lmp')
 
 if __name__ == '__main__':
-    train()
-    #test()
+    #train()
+    test()
     #play()

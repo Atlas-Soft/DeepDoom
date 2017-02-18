@@ -63,7 +63,7 @@ class DoomQModel(QModel):
 
         self.q_net = Model(input=x0, output=y0)
         self.q_net.compile(optimizer=self.optimizer, loss=self.loss_fun)
-        self.q_net.summary()
+        #self.q_net.summary()
 
     def predict(self, S, q):
         '''
