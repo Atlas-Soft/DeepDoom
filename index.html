@@ -62,27 +62,51 @@ specific behaviors. These
 scenarios where created using Doom Builder and VizDoom. The following
 are descriptions of
 the scenarios:</p>
-<h4>
-Scenario
-1</h4>
-<h6>Description:</h6>
-<h6>Goal Function:</h6>
-<h6>Files:</h6>
+<h4>Scenario 1: Rigid Turning</h4>
+<h5>Description:</h5>
+<p>The purpose of this scenario is to train the AI on navigating
+through corridors with sharp 90° turns. Map is a rigid S-shape with
+wall and floor textures that are randomly determined at the time of
+loading
+the map. The player gets rewarded for navigating from one end of the
+'S' to the other, and gets penalized for bumping into walls.</p>
+<p><em>Available Actions</em>: [MOVE_FORWARD,
+MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]</p>
+<h5>Goal Function:</h5>
+<ul>
+<li><b>+50</b> reward checkpoints</li>
+<li><b>+100</b> level exit</li>
+<li><b>-10</b> hitting walls</li>
+<li><b>-1</b> living reward</li>
+</ul>
+<h5>Files:</h5>
+<ul>
+<li><a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src/wads/corridors.wad">
+rigid_turning.wad</a></li>
+<li><a href="https://github.com/Atlas-Soft/DeepDoom/tree/master/src/configs/rigid_turning.cfg">
+rigid_turning.cfg</a></li>
+</ul>
+<h4>Scenario 2: Exit Finding</h4>
+<h5>Description:</h5>
+<p></p>
+<h5>Goal Function:</h5>
+<ul>
+<li></li>
+</ul>
+<h5>Files:</h5>
+<ul>
+<li></li>
+</ul>
 <h2>Results:</h2>
-<hr>
-In Progress;<br>
-The new Q-Learning implementation is currently training. &nbsp;This
-process will take awhile, giving us time to work on documentation.<br>
-Stay tuned for more!
-<h2>Getting Started</h2>
-<hr>
-<h4>Requirements:</h4>
-<p>Requires Python 3.5.</p>
-<p>Requires the following Python Packages:</p>
-<p>-<a href="https://github.com/Marqt/ViZDoom">VizDoom</a></p>
+<p>In Progress;<br>
+The new Q-Learning implementation is currently training. This process
+will take awhile, giving us time to work on documentation.
+Stay tuned for more!</p>
+<a href="https://github.com/marqt/vizdoom">VizDoom</a>
+<p></p>
 <p>-<a href="https://github.com/fchollet/keras">Keras</a></p>
 <p>-<a href="http://matplotlib.org/">Matplotlib</a></p>
-<h4>Setupand Installation:</h4>
+<h4>Setup and Installation:</h4>
 <p>Download or clone repository and install required packages.</p>
 <p>The <a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src">/src/</a>
 folder includes all scripts used for this project.</p>
@@ -91,5 +115,5 @@ folder contains the wad files for the scenarios.</p>
 <p>The <a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src/configs">/src/configs/</a>
 folder contains the config files for the scenarios.</p>
 <p></p>
-<p><small>Last Edited 2/16/2017</small></p>
+<p><small>Last Edited 2/17/2017</small></p>
 </body></html>
