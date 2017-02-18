@@ -1,3 +1,11 @@
+#!/usr/bin/python3
+'''
+Doom.py
+Authors: Rafael Zamora
+Last Updated: 2/18/17
+
+'''
+
 from Qlearning4k import Game
 from vizdoom import DoomGame, Mode, ScreenResolution
 import itertools as it
@@ -6,17 +14,18 @@ from tqdm import tqdm
 
 class Doom(Game):
 
-    def __init__(self, config, frame_tics = 1):
+    def __init__(self, config, frame_skips=0):
         self.config = config
         self.game = DoomGame()
         self.game.load_config(config)
-        self.game.set_screen_resolution(ScreenResolution.RES_160X120)
         self.game.set_window_visible(False)
         self.game.init()
 
+        self.res = (self.game.get_screen_width(), self.game.get_screen_height())
+
         button_count = self.game.get_available_buttons_size()
         self.actions = [list(a) for a in it.product([0, 1], repeat=button_count)]
-        self.frame_tics = frame_tics
+        self.frame_tics = 1 + frame_skips
         self.pbar = None
         self.game.new_episode()
 
@@ -32,12 +41,18 @@ class Doom(Game):
 
     def get_state(self):
         state = self.game.get_state()
+        screen_buffer = np.array(state.screen_buffer).astype('float32')/255
         try:
-            screen_buffer = np.array(state.screen_buffer).astype('float32')/255
+            grey_buffer = np.dot(np.transpose(screen_buffer, (1, 2, 0)), [0.21, 0.72, 0.07])#Greyscaling
             depth_buffer = np.array(state.depth_buffer).astype('float32')/255
-            processed_buffer = np.concatenate([screen_buffer, depth_buffer], 0)
+            depth_buffer[(depth_buffer > .25)] = .25 #Effects depth radius
+            depth_buffer_filtered = (depth_buffer - np.amin(depth_buffer))/ (np.amax(depth_buffer) - np.amin(depth_buffer))
+            processed_buffer = grey_buffer + (.75* (1- depth_buffer_filtered))
+            processed_buffer = (processed_buffer - np.amin(processed_buffer))/ (np.amax(processed_buffer) - np.amin(processed_buffer))
+            processed_buffer = np.round(processed_buffer, 6)
+            processed_buffer = processed_buffer.reshape(self.res[-2:])
         except:
-            processed_buffer = np.zeros((4, 120, 160))
+            processed_buffer = np.zeros(self.res[-2:])
         return processed_buffer
 
     def get_score(self):
@@ -55,7 +70,6 @@ class Doom(Game):
 
         '''
         self.game.close()
-        self.game.set_screen_resolution(ScreenResolution.RES_160X120)
         self.game.set_window_visible(False)
         self.game.add_game_args("+vid_forcesurface 1")
         self.game.init()
@@ -66,9 +80,9 @@ class Doom(Game):
         if verbose: self.pbar = tqdm(total=self.game.get_episode_timeout())
         while not self.is_over():
             S = agent.get_game_data(self)
-            q = agent.model.model.predict(S.reshape(1, agent.nb_frames, 120, 160))
+            q = agent.model.q_net.predict(S)
             q = int(np.argmax(q[0]))
-            a = agent.model.predict(S.reshape(1, agent.nb_frames, 120, 160), q)
+            a = agent.model.predict(S, q)
             self.play(a)
 
         score = self.game.get_total_reward()
