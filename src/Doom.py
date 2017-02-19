@@ -106,6 +106,7 @@ class Doom(Game):
         print("\nRunning Replay:", filename)
         self.game.replay_episode("../data/replay_data/" + filename)
         while not self.game.is_episode_finished():
+            print(self.game.get_last_reward())
             self.game.advance_action()
 
         score = self.game.get_total_reward()
