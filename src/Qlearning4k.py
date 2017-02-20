@@ -16,6 +16,7 @@ from keras import backend as K
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import os
+import datetime
 
 class QLearnAgent:
 	"""
@@ -24,12 +25,13 @@ class QLearnAgent:
 
 	"""
 
-	def __init__(self, model, nb_epoch=1000, steps=1000, batch_size=50, memory_size=1000, nb_frames=1, alpha = 0.01, gamma=0.9, epsilon=[1., .1], epsilon_rate=1.0, observe=0, checkpoint=None, filename='w_.h5'):
+	def __init__(self, model, target_update = 1000, nb_epoch=1000, steps=1000, batch_size=50, memory_size=1000, nb_frames=1, alpha = 0.01, gamma=0.9, epsilon=[1., .1], epsilon_rate=1.0, observe=0, checkpoint=None, filename='w_.h5'):
 		'''
 		Method initiates memory bank for q-learner.
 
 		'''
 		self.model = model
+		self.target_update = target_update
 		self.nb_epoch = nb_epoch
 		self.frames = None
 		self.memory = Memory(memory_size)
@@ -86,7 +88,7 @@ class QLearnAgent:
 					q = int(np.random.randint(len(game.actions)))
 					a = self.model.predict(S, q)
 				else:
-					q = self.model.q_net.predict(S)
+					q = self.model.online_network.predict(S)
 					q = int(np.argmax(q[0]))
 					a = self.model.predict(S, q)
 				game.play(a)
@@ -101,13 +103,16 @@ class QLearnAgent:
 				batch = self.memory.get_batch(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
 				if batch:
 					inputs, targets = batch
-					loss += float(self.model.q_net.train_on_batch(inputs, targets))
+					loss += float(self.model.online_network.train_on_batch(inputs, targets))
 				if game_over:
 					game.reset()
 					self.frames = None
 					S = self.get_game_data(game)
 				step += 1
 				pbar.update(1)
+
+				if self.model.target_network and step % self.target_update == 0:
+					self.model.target_network.set_weights(self.model.online_network.get_weights())
 
 			# Save weights at checkpoints
 			if self.checkpoint and ((epoch + 1 - self.observe) % self.checkpoint == 0 or epoch + 1 == self.nb_epoch):
@@ -172,10 +177,9 @@ class Memory():
 		'''
 		Method generates batch for Deep Q-learn training.
 		'''
-		model = model.q_net
 		if len(self.memory) < batch_size:
 			batch_size = len(self.memory)
-		nb_actions = model.output_shape[-1]
+		nb_actions = model.online_network.output_shape[-1]
 		samples = np.array(sample(self.memory, batch_size))
 		input_dim = np.prod(self.input_shape)
 		S = samples[:, 0 : input_dim]
@@ -188,8 +192,14 @@ class Memory():
 		S = S.reshape((batch_size, ) + self.input_shape)
 		S_prime = S_prime.reshape((batch_size, ) + self.input_shape)
 		X = np.concatenate([S, S_prime], axis=0)
-		Y = model.predict(X)
-		Qsa = np.max(Y[batch_size:], axis=1).repeat(nb_actions).reshape((batch_size, nb_actions))
+		if model.target_network:
+			Y = model.online_network.predict(X)
+			best = np.argmax(Y[batch_size:], axis = 1)
+			Qsa = model.target_network.predict(X)
+			Qsa = Qsa[np.arange(len(best)), best].repeat(nb_actions).reshape((batch_size, nb_actions))
+		else:
+			Y = model.online_network.predict(X)
+			Qsa = np.max(Y[batch_size:], axis=1).repeat(nb_actions).reshape((batch_size, nb_actions))
 		delta = np.zeros((batch_size, nb_actions))
 		a = np.cast['int'](a)
 		delta[np.arange(batch_size), a] = 1

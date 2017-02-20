@@ -27,3 +27,6 @@ CHANGE-LOG:
   2/16/17 v.0.0.2
     - FIXED Q-learn bugs
     - REVISED README.md
+
+  2/20/17 v.0.0.3
+    - Implemented Double QLearn
