@@ -1,0 +1,49 @@
+// all of the sector tags and wall linedef textures must
+// correspond to the given variables for randomization
+int ceilingAndFloorTag = 1;
+str wallTexture = "GRAY1";
+
+// randomly chooses a ceiling texture per entering the level
+script 20 ENTER {
+    switch (Random(1,3)) {
+    case 1:
+        ChangeCeiling(ceilingAndFloorTag,"CEIL3_5");
+        break;
+    case 2:
+        ChangeCeiling(ceilingAndFloorTag,"COMP01");
+        break;
+    case 3:
+        ChangeCeiling(ceilingAndFloorTag,"FLAT2");
+        break;
+    }
+}
+
+// randomly chooses a floor texture per entering the level
+script 21 ENTER {
+    switch (Random(1,3)) {
+    case 1:
+        ChangeFloor(ceilingAndFloorTag,"FLAT8");
+        break;
+    case 2:
+        ChangeFloor(ceilingAndFloorTag,"FLOOR0_5");
+        break;
+    case 3:
+        ChangeFloor(ceilingAndFloorTag,"FLOOR3_3");
+        break;
+    }
+}
+
+// randomly chooses a wall texture per entering the level
+script 22 ENTER {
+    switch (Random(1,3)) {
+    case 1:
+        ReplaceTextures(wallTexture,"CRATE1");
+        break;
+    case 2:
+        ReplaceTextures(wallTexture,"GRAY4");
+        break;
+    case 3:
+        ReplaceTextures(wallTexture,"STUCCO");
+        break;
+    }
+}
