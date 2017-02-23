@@ -195,8 +195,8 @@ class Memory():
 		if model.target_network:
 			Y = model.online_network.predict(X)
 			best = np.argmax(Y[batch_size:], axis = 1)
-			Qsa = model.target_network.predict(X)
-			Qsa = Qsa[np.arange(len(best)), best].repeat(nb_actions).reshape((batch_size, nb_actions))
+			YY = model.target_network.predict(X)
+			Qsa = YY[np.arange(len(best)), best].repeat(nb_actions).reshape((batch_size, nb_actions))
 		else:
 			Y = model.online_network.predict(X)
 			Qsa = np.max(Y[batch_size:], axis=1).repeat(nb_actions).reshape((batch_size, nb_actions))

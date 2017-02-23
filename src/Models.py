@@ -35,7 +35,7 @@ class QModel():
 
 class DQModel(QModel):
     """
-    QModel class is used to define Deep Q-Learning models for the Vizdoom
+    DQModel class is used to define Deep Q-Learning models for the Vizdoom
 
     """
 
@@ -52,12 +52,12 @@ class DQModel(QModel):
 
         #Convolutional Layer
         m = Convolution2D(32, 8, 8, subsample = (4,4), activation='relu')(x0)
-        m = Convolution2D(64, 5, 5, subsample = (2,2), activation='relu')(m)
-        m = Convolution2D(64, 3, 3, subsample = (2,2), activation='relu')(m)
+        m = Convolution2D(64, 5, 5, subsample = (4,4), activation='relu')(m)
         m = Flatten()(m)
 
         # Fully Connected Layer
-        m = Dense(800, activation='relu')(m)
+        m = Dense(4032, activation='relu')(m)
+        m = Dropout(0.5)(m)
 
         #Output Layer
         y0 = Dense(nb_actions)(m)
@@ -65,7 +65,7 @@ class DQModel(QModel):
         self.online_network = Model(input=x0, output=y0)
         self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
         self.target_network = None
-        #self.online_network.summary()
+        self.online_network.summary()
 
     def predict(self, S, q):
         '''
@@ -86,7 +86,7 @@ class DQModel(QModel):
 
 class DDQModel(QModel):
     """
-    QModel class is used to define Deep Q-Learning models for the Vizdoom
+    DDQModel class is used to define Double Deep Q-Learning models for the Vizdoom
 
     """
 
@@ -104,7 +104,6 @@ class DDQModel(QModel):
         #Convolutional Layer
         m = Convolution2D(32, 8, 8, subsample = (4,4), activation='relu')(x0)
         m = Convolution2D(64, 5, 5, subsample = (2,2), activation='relu')(m)
-        m = Convolution2D(64, 3, 3, subsample = (2,2), activation='relu')(m)
         m = Flatten()(m)
 
         # Fully Connected Layer
@@ -117,7 +116,7 @@ class DDQModel(QModel):
         self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
         self.target_network = Model(input=x0, output=y0)
         self.target_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
-        #self.online_network.summary()
+        self.online_network.summary()
 
     def predict(self, S, q):
         '''

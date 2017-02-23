@@ -101,7 +101,7 @@ class Doom(Game):
 
         '''
         self.game.close()
-        #self.game.set_screen_resolution(ScreenResolution.RES_800X600)
+        self.game.set_screen_resolution(ScreenResolution.RES_800X500)
         self.game.set_window_visible(True)
         self.game.set_ticrate(60)
         self.game.add_game_args("+vid_forcesurface 1")

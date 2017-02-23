@@ -30,3 +30,7 @@ CHANGE-LOG:
 
   2/20/17 v.0.0.3
     - Implemented Double QLearn
+
+  2/22/17 v.0.0.4
+    - Fixed DQModel
+    - Trained rigid turning scenario
