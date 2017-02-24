@@ -35,17 +35,19 @@ class QModel():
 
 class DQModel(QModel):
     """
-    DQModel class is used to define Deep Q-Learning models for the Vizdoom
+    QModel class is used to define Deep Q-Learning models for the Vizdoom
 
     """
 
-    def __init__(self, resolution=(120, 160), nb_frames=1, nb_actions=2):
+    def __init__(self, resolution=(120, 160), nb_frames=1, nb_actions=2, depth_radius=1.0, depth_contrast=0.8):
         '''
 
         '''
         #Parameters
+        self.depth_radius = depth_radius
+        self.depth_contrast = depth_contrast
         self.loss_fun = 'mse'
-        self.optimizer = RMSprop(lr=0.00025)
+        self.optimizer = RMSprop(lr=0.0001)
 
         #Input Layers
         x0 = Input(shape=(nb_frames, resolution[0], resolution[1]))
