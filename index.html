@@ -10,6 +10,10 @@ text-transform: none;
 text-align: left;
 background-color: #43e8ff;
 }
+
+#c1 {display:block;margin:0px auto;background-color:transparent;padding:0;border:none;}
+//body {border:none;margin:0;padding:0;overflow:hidden;background-color:transparent;}
+object{display:block;margin:0;padding:0;}#t td,#r1,#r2{font-weight:bold;white-space:nowrap;cursor:pointer;font-family:Verdana,Arial,Helvetica,serif;font-size:21.4pt;}#r1{color:#000;}#r1.p{color:#000;}#t td {color:#000;}#t.p td {color:#000;}#t .ct td{text-align:center;}#t .cr td{text-align:center;}#t .cl td{text-align:center;font-size:10.7pt;}
 </style>
 
 <script type="text/javascript">
@@ -184,7 +188,7 @@ function gtad()	{window.open("http://www.timeanddate.com/clocks/freecountdown.ht
 tf=45;
 </script>
 </head>
-<body>
+<body onload = "init()">
 <h1 style="color: rgb(253, 5, 19);"><span>DeepDoom</span></h1>
 <h2>About</h2>
 <hr>
@@ -274,7 +278,41 @@ rigid_turning.cfg</a></li>
 The new Q-Learning implementation is currently training. This process
 will take awhile, giving us time to work on documentation.
 Stay tuned for more!</p>
-<iframe src="http://free.timeanddate.com/countdown/i5lrklfh/n4513/cf12/cm0/cu5/ct0/cs0/ca1/co1/cr0/ss0/cac000/cpc000/pct/tcfff/fs100/szw576/szh243/tatProject%20Due%20in%3A/tac000/tptProject%20was%20due%3A/tpc000/iso2017-03-31T23:59:59" allowTransparency="true" frameborder="0" width="269" height="89"></iframe>
+<table border=0 cellpadding=0 cellspacing=0 id=c2>
+	<tr>
+		<td id=c1>
+			<div style="text-align:center;" title="Countdown timer provided by timeanddate.com" onclick="gtad()">
+				<div id=r1>Project Due in:</div>
+				<div id=t>
+					<table border=0 cellpadding=0 cellspacing=0 style="margin:0 auto;">
+						<tr class=cr>
+							<td id=cd>35</td>
+							<td>:</td>
+							<td id=ch>04</td>
+							<td>:</td>
+							<td id=cm>29</td>
+							<td>:</td>
+							<td id=cs>53</td>
+							<td>:</td>
+							<td id=ci>000</td>
+						</tr>
+						<tr class=cl>
+							<td id=ld>Days</td>
+							<td></td>
+							<td id=lh>Hrs</td>
+							<td></td>
+							<td id=lm>Mins</td>
+							<td></td>
+							<td id=ls>Secs</td>
+							<td></td>
+							<td id=lms>mSecs</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</td>
+	</tr>
+</table>
 <h2>Resources:</h2>
 <p><a href="https://github.com/marqt/vizdoom">VizDoom</a></p>
 <p>-<a href="https://github.com/fchollet/keras">Keras</a></p>
