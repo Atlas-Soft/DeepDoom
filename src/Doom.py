@@ -35,7 +35,7 @@ class Doom(Game):
     def play(self, action):
         self.game.set_action(self.actions[action])
         self.game.advance_action()
-        if self.pbar: self.pbar.update(self.frame_tics)
+        if self.pbar: self.pbar.update(1)
 
     def get_state(self, depth_radius, depth_contrast):
         state = self.game.get_state()

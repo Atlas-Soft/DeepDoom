@@ -61,7 +61,7 @@ def test():
     plt.show()
     # Run Scenario and play replay
     model = DQModel(resolution=doom.get_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=depth_radius, depth_contrast=depth_contrast)
-    model.load_weights('rigid_turning_0.h5')
+    model.load_weights('rigid_turning_.h5')
     agent = QLearnAgent(model, **learn_param)
     for i in range(10):
         doom = Doom(scenario)
@@ -79,6 +79,6 @@ def play():
     doom.human_play()
 
 if __name__ == '__main__':
-    train()
-    #test()
+    #train()
+    test()
     #play()
