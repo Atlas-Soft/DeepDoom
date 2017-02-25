@@ -16,7 +16,7 @@ background-color: #43e8ff;
 object{display:block;margin:0;padding:0;}#t td,#r1,#r2{font-weight:bold;white-space:nowrap;cursor:pointer;font-family:Verdana,Arial,Helvetica,serif;font-size:21.4pt;}#r1{color:#000;}#r1.p{color:#000;}#t td {color:#000;}#t.p td {color:#000;}#t .ct td{text-align:center;}#t .cr td{text-align:center;}#t .cl td{text-align:center;font-size:10.7pt;}
 </style>
 </head>
-<body onload = "init()">
+<body>
 <h1 style="color: rgb(253, 5, 19);"><span>DeepDoom</span></h1>
 <h2>About</h2>
 <hr>
@@ -69,13 +69,14 @@ the scenarios:</p>
 <h4>Scenario 1: Rigid Turning</h4>
 <h5>Description:</h5>
 <p>The purpose of this scenario is to train the AI on navigating
-through corridors with sharp 90° turns. Map is a rigid S-shape with
+through corridors with sharp 90&deg; turns. Map is a rigid S-shape with
 wall and floor textures that are randomly determined at the time of
 loading
 the map. The player gets rewarded for navigating from one end of the
-'S' to the other, and gets penalized for bumping into walls.</p>
+'S' to the other, and gets penalized for bumping into walls and not moving.</p>
 <p><em>Available Actions</em>: [MOVE_FORWARD,
 MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]</p>
+<img src="webPhotos/rigid_turning.png" alt="rigid_turning.wad map" width="40%">
 <h5>Goal Function:</h5>
 <ul>
 <li><b>+50</b> reward checkpoints</li>
@@ -85,21 +86,35 @@ MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]</p>
 </ul>
 <h5>Files:</h5>
 <ul>
-<li><a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src/wads/corridors.wad">
+<li><a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src/wads/rigid_turning.wad">
 rigid_turning.wad</a></li>
 <li><a href="https://github.com/Atlas-Soft/DeepDoom/tree/master/src/configs/rigid_turning.cfg">
 rigid_turning.cfg</a></li>
 </ul>
 <h4>Scenario 2: Exit Finding</h4>
 <h5>Description:</h5>
-<p></p>
+<p>This scenario is designed to train the AI to spot an exit from a room, in the form of a hallway branching off this room, and move into that exit.
+Map is a square room where player starts in, with long 128-unit-wide corridor leading out of it.
+Player is randomly placed at a point inside the square starting room by a ZDoom ACS script that runs when player enters the map.
+The textures of the walls and floors are selected randomly by another ACS script from a pool of predefined textures.
+The player is rewarded for moving closer to the exit while looking at it (the exit is within a 21.6&deg; field of view relative to player's direction).
+The player does not receive any reward for moving towards the exit while not looking at it.
+The player is penalized for bumping into walls and not moving.</p>
+<p><em>Available Actions</em>: [MOVE_FORWARD,
+MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]</p>
+<img src="webPhotos/exit_finding.png" alt="exit_finding.wad map" width="40%">
 <h5>Goal Function:</h5>
 <ul>
-<li></li>
+	<li>+1 moving reward (changes player x,y position)</li>
+	<li>+5 moving closer to goal while looking at it</li>
+	<li>+100 level exit</li>
+	<li>-10 hitting walls</li>
+	<li>-1 living reward</li>
 </ul>
 <h5>Files:</h5>
 <ul>
-<li></li>
+	<li><a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src/wads/exit_finding.wad">exit_finding.wad</a></li>
+	<li><a href="https://github.com/Atlas-Soft/DeepDoom/tree/master/src/configs/exit_finding.cfg">exit_finding.cfg</a></li>
 </ul>
 <h2>Results:</h2>
 <p>In Progress;<br>
