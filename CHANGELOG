@@ -34,3 +34,7 @@ CHANGE-LOG:
   2/22/17 v.0.0.4
     - Fixed DQModel
     - Trained rigid turning scenario
+
+  2/26/17 v.0.0.5
+    - REVISED Source Code for RLAgent and DoomScenario
+    - ADDED Alpha Decay

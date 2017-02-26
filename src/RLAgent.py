@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 '''
-Qlearning4k.py
+RLAgent.py
 Authors: Rafael Zamora
 Last Updated: 2/18/17
 
@@ -18,50 +18,50 @@ from tqdm import tqdm
 import os
 import datetime
 
-class QLearnAgent:
+class RLAgent:
 	"""
-	Q-learner agent class used to interface models with Vizdoom game and
+	RLAgent class used to interface models with Vizdoom game and
 	preform training.
 
 	"""
 
-	def __init__(self, model, learn_algo = 'qlearn', exp_policy='e-greedy', frame_skips=4, target_update = 1000, nb_epoch=1000, steps=1000, batch_size=50, memory_size=1000, nb_frames=1, alpha = [1.0,0.1], alpha_rate=1.0, alpha_wait=0, gamma=0.9, epsilon=[1., .1], epsilon_rate=1.0, epislon_wait=0, checkpoint=None, filename='w_.h5'):
+	def __init__(self, model, learn_algo = 'qlearn', exp_policy='e-greedy', frame_skips=4, nb_epoch=1000, steps=1000, batch_size=50, memory_size=1000, nb_frames=1, alpha = [1.0,0.1], alpha_rate=1.0, alpha_wait=0, gamma=0.9, epsilon=[1., .1], epsilon_rate=1.0, epislon_wait=0, checkpoint=None, filename='w_.h5'):
 		'''
-		Method initiates memory bank for q-learner.
+		Method initiates learning parameters for Reinforcement Learner.
 
 		'''
 		self.model = model
+		self.memory = ReplayMemory(memory_size)
+		self.frames = None
+		self.checkpoint = checkpoint
+		self.filename = filename
+
+		# Learning Parameters
 		self.learn_algo = learn_algo
-		self.target_update = target_update
 		self.exp_policy = exp_policy
 		self.nb_epoch = nb_epoch
-		self.memory = Memory(memory_size)
-		self.nb_frames = nb_frames
 		self.steps = steps
 		self.batch_size = batch_size
 		self.nb_frames = nb_frames
+		self.frame_skips = frame_skips
+		self.gamma = gamma
+
+		# Set Alpha and Alpha decay
 		self.alpha, self.final_alpha = alpha
 		self.alpha_wait = alpha_wait
 		self.delta_alpha = ((alpha[0] - alpha[1]) / (nb_epoch * alpha_rate))
-		self.gamma = gamma
 
 		# Set Epsilon and Epsilon decay
 		self.epsilon, self.final_epsilon = epsilon
 		self.epislon_wait = epislon_wait
 		self.delta_epsilon =  ((epsilon[0] - epsilon[1]) / (nb_epoch * epsilon_rate))
 
-		self.checkpoint = checkpoint
-		self.filename = filename
-
-		self.frames = None
-		self.frame_skips = frame_skips
-
-	def get_game_data(self, game):
+	def get_state_data(self, game):
 		'''
 		Method returns model ready state data.
 
 		'''
-		frame = game.get_state(self.model.depth_radius, self.model.depth_contrast)
+		frame = game.get_processed_state(self.model.depth_radius, self.model.depth_contrast)
 		if self.frames is None:
 			self.frames = [frame] * self.nb_frames
 		else:
@@ -71,7 +71,8 @@ class QLearnAgent:
 
 	def train(self, game):
 		'''
-		Method preforms Q learning on agent.
+		Method preforms Reinforcement Learning on agent's model according to
+		learning parameters.
 
 		'''
 		loss_history = []
@@ -86,9 +87,9 @@ class QLearnAgent:
 			step = 0
 			loss = 0.
 			total_reward = 0
-			game.reset()
+			game.game.new_episode()
 			self.frames = None
-			S = self.get_game_data(game)
+			S = self.get_state_data(game)
 			a_prime = 0
 
 			# Preform learning step
@@ -106,12 +107,12 @@ class QLearnAgent:
 
 				# Advance Action over frame_skips + 1
 				for i in range(self.frame_skips+1):
-					if not game.is_over(): game.play(a)
+					if not game.game.is_episode_finished(): game.play(a)
 
 				# Store transition in memory
-				r = game.get_score()
-				S_prime = self.get_game_data(game)
-				game_over = game.is_over()
+				r = game.game.get_last_reward()
+				S_prime = self.get_state_data(game)
+				game_over = game.game.is_episode_finished()
 				transition = [S, a, r, S_prime, a_prime, game_over]
 				self.memory.remember(*transition)
 				S = S_prime
@@ -122,8 +123,6 @@ class QLearnAgent:
 					batch = self.memory.get_batch_dqlearn(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
 				elif self.learn_algo == 'sarsa':
 					batch = self.memory.get_batch_sarsa(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
-				elif self.learn_algo == 'ddqlearn':
-					batch = self.memory.get_batch_ddqlearn(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
 
 				# Train model online network
 				if batch:
@@ -131,15 +130,11 @@ class QLearnAgent:
 					loss += float(self.model.online_network.train_on_batch(inputs, targets))
 
 				if game_over:
-					game.reset()
+					game.game.new_episode()
 					self.frames = None
-					S = self.get_game_data(game)
+					S = self.get_state_data(game)
 				step += 1
 				pbar.update(1)
-
-				# Update Target Network weights (DDQ-Learning)
-				if self.model.target_network and step % self.target_update == 0:
-					self.model.target_network.set_weights(self.model.online_network.get_weights())
 
 			# Save weights at checkpoints
 			if self.checkpoint and ((epoch + 1 - self.epislon_wait) % self.checkpoint == 0 or epoch + 1 == self.nb_epoch):
@@ -179,9 +174,9 @@ class QLearnAgent:
 		plt.savefig("../doc/figures/" + self.filename[:-3] + "_loss.png")
 		plt.show()
 
-class Memory():
+class ReplayMemory():
 	"""
-	Memory class used to stores transition data and generate batces for Q-learning.
+	ReplayMemory class used to stores transition data and generate batces for Q-learning.
 
 	"""
 	def __init__(self, memory_size=100):
@@ -199,10 +194,9 @@ class Memory():
 		'''
 		self.input_shape = s.shape[1:]
 		self.memory.append(np.concatenate([s.flatten(), np.array(a).flatten(), np.array(r).flatten(), s_prime.flatten(), np.array(a_prime).flatten(), 1 * np.array(game_over).flatten()]))
-		if self._memory_size > 0 and len(self.memory) > self._memory_size:
-			self.memory.pop(0)
+		if self._memory_size > 0 and len(self.memory) > self._memory_size: self.memory.pop(0)
 
-	def get_batch_dqlearn(self, model, batch_size, alpha=0.01, gamma=0.9):
+	def get_batch_dqlearn(self, model, batch_size, alpha=1.0, gamma=0.9):
 		'''
 		Method generates batch for Deep Q-learn training.
 		'''
@@ -239,43 +233,9 @@ class Memory():
 		targets = ((1 - delta) * Y[:batch_size]) + ((alpha * ((delta * (r + (gamma * (1 - game_over) * Qsa))) - (delta * Y[:batch_size]))) + (delta * Y[:batch_size]))
 		return S, targets
 
-	def get_batch_sarsa(self, model, batch_size, alpha=0.01, gamma=0.9):
+	def get_batch_sarsa(self, model, batch_size, alpha=1.0, gamma=0.9):
 		'''
-		Method generates batch for Deep Q-learn training.
-		'''
-		if len(self.memory) < batch_size:
-			batch_size = len(self.memory)
-		nb_actions = model.online_network.output_shape[-1]
-		samples = np.array(sample(self.memory, batch_size))
-		input_dim = np.prod(self.input_shape)
-		S = samples[:, 0 : input_dim]
-		a = samples[:, input_dim]
-		r = samples[:, input_dim + 1]
-		S_prime = samples[:, input_dim + 2 : 2 * input_dim + 2]
-		a_prime = samples[:, 2 * input_dim + 2]
-		game_over = samples[:, 2 * input_dim + 3]
-		r = r.repeat(nb_actions).reshape((batch_size, nb_actions))
-		game_over = game_over.repeat(nb_actions).reshape((batch_size, nb_actions))
-		S = S.reshape((batch_size, ) + self.input_shape)
-		S_prime = S_prime.reshape((batch_size, ) + self.input_shape)
-		X = np.concatenate([S, S_prime], axis=0)
-		if model.target_network:
-			Y = model.online_network.predict(X)
-			best = np.argmax(Y[batch_size:], axis = 1)
-			YY = model.target_network.predict(X)
-			Qsa = YY[np.arange(len(best)), best].repeat(nb_actions).reshape((batch_size, nb_actions))
-		else:
-			Y = model.online_network.predict(X)
-			Qsa = np.max(Y[batch_size:], axis=1).repeat(nb_actions).reshape((batch_size, nb_actions))
-		delta = np.zeros((batch_size, nb_actions))
-		a = np.cast['int'](a)
-		delta[np.arange(batch_size), a] = 1
-		targets = ((1 - delta) * Y[:batch_size]) + ((alpha * ((delta * (r + (gamma * (1 - game_over) * Qsa))) - (delta * Y[:batch_size]))) + (delta * Y[:batch_size]))
-		return S, targets
-
-	def get_batch_ddqlearn(self, model, batch_size, alpha=0.01, gamma=0.9):
-		'''
-		Method generates batch for Deep Q-learn training.
+		Method generates batch for Deep SARSA training.
 		'''
 		if len(self.memory) < batch_size:
 			batch_size = len(self.memory)
@@ -293,10 +253,6 @@ class Memory():
 		S = S.reshape((batch_size, ) + self.input_shape)
 		S_prime = S_prime.reshape((batch_size, ) + self.input_shape)
 		X = np.concatenate([S, S_prime], axis=0)
-		Y = model.online_network.predict(X)
-		best = np.argmax(Y[batch_size:], axis = 1)
-		YY = model.target_network.predict(X)
-		Qsa = YY[np.arange(len(best)), best].repeat(nb_actions).reshape((batch_size, nb_actions))
 		Y = model.online_network.predict(X)
 		Qsa = np.max(Y[batch_size:], axis=1).repeat(nb_actions).reshape((batch_size, nb_actions))
 		delta = np.zeros((batch_size, nb_actions))
@@ -304,26 +260,3 @@ class Memory():
 		delta[np.arange(batch_size), a] = 1
 		targets = ((1 - delta) * Y[:batch_size]) + ((alpha * ((delta * (r + (gamma * (1 - game_over) * Qsa))) - (delta * Y[:batch_size]))) + (delta * Y[:batch_size]))
 		return S, targets
-
-class Game(object):
-
-	def __init__(self):
-		self.reset()
-
-	def reset(self):
-		pass
-
-	def play(self, action):
-		pass
-
-	def get_state(self):
-		return None
-
-	def get_score(self):
-		return 0
-
-	def is_over(self):
-		return False
-
-	def get_total_score(self):
-		return False
