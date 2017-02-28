@@ -10,13 +10,14 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from RLAgent import RLAgent
 from DoomScenario import DoomScenario
-from Models import DModel
+from Models import DModel, HDModel
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Parameters
-scenario = 'configs/exit_finding.cfg'
+scenario = 'configs/doors.cfg'
 depth_radius = 1.0
-depth_contrast = 0.9
+depth_contrast = 0.6
 learn_param = {
     'learn_algo' : 'dqlearn',
     'exp_policy' : 'e-greedy',
@@ -34,10 +35,10 @@ learn_param = {
     'epsilon_rate' : 0.7,
     'epislon_wait' : 10,
     'checkpoint' : 1,
-    'filename' : 'exit_finding_.h5'
+    'filename' : 'doors_.h5'
 }
 
-def train():
+def train_model():
     '''
     '''
     #Initiates VizDoom Scenario
@@ -47,9 +48,27 @@ def train():
     model = DModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=depth_radius, depth_contrast=depth_contrast)
     agent = RLAgent(model, **learn_param)
     agent.train(doom)
-    model.save_weights("exit_finding.h5")
+    model.save_weights("doors.h5")
 
-def test():
+def train_h_model():
+    #Initiates VizDoom Scenario
+    doom = DoomScenario(scenario)
+
+    # Preform Q Learning on Scenario using HDModel
+    model_rigid_turning = DModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=1.0, depth_contrast=0.9)
+    model_rigid_turning.load_weights('rigid_turning.h5')
+
+    model_exit_finding = DModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=1.0, depth_contrast=0.9)
+    model_exit_finding.load_weights('exit_finding.h5')
+
+    models = [model_rigid_turning, model_exit_finding]
+
+    model = HDModel(sub_models=models, skill_frame_skip=6, resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=depth_radius, depth_contrast=depth_contrast)
+    agent = RLAgent(model, **learn_param)
+    agent.train(doom)
+    model.save_weights("all.h5")
+
+def test_model():
     '''
     Method used to show trained model playing Vizdoom Scenario.
 
@@ -60,14 +79,35 @@ def test():
     plt.show()
 
     # Run Scenario and play replay
-    model = DModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=depth_radius, depth_contrast=depth_contrast)
-    model.load_weights('rigid_turning.h5')
+    model = DModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions)/2, depth_radius=depth_radius, depth_contrast=depth_contrast)
+    model.load_weights('exit_finding_.h5')
     agent = RLAgent(model, **learn_param)
     for i in range(10):
         doom = DoomScenario(scenario)
         doom.run(agent, save_replay='test.lmp', verbose=True)
         doom.replay('test.lmp')
 
+def test_h_model():
+    #Initiates VizDoomScenario Scenario
+    doom = DoomScenario(scenario)
+    plt.imshow(doom.get_processed_state(depth_radius, depth_contrast), interpolation='nearest', cmap='gray')
+    plt.show()
+
+    # Run Scenario and Play replay using HDModel
+    model_rigid_turning = DModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=1.0, depth_contrast=0.9)
+    model_rigid_turning.load_weights('rigid_turning.h5')
+
+    model_exit_finding = DModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=1.0, depth_contrast=0.9)
+    model_exit_finding.load_weights('exit_finding.h5')
+
+    models = [model_rigid_turning, model_exit_finding]
+
+    model = HDModel(sub_models=models, skill_frame_skip=6, resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=depth_radius, depth_contrast=depth_contrast)
+    agent = RLAgent(model, **learn_param)
+    for i in range(10):
+        doom = DoomScenario(scenario)
+        doom.run(agent, save_replay='test.lmp', verbose=True)
+        doom.replay('test.lmp')
 
 def play():
     '''
@@ -75,10 +115,10 @@ def play():
 
     '''
     #Initiates VizDoomScenario Scenario and play
-    doom = DoomScenario('configs/rigid_turning.cfg', depth_radius=depth_radius, depth_contrast=depth_contrast)
+    doom = DoomScenario('configs/doors.cfg')
     doom.human_play()
 
 if __name__ == '__main__':
-    train()
+    train_model()
     #test()
     #play()

@@ -72,12 +72,13 @@ class DoomScenario:
             S = agent.get_state_data(self)
             q = agent.model.online_network.predict(S)
             q = int(np.argmax(q[0]))
-            a = agent.model.predict(S, q)
+            a = agent.model.predict(self, q)
             for i in range(agent.frame_skips+1):
                 if not self.game.is_episode_finished():
                     self.play(a)
 
         agent.frames = None
+        if agent.model.__class__.__name__ == 'HDModel': agent.model.sub_model_frames = None
         score = self.game.get_total_reward()
         if verbose:
             print("Total Score:", score)

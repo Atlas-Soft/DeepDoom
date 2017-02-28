@@ -80,6 +80,7 @@ class RLAgent:
 
 		# Q-Learning Loop
 		print("\nTraining:", game.config)
+		print("Model:", self.model.__class__.__name__)
 		print("Algorithm:", self.learn_algo)
 		print("Exploration_Policy:", self.exp_policy, '\n')
 		for epoch in range(self.nb_epoch):
@@ -130,6 +131,7 @@ class RLAgent:
 					loss += float(self.model.online_network.train_on_batch(inputs, targets))
 
 				if game_over:
+					if model.__class__.__name__ == 'HDModel': model.sub_model_frames = None
 					game.game.new_episode()
 					self.frames = None
 					S = self.get_state_data(game)
