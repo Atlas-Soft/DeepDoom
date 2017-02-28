@@ -115,10 +115,10 @@ def play():
 
     '''
     #Initiates VizDoomScenario Scenario and play
-    doom = DoomScenario('configs/doors.cfg')
+    doom = DoomScenario('configs/switches.cfg')
     doom.human_play()
 
 if __name__ == '__main__':
-    train_model()
+    #train_model()
     #test()
-    #play()
+    play()
