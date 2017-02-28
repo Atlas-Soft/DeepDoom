@@ -19,7 +19,6 @@ script 1 (void)
 {
     Generic_Door(0, 34, 0, 16, 0);
     reward += 50.0;
-    print(f:reward);
 }
 
 //Open Door Reward Reverse
@@ -27,14 +26,12 @@ script 2 (void)
 {
     Generic_Door(0, 34, 0, 16, 0);
     reward += 5.0;
-    print(f:reward);
 }
 
 //Exit Reward
 script 3 (void)
 {
     reward += 20.0;
-    print(f:reward);
     Exit_Normal(0);
 }
 
@@ -114,7 +111,6 @@ script 50 ENTER
         if(yf != yi || xf != xi)
         {
             reward += 1.0;
-            print(f:reward);
             yi = yf;
             xi = xf;
         }
