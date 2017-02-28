@@ -106,7 +106,7 @@ MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]</p>
 <h5>Goal Function:</h5>
 <ul>
 	<li>+1 moving reward (changes player x,y position)</li>
-	<li>+5 moving closer to goal while looking at it</li>
+	<li>+10 * (x)  moving closer to goal while looking at it where x corresponds inversely to distance to the exit.  x decreases as distance increases</li>
 	<li>+100 level exit</li>
 	<li>-10 hitting walls</li>
 	<li>-1 living reward</li>
