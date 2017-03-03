@@ -116,6 +116,56 @@ MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]</p>
 	<li><a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src/wads/exit_finding.wad">exit_finding.wad</a></li>
 	<li><a href="https://github.com/Atlas-Soft/DeepDoom/tree/master/src/configs/exit_finding.cfg">exit_finding.cfg</a></li>
 </ul>
+
+<h4>Scenario 3: Switches</h4>
+<h5>Description:</h5>
+<p>This scenario is designed to train the AI to spot a switch on a wall. 
+Map is a square room where player starts in, with a button placed on the south wall.
+Player is randomly placed at a point inside the room, facing a random direction, by a ZDoom ACS script that runs when player enters the map.
+The textures of the walls, floor, ceiling, and button are selected randomly by another ACS script from a pool of predefined textures.
+The player is rewarded for moving closer to the switch while looking at it (the switch is within a 21.6&deg; field of view relative to player's direction).
+The player does not receive any reward for moving towards the switch while not looking at it.
+The player is penalized for bumping into walls and not moving.</p>
+<p><em>Available Actions</em>: [USE, MOVE_FORWARD,
+MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]</p>
+<img src="https://raw.githubusercontent.com/Atlas-Soft/DeepDoom/master/webPhotos/Switches.PNG" alt="Switches.wad map" width="40%">
+<h5>Goal Function:</h5>
+<ul>
+	<li>+1 moving reward (changes player x,y position)</li>
+	<li>+10 * (x)  moving closer to goal while looking at it where x corresponds inversely to distance to the switch.  x decreases as distance increases</li>
+	<li>+100 pressing the switch</li>
+	<li>-1 living reward</li>
+</ul>
+<h5>Files:</h5>
+<ul>
+	<li><a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src/wads/Switches.wad">Switches.wad</a></li>
+	<li><a href="https://github.com/Atlas-Soft/DeepDoom/tree/master/src/configs/switches.cfg">switches.cfg</a></li>
+</ul>
+
+<h4>Scenario 4: Doors</h4>
+<h5>Description:</h5>
+<p>This scenario is designed to train the AI to recognize and open doors.
+Map is a straight rectangular corridor with 9 doors placed inside it.
+Player is placed at one end of this corridor and is expected to proceed straight towards the exit.
+The textures of the walls, floor, ceiling, and doors are selected randomly by an ACS script that runs when the player enters the map.
+The player is rewarded for advancing towards doors, for advancing through doors that are open, and for reaching the exit.
+The player is penalized for not moving.</p>
+<p><em>Available Actions</em>: [USE, MOVE_FORWARD]</p>
+<img src="https://raw.githubusercontent.com/Atlas-Soft/DeepDoom/master/webPhotos/Doors.PNG" alt="Doors.wad map" width="40%">
+<h5>Goal Function:</h5>
+<ul>
+	<li>+1 moving reward (changes player x,y position)</li>
+	<li>+50 passing through an open door</li>
+	<li>+10 moving towards the next door</li>
+	<li>+20 reaching level exit</li>
+	<li>-1 living reward</li>
+</ul>
+<h5>Files:</h5>
+<ul>
+	<li><a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src/wads/Doors.wad">Doors.wad</a></li>
+	<li><a href="https://github.com/Atlas-Soft/DeepDoom/tree/master/src/configs/doors.cfg">doors.cfg</a></li>
+</ul>
+
 <h2>Results:</h2>
 <p>In Progress;<br>
 The new Q-Learning implementation is currently training. This process
@@ -135,5 +185,5 @@ folder contains the wad files for the scenarios.</p>
 <p>The <a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src/configs">/src/configs/</a>
 folder contains the config files for the scenarios.</p>
 <p></p>
-<p><small>Last Edited 2/17/2017</small></p>
+<p><small>Last Edited 3/3/2017</small></p>
 </body></html>
