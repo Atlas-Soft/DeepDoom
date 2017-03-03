@@ -2,7 +2,7 @@
 '''
 Models.py
 Authors: Rafael Zamora
-Last Updated: 2/18/17
+Last Updated: 3/3/17
 
 '''
 
@@ -11,8 +11,6 @@ Script defines the models used by the Doom Ai.
 Models are built using the Keras high-level neural network library.
 Keras uses TensorFlow and Theano as back-ends.
 
-***Current models are in the prototyping phase,
-
 """
 import numpy as np
 import keras.backend as K
@@ -20,9 +18,9 @@ from keras.models import Model
 from keras.layers import *
 from keras.optimizers import RMSprop, SGD
 
-class DModel:
+class DQNModel:
     """
-    DModel class is used to define Deep Reinforcement Learning models for the
+    DQNModel class is used to define DQN models for the
     Vizdoom environment.
 
     """
@@ -73,9 +71,9 @@ class DModel:
         '''
         self.online_network.save_weights('../data/model_weights/' + filename, overwrite=True)
 
-class HDModel:
+class HDQNModel:
     """
-    HDModel class is used to define Deep Heirarchical Reinforcement Learning models for the
+    HDQNModel class is used to define Heirarchical-DQN models for the
     Vizdoom environment.
 
     """

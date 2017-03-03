@@ -1,22 +1,20 @@
-# DeepDoom
-![Current Version](https://img.shields.io/badge/version-0.0.2-red.svg)
+# DeepDoom: Navigating Complex Environments Using Heirarchical Deep Q-Networks
 
-Last Updated: **February 16, 2016**
+![Current Version](https://img.shields.io/badge/version-0.0.5-red.svg)
 
-## Overview
-Senior Project:
+**Last Updated: March 3, 2016**
 
-Applying Deep Reinforcement Learning Techniques on the ViZDoom environment to learn
-navigation behaviors. Our goal is to train Deep Q-Learning Networks on simple navigational
-tasks and combine them to solve more complex navigational tasks.
+**Team:**
 
-Our Deep Q-Learning implementation is based on the following sources:
+- [Rafael Zamora](https://github.com/rz4) - Team Leader, Lead Programmer, Machine Learning Specialist
+- [Lauren An](https://github.com/AtlasSoft-lsa3) - Programmer, Head of Testing
+- [William Steele](https://github.com/billionthb) - Programmer, Hardware Specialist, Head of Documentation
+- [Joshua Hidayat](https://github.com/Arngeirr) - Programmer, Head of Data Gathering
 
-- [Qlearning4k](https://github.com/farizrahman4u/qlearning4k)
+## Introduction
 
-- [Playing Atari with Deep Reinforcement Learning](https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf)
+## DQN and Heirarchical-DQN
 
-- [Human-level control through deep reinforcement learning](http://www.nature.com/nature/journal/v518/n7540/full/nature14236.html)
 
 ## Scenarios
 
@@ -24,34 +22,17 @@ We designed a set of scenarios where the agent will learn specific behaviors. Th
 scenarios where created using Doom Builder and ViZDoom. The following are descriptions of
 the scenarios:
 
-##  
+---
 
-### Scenario 1 : Corridors
+### Scenario 1 : Rigid Turning
 
+![rigid_turning_map](webPhotos/rigid_turning.PNG)
 #### Description:
-The purpose of this scenario is to train the AI on walking. Map is a straight corridor. Player gets rewarded for navigating deeper along the corridor and gets penalized for hitting walls.
+The purpose of this scenario is to train the AI on navigating through corridors with sharp 90° turns. Map is a rigid S-shape with wall and floor textures that are randomly determined at the time of loading the map. The player gets rewarded for navigating from one end of the 'S' to the other, and gets penalized for bumping into walls and not moving.
 
-*Available Actions* : [MOVE_FORWARD, MOVE_BACKWARD, MOVE_LEFT, MOVE_RIGHT, TURN_LEFT, TURN_RIGHT]
+*Available Actions* : [MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
 
-#### Goal Function:
-
-- **+50** reward checkpoints
-- **+100** level exit
-- **-10** hitting walls
-- **-1** living reward
-
-##### Files:
-- [corridors.wad](src/wads/corridors.wad)
-- [corridors.cfg](src/configs/corridors.cfg)
-
-##  
-
-### Scenario 2 : Rigid Turning
-
-##### Description:
-The purpose of this scenario is to train the AI on turning, specifically via rigid turns. Map is a rigid M-shape with grey walls, ceilings, and floors. Player gets rewarded for navigating from one end of the M-shape to the other end and gets penalized for hitting walls.
-
-*Available Actions* : [MOVE_FORWARD, MOVE_BACKWARD, MOVE_LEFT, MOVE_RIGHT, TURN_LEFT, TURN_RIGHT]
+This set of action are the minimum required to reach the level exit for this scenario.
 
 ##### Goal Function:
 
@@ -64,14 +45,26 @@ The purpose of this scenario is to train the AI on turning, specifically via rig
 - [rigid_turning.wad](src/wads/rigid_turning.wad)
 - [rigid_turning.cfg](src/configs/rigid_turning.cfg)
 
-##  
+---
 
-### Scenario 3 : Curved Turning
+### Scenario 2 : Exit Finding
 
-##### Description:
-The purpose of this scenario is to train the AI on turning, specifically via curved turns. Map is a sine graph with grey walls, ceilings, and floors. Player gets rewarded for navigating from one end of the sine graph to the other end and gets penalized for hitting walls.
+![exit_finding_map](webPhotos/exit_finding.PNG)
+#### Description:
+This scenario is designed to train the AI to spot an exit from a room, in the form of a
+hallway branching off this room, and move into that exit. Map is a square room where
+player starts in, with long 128-unit-wide corridor leading out of it. Player is
+randomly placed at a point inside the square starting room by a ZDoom ACS script that
+runs when player enters the map. The textures of the walls and floors are selected
+randomly by another ACS script from a pool of predefined textures. The player is
+rewarded for moving closer to the exit while looking at it (the exit is within a 21.6°
+field of view relative to player's direction). The player does not receive any reward
+for moving towards the exit while not looking at it. The player is penalized for
+bumping into walls and not moving.
 
-*Available Actions* : [MOVE_FORWARD, MOVE_BACKWARD, MOVE_LEFT, MOVE_RIGHT, TURN_LEFT, TURN_RIGHT]
+*Available Actions* : [MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
+
+This set of action are the minimum required to reach the level exit for this scenario.
 
 ##### Goal Function:
 
@@ -81,8 +74,10 @@ The purpose of this scenario is to train the AI on turning, specifically via cur
 - **-1** living reward
 
 ##### Files:
-- [curved_turning.wad](src/wads/curved_turning.wad)
-- [curved_turning.cfg](src/configs/curved_turning.cfg)
+- [exit_finding.wad](src/wads/exit_finding.wad)
+- [exit_finding.cfg](src/configs/exit_finding.cfg)
+
+---
 
 ## Results:
 
@@ -90,24 +85,86 @@ N/A
 
 ## Getting Started
 
-#### Requirements:
+### Requirements:
 
 Requires Python 3.5.
 
 Requires the following Python Packages:
 
--[ViZDoom](https://github.com/Marqt/ViZDoom)
+- [ViZDoom](https://github.com/Marqt/ViZDoom)
 
--[Keras](https://github.com/fchollet/keras)
+- [Keras](https://github.com/fchollet/keras)
 
--[Matplotlib](http://matplotlib.org/)
+- [TensorFlow](https://tensorflow.org/)
 
-#### Setup and Installation:
+- [H5Py](https://h5py.org/)
+
+- [Matplotlib](http://matplotlib.org/)
+
+### Setup and Installation:
 
 Download or clone repository and install required packages.
 
-The [/src/](src) folder includes all scripts used for this project.
+>**Important:** keras.json configuration file (located in ~/.keras/) should be set to
+>the following:
 
-The [/src/wads/](src/wads) folder contains the wad files for the scenarios.
+```json
+{
+    "floatx": "float32",
+    "epsilon": 1e-07,
+    "backend": "tensorflow",
+    "image_dim_ordering": "th"
+}
+```
 
-The [/src/configs/](src/configs) folder contains the config files for the scenarios.
+**Wads, Vizdoom Configs, and Model Weights:**
+
+The [`/src/wads/`](src/wads) folder contains the `.wad` for the scenarios.
+
+The [`/src/configs/`](src/configs) folder contains the `.cfg` files for the scenarios.
+
+The [`/data/model_weights`](data/model_weights) folder contains trained .h5 model
+weight files.
+
+### Testing Models:
+
+>*Model Weights currently unavailable*
+
+You can test out the different trained models by changing the testing parameters
+in [`Test.py`](src/Test.py):
+
+`Test.py`
+```python
+
+# Testing Parameters
+scenario = 'configs/rigid_turning.cfg'  # Vizdoom Scenario
+model_weights = "rigid_turning.h5"      # DQN Model Weights .h5 file
+depth_radius = 1.0                      # Depth Buffer Radius (recommended to keep at 1.0)  
+depth_contrast = 0.9                    # Depth Buffer contrast on Greyscaled image
+test_param = {
+    'frame_skips' : 6,                  # Number of frames same action
+    'nb_frames' : 3                     # Number of previous frames model uses
+}
+nb_runs = 10                            # Number of Testing runs done on model
+
+```
+> **Caution:** Certain `model_weight` files are not compatible with specific scenarios.
+> Also, make sure `nb_frames` are compatible with *model_weight* file.
+
+From [`/src/`](src) run [`Test.py`](src/Test.py):
+
+```
+$python3 Test.py
+Using TensorFlow backend.
+Testing DQN-Model: rigid_turning.h5
+
+Running Simulation: configs/rigid_turning.cfg
+ 66%|█████████████████████████▌             | 197/300 [00:01<00:00, 160.48it/s]
+Total Score: 1209.0
+
+Running Replay: test.lmp
+Total Score: 1209.0
+
+```
+The following is a screenshot of VizDoom `test.lmp` replay:
+![replay_sc](webPhotos/rigid_turning_sc1.png)

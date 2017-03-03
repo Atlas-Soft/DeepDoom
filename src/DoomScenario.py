@@ -78,11 +78,11 @@ class DoomScenario:
                     self.play(a)
 
         agent.frames = None
-        if agent.model.__class__.__name__ == 'HDModel': agent.model.sub_model_frames = None
+        if agent.model.__class__.__name__ == 'HDQNModel': agent.model.sub_model_frames = None
         score = self.game.get_total_reward()
         if verbose:
-            print("Total Score:", score)
             self.pbar.close()
+            print("Total Score:", score)
         return score
 
     def replay(self, filename, verbose=False):

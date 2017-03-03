@@ -2,11 +2,14 @@
 '''
 RLAgent.py
 Authors: Rafael Zamora
-Last Updated: 2/18/17
+Last Updated: 3/3/17
 
 '''
 
 """
+Script defines the interface between the DQN models and the Vizdoom
+environment.
+
 Citation: Code is based on code from qlearning4k github project
 
 """
@@ -21,11 +24,16 @@ import datetime
 class RLAgent:
 	"""
 	RLAgent class used to interface models with Vizdoom game and
-	preform training.
+	preform training. Currently, we have defined the Deep Q-learning and SARSA
+	algorithms for reinforcement learning.
+
+	E-greedy is the only exploration policy implemented at the moment.
+
+	Linear alpha (Reinforcement Learning rate) decay is implemented.
 
 	"""
 
-	def __init__(self, model, learn_algo = 'qlearn', exp_policy='e-greedy', frame_skips=4, nb_epoch=1000, steps=1000, batch_size=50, memory_size=1000, nb_frames=1, alpha = [1.0,0.1], alpha_rate=1.0, alpha_wait=0, gamma=0.9, epsilon=[1., .1], epsilon_rate=1.0, epislon_wait=0, checkpoint=None, filename='w_.h5'):
+	def __init__(self, model, learn_algo = 'qlearn', exp_policy='e-greedy', nb_tests=100, frame_skips=4, nb_epoch=1000, steps=1000, batch_size=50, memory_size=1000, nb_frames=1, alpha = [1.0,0.1], alpha_rate=1.0, alpha_wait=0, gamma=0.9, epsilon=[1., .1], epsilon_rate=1.0, epislon_wait=0, checkpoint=None, filename='w_.h5'):
 		'''
 		Method initiates learning parameters for Reinforcement Learner.
 
@@ -35,6 +43,7 @@ class RLAgent:
 		self.frames = None
 		self.checkpoint = checkpoint
 		self.filename = filename
+		self.nb_tests = nb_tests
 
 		# Learning Parameters
 		self.learn_algo = learn_algo
@@ -58,7 +67,9 @@ class RLAgent:
 
 	def get_state_data(self, game):
 		'''
-		Method returns model ready state data.
+		Method returns model ready state data. The buffers from Vizdoom are
+		processed and grouped depending on how many previous frames the model is
+		using as defined in the nb_frames variable.
 
 		'''
 		frame = game.get_processed_state(self.model.depth_radius, self.model.depth_contrast)
@@ -74,9 +85,11 @@ class RLAgent:
 		Method preforms Reinforcement Learning on agent's model according to
 		learning parameters.
 
+
 		'''
 		loss_history = []
 		reward_history = []
+		history = []
 
 		# Q-Learning Loop
 		print("\nTraining:", game.config)
@@ -131,7 +144,7 @@ class RLAgent:
 					loss += float(self.model.online_network.train_on_batch(inputs, targets))
 
 				if game_over:
-					if self.model.__class__.__name__ == 'HDModel': self.model.sub_model_frames = None
+					if self.model.__class__.__name__ == 'HDQNModel': self.model.sub_model_frames = None
 					game.game.new_episode()
 					self.frames = None
 					S = self.get_state_data(game)
@@ -152,13 +165,23 @@ class RLAgent:
 			print("Testing:")
 			pbar.close()
 			pbar = tqdm(total=100)
-			for i in range(100):
-				total_reward += game.run(self)
+			rewards = []
+			for i in range(self.nb_tests):
+				rewards.append(game.run(self))
 				pbar.update(1)
-			total_reward /= 100
-			print("Epoch {:03d}/{:03d} | Loss {:.4f} | Alpha {:.3f} | Epsilon {:.3f} | Average Reward {}".format(epoch + 1, self.nb_epoch, loss, self.alpha, self.epsilon, total_reward))
-			reward_history.append(total_reward)
+			rewards = np.array(rewards)
+			total_reward_avg = np.mean(rewards)
+			total_reward_max = np.max(rewards)
+			total_reward_min = np.min(rewards)
+			total_reward_std = np.std(rewards)
+			print("Epoch {:03d}/{:03d} | Loss {:.4f} | Alpha {:.3f} | Epsilon {:.3f} | Average Reward {}".format(epoch + 1, self.nb_epoch, loss, self.alpha, self.epsilon, total_reward_avg))
+			reward_history.append(total_reward_avg)
 			loss_history.append(loss)
+			history.append([loss, total_reward_avg, total_reward_max, total_reward_min, total_reward_std])
+
+		# Save training data to csv
+		history = np.array(history)
+		np.savetxt("../doc/figures/" + self.filename[:-3] + "_training.csv", history, ',')
 
 		# Summarize history for reward
 		plt.plot(reward_history)
@@ -201,6 +224,7 @@ class ReplayMemory():
 	def get_batch_dqlearn(self, model, batch_size, alpha=1.0, gamma=0.9):
 		'''
 		Method generates batch for Deep Q-learn training.
+
 		'''
 		nb_actions = model.online_network.output_shape[-1]
 		input_dim = np.prod(self.input_shape)
@@ -238,6 +262,7 @@ class ReplayMemory():
 	def get_batch_sarsa(self, model, batch_size, alpha=1.0, gamma=0.9):
 		'''
 		Method generates batch for Deep SARSA training.
+
 		'''
 		if len(self.memory) < batch_size:
 			batch_size = len(self.memory)
