@@ -13,6 +13,31 @@
 
 ## Introduction
 
+Google DeepMind's landmark paper, [***Playing Atari With Deep Reinforcement
+Learning***](https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf), shows the feasibility of
+game playing using only visual input. This was
+done by combining Deep Convolutional Neural Networks (CNNs) with Q-learning. The Deep
+Q-Networks were used to learn 2D Atari-2600 games such as Pong, Breakout, and Space
+Invaders. There has been research into applying these same techniques in 3D
+environments such as [Minecraft](https://www.ijcai.org/Proceedings/16/Papers/643.pdf)
+and Doom.
+
+[ViZDoom](https://arxiv.org/pdf/1605.02097.pdf) is a Doom based AI research platform
+which allows us to test reinforcement learning techniques in Doom's 3D environment.
+ViZDoom's Visual Doom AI Competition shows that AIs can be taught to play sufficiently
+in the Doom environment using DQNs.
+
+[Previous research](https://arxiv.org/pdf/1609.05521.pdf) done using ViZDoom has mainly
+focused on combat with only a minor focus on navigation (*item/health pickups*). Navigation
+is an important part in playing Doom, especially in single-player instances of the game.
+Levels designed for human players are complex, requiring the player to use multiple
+navigational behaviors throughout the level.
+
+We propose a [hierarchical implementation](https://arxiv.org/pdf/1604.07255.pdf) of the Deep Q-Networks in order to solve
+complex navigational problems. DQN models are trained on simple tasks and then
+integrated as sub-models in the Hierarchical-DQN model. This allows knowledge learned
+from simple tasks to be used for more complex tasks.
+
 ## DQN and Hierarchical-DQN
 
 
@@ -97,7 +122,7 @@ Requires the following Python Packages:
 
 - [ViZDoom v1.1.1+](https://github.com/Marqt/ViZDoom)
 
-- [Keras](https://github.com/fchollet/keras)
+- [Keras v1.2.2+](https://github.com/fchollet/keras)
 
 - [TensorFlow v1.0+](https://tensorflow.org/)
 
