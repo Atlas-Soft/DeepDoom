@@ -63,9 +63,9 @@ The following are descriptions of the scenarios:
  - The player gets rewarded for walking down a corridor and turning a 90° corner.
  - The player gets penalized for bumping into walls and not moving.
 
-*Available Actions* : [MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
-
-This set of actions is the minimum required to complete the rigid turning scenario.
+#### Available Actions:
+ - [MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
+ - This set of actions is the minimum required to complete the rigid turning scenario.
 
 ##### Goal Function:
 
@@ -96,9 +96,9 @@ This set of actions is the minimum required to complete the rigid turning scenar
  - The player gets rewarded for moving towards the exit when it is within a 21.6° field of view relative to the player's direction; therefore, the player does not get rewarded for moving towards the exit while facing away.
  - The player gets penalized for bumping into walls and not moving.
 
-*Available Actions* : [MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
-
-This set of actions is the minimum required to complete the exit finding scenario.
+#### Available Actions:
+ - [MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
+ - This set of actions is the minimum required to complete the exit finding scenario.
 
 ##### Goal Function:
 
@@ -130,9 +130,10 @@ This set of actions is the minimum required to complete the exit finding scenari
  - The player gets rewarded for moving towards the switch when it is within a 21.6° field of view relative to the player's direction; therefore, the player does not get rewarded for moving towards the exit while facing away.
  - The player gets penalized for not moving.
 
-*Available Actions* : [USE, MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
-
-This set of actions is the minimum required to complete the switches scenario.
+#### Available Actions:
+ - [USE, MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
+ - This set of actions is the minimum required to complete the switches scenario.
+ 
 >***Note: the USE action is defined at the beginning of the action list to ensure indexing consistency.***
 
 #### Goal Function:
@@ -164,9 +165,9 @@ This set of actions is the minimum required to complete the switches scenario.
  - The player gets rewarded for advancing towards doors, for advancing through opened doors, and for reaching the exit.
  - The player gets penalized for not moving.
 
-*Available Actions* : [USE, MOVE_FORWARD]
-
-This set of actions is the minimum required to complete the doors scenario.
+#### Available Actions:
+ - [USE, MOVE_FORWARD]
+ - This set of actions is the minimum required to complete the doors scenario.
 
 #### Goal Function:
 
