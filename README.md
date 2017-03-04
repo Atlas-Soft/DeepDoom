@@ -275,5 +275,5 @@ Total Score: 1209.0
 The following is a screenshot of ViZDoom `test.lmp` replay:
 ![replay_sc](webPhotos/rigid_turning_sc1.png)
 
-## Licence
+## License
 Deep Doom Project is under the MIT License.
