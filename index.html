@@ -11,6 +11,14 @@ text-align: left;
 background-color: #43e8ff;
 }
 
+.description {
+	list-style-type: circle;
+}
+
+.files {
+	list-style-type: square;
+}
+
 #c1 {display:block;margin:0px auto;background-color:transparent;padding:0;border:none;}
 //body {border:none;margin:0;padding:0;overflow:hidden;background-color:transparent;}
 object{display:block;margin:0;padding:0;}#t td,#r1,#r2{font-weight:bold;white-space:nowrap;cursor:pointer;font-family:Verdana,Arial,Helvetica,serif;font-size:21.4pt;}#r1{color:#000;}#r1.p{color:#000;}#t td {color:#000;}#t.p td {color:#000;}#t .ct td{text-align:center;}#t .cr td{text-align:center;}#t .cl td{text-align:center;font-size:10.7pt;}
@@ -68,114 +76,126 @@ are descriptions of
 the scenarios:</p>
 <h4>Scenario 1: Rigid Turning</h4>
 <h5>Description:</h5>
-<p>The purpose of this scenario is to train the AI on navigating
-through corridors with sharp 90&deg; turns. Map is a rigid S-shape with
-wall and floor textures that are randomly determined at the time of
-loading
-the map. The player gets rewarded for navigating from one end of the
-'S' to the other, and gets penalized for bumping into walls and not moving.</p>
+<ul class="description">
+	<li>The purpose of this scenario is to train the AI on navigating through corridors with sharp 90&deg; turns.</li>
+	<li>Map is a rigid S-shape consisting of two left and two right turns, with straight corridors connecting them, followed by a third left turn that is beyond the player exit.</li>
+	<li>The player starts at one end of the corridor</li>
+	<li>The textures of the walls, floors, and ceiling are randomly selected by an ACS script from a pool of predefined textures</li>
+	<li>The player gets rewarded for progressing from one end of the 'S' to the other.</li>
+	<li>The player gets penalized for bumping into walls and not moving.</li>
+</ul>
 <p><em>Available Actions</em>: [MOVE_FORWARD,
 MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]</p>
 <img src="https://raw.githubusercontent.com/Atlas-Soft/DeepDoom/master/webPhotos/rigid_turning.PNG" alt="rigid_turning.wad map" width="40%">
 <h5>Goal Function:</h5>
-<ul>
-<li><b>+50</b> reward checkpoints</li>
-<li><b>+100</b> level exit</li>
-<li><b>-10</b> hitting walls</li>
-<li><b>-1</b> living reward</li>
+<ul class="goal">
+	<li><b>+50</b> reward checkpoints</li>
+	<li><b>+100</b> level exit</li>
+	<li><b>-10</b> hitting walls</li>
+	<li><b>-1</b> living reward</li>
 </ul>
 <h5>Files:</h5>
-<ul>
-<li><a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src/wads/rigid_turning.wad">
-rigid_turning.wad</a></li>
-<li><a href="https://github.com/Atlas-Soft/DeepDoom/tree/master/src/configs/rigid_turning.cfg">
-rigid_turning.cfg</a></li>
+<ul class"files">
+	<li><a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src/wads/rigid_turning.wad">rigid_turning.wad</a></li>
+	<li><a href="https://github.com/Atlas-Soft/DeepDoom/tree/master/src/configs/rigid_turning.cfg">rigid_turning.cfg</a></li>
 </ul>
+
 <h4>Scenario 2: Exit Finding</h4>
 <h5>Description:</h5>
-<p>This scenario is designed to train the AI to spot an exit from a room, in the form of a hallway branching off this room, and move into that exit.
-Map is a square room where player starts in, with long 128-unit-wide corridor leading out of it.
-Player is randomly placed at a point inside the square starting room by a ZDoom ACS script that runs when player enters the map.
-The textures of the walls and floors are selected randomly by another ACS script from a pool of predefined textures.
-The player is rewarded for moving closer to the exit while looking at it (the exit is within a 21.6&deg; field of view relative to player's direction).
-The player does not receive any reward for moving towards the exit while not looking at it.
-The player is penalized for bumping into walls and not moving.</p>
+<ul class="description">
+	<li>This scenario is designed to train the AI to spot an exit from a room, in the form of a hallway branching off this room, and move into that exit.</li>
+	<li>Map is a square room where player starts in, with long 128-unit-wide corridor leading out of it.</li>
+	<li>Player is randomly placed at a point inside the square starting room by a ZDoom ACS script that runs when player enters the map.</li>
+	<li>The textures of the walls and floors are selected randomly by another ACS script from a pool of predefined textures.</li>
+	<li>The player is rewarded for moving closer to the exit while looking at it (the exit is within a 21.6&deg; field of view relative to player's direction).</li>
+	<li>The player does not receive any reward for moving towards the exit while not looking at it.</li>
+	<li>The player is penalized for bumping into walls and not moving.</li>
+</ul>
 <p><em>Available Actions</em>: [MOVE_FORWARD,
 MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]</p>
 <img src="https://raw.githubusercontent.com/Atlas-Soft/DeepDoom/master/webPhotos/exit_finding.PNG" alt="exit_finding.wad map" width="40%">
 <h5>Goal Function:</h5>
-<ul>
-	<li>+1 moving reward (changes player x,y position)</li>
-	<li>+10 * (x)  moving closer to goal while looking at it where x corresponds inversely to distance to the exit.  x decreases as distance increases</li>
-	<li>+100 level exit</li>
-	<li>-10 hitting walls</li>
-	<li>-1 living reward</li>
+<ul class="goal">
+	<li><b>+1</b> moving reward (changes player x,y position)</li>
+	<li><b>+10 * (x)</b>  moving closer to goal while looking at it where x corresponds inversely to distance to the exit.  x decreases as distance increases</li>
+	<li><b>+100</b> level exit</li>
+	<li><b>-10</b> hitting walls</li>
+	<li><b>-1</b> living reward</li>
 </ul>
 <h5>Files:</h5>
-<ul>
+<ul class="files">
 	<li><a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src/wads/exit_finding.wad">exit_finding.wad</a></li>
 	<li><a href="https://github.com/Atlas-Soft/DeepDoom/tree/master/src/configs/exit_finding.cfg">exit_finding.cfg</a></li>
 </ul>
 
 <h4>Scenario 3: Switches</h4>
 <h5>Description:</h5>
-<p>This scenario is designed to train the AI to spot a switch on a wall. 
-Map is a square room where player starts in, with a button placed on the south wall.
-Player is randomly placed at a point inside the room, facing a random direction, by a ZDoom ACS script that runs when player enters the map.
-The textures of the walls, floor, ceiling, and button are selected randomly by another ACS script from a pool of predefined textures.
-The player is rewarded for moving closer to the switch while looking at it (the switch is within a 21.6&deg; field of view relative to player's direction).
-The player does not receive any reward for moving towards the switch while not looking at it.
-The player is penalized for bumping into walls and not moving.</p>
+<ul class="description">
+	<li>This scenario is designed to train the AI to spot a switch on a wall.</li>
+	<li>Map is a square room where player starts in, with a button placed on the south wall.</li>
+	<li>Player is randomly placed at a point inside the room, facing a random direction, by a ZDoom ACS script that runs when player enters the map.</li>
+	<li>The textures of the walls, floor, ceiling, and button are selected randomly by another ACS script from a pool of predefined textures.</li>
+	<li>The player is rewarded for moving closer to the switch while looking at it (the switch is within a 21.6&deg; field of view relative to player's direction).</li>
+	<li>The player does not receive any reward for moving towards the switch while not looking at it.</li>
+	<li>The player is penalized for bumping into walls and not moving.</li>
+</ul>
 <p><em>Available Actions</em>: [USE, MOVE_FORWARD,
 MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]</p>
 <img src="https://raw.githubusercontent.com/Atlas-Soft/DeepDoom/master/webPhotos/Switches.PNG" alt="Switches.wad map" width="40%">
 <h5>Goal Function:</h5>
-<ul>
-	<li>+1 moving reward (changes player x,y position)</li>
-	<li>+10 * (x)  moving closer to goal while looking at it where x corresponds inversely to distance to the switch.  x decreases as distance increases</li>
-	<li>+100 pressing the switch</li>
-	<li>-1 living reward</li>
+<ul class="goal">
+	<li><b>+1</b> moving reward (changes player x,y position)</li>
+	<li><b>+10 * (x)</b>  moving closer to goal while looking at it where x corresponds inversely to distance to the switch.  x decreases as distance increases</li>
+	<li><b>+100</b> pressing the switch</li>
+	<li><b>-1</b> living reward</li>
 </ul>
 <h5>Files:</h5>
-<ul>
+<ul class="files">
 	<li><a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src/wads/Switches.wad">Switches.wad</a></li>
 	<li><a href="https://github.com/Atlas-Soft/DeepDoom/tree/master/src/configs/switches.cfg">switches.cfg</a></li>
 </ul>
 
 <h4>Scenario 4: Doors</h4>
 <h5>Description:</h5>
-<p>This scenario is designed to train the AI to recognize and open doors.
-Map is a straight rectangular corridor with 9 doors placed inside it.
-Player is placed at one end of this corridor and is expected to proceed straight towards the exit.
-The textures of the walls, floor, ceiling, and doors are selected randomly by an ACS script that runs when the player enters the map.
-The player is rewarded for advancing towards doors, for advancing through doors that are open, and for reaching the exit.
-The player is penalized for not moving.</p>
+<ul class="description">
+	<li>This scenario is designed to train the AI to recognize and open doors.</li>
+	<li>Map is a straight rectangular corridor with 9 doors placed inside it.</li>
+	<li>Player is placed at one end of this corridor and is expected to proceed straight towards the exit.</li>
+	<li>The textures of the walls, floor, ceiling, and doors are selected randomly by an ACS script that runs when the player enters the map.</li>
+	<li>The player is rewarded for advancing towards doors, for advancing through doors that are open, and for reaching the exit.</li>
+	<li>The player is penalized for not moving.</li>
+</ul>
 <p><em>Available Actions</em>: [USE, MOVE_FORWARD]</p>
 <img src="https://raw.githubusercontent.com/Atlas-Soft/DeepDoom/master/webPhotos/Doors.PNG" alt="Doors.wad map" width="40%">
 <h5>Goal Function:</h5>
-<ul>
-	<li>+1 moving reward (changes player x,y position)</li>
-	<li>+50 passing through an open door</li>
-	<li>+10 moving towards the next door</li>
-	<li>+20 reaching level exit</li>
-	<li>-1 living reward</li>
+<ul class="goal">
+	<li><b>+1</b> moving reward (changes player x,y position)</li>
+	<li><b>+50</b> passing through an open door</li>
+	<li><b>+10</b> moving towards the next door</li>
+	<li><b>+20</b> reaching level exit</li>
+	<li><b>-1</b> living reward</li>
 </ul>
 <h5>Files:</h5>
-<ul>
+<ul class="files">
 	<li><a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src/wads/Doors.wad">Doors.wad</a></li>
 	<li><a href="https://github.com/Atlas-Soft/DeepDoom/tree/master/src/configs/doors.cfg">doors.cfg</a></li>
 </ul>
 
 <h2>Results:</h2>
 <p>In Progress;<br>
-The new Q-Learning implementation is currently training. This process
+We have successfully trained the rigid_turning model to convergence!
+<br><img src="https://raw.githubusercontent.com/Atlas-Soft/DeepDoom/master/doc/figures/rigid_turning_total_reward.png">   <img src="https://raw.githubusercontent.com/Atlas-Soft/DeepDoom/master/doc/figures/rigid_turning_loss.png"><br>
+Our program is hard at work learning how to navigate through the other scenarios. This process
 will take awhile, giving us time to work on documentation.
 Stay tuned for more!</p>
 <iframe src="http://free.timeanddate.com/countdown/i5lrklfh/n4513/cf12/cm0/cu5/ct0/cs0/ca1/co1/cr0/ss0/cac000/cpc000/pct/tcfff/fs100/szw576/szh243/tatProject%20Due%20in%3A/tac000/tptProject%20was%20due%3A/tpc000/iso2017-03-31T23:59:59" allowTransparency="true" frameborder="0" width="269" height="89">some pig</iframe>
-<h2>Resources:</h2>
-<p><a href="https://github.com/marqt/vizdoom">VizDoom</a></p>
-<p>-<a href="https://github.com/fchollet/keras">Keras</a></p>
-<p>-<a href="http://matplotlib.org/">Matplotlib</a></p>
+<h2><a name="resources"></a>Resources:</h2>
+<ul>
+	<li><a href="https://github.com/marqt/vizdoom">VizDoom</a></li>
+	<li><a href="https://github.com/fchollet/keras">Keras</a></li>
+	<li><a href="http://matplotlib.org/">Matplotlib</a></li>
+	<li><a href="https://www.tensorflow.org/">TensorFlow</a></li>
+</ul>
 <h4>Setup and Installation:</h4>
 <p>Download or clone repository and install required packages.</p>
 <p>The <a href="https://github.com/Atlas-Soft/DeepDoom/blob/master/src">/src/</a>
