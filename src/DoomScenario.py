@@ -6,6 +6,13 @@ Last Updated: 2/18/17
 
 '''
 
+"""
+This script defines the instance of Vizdoom used to train and test the DQNs and
+Hierarchical-DQNs.
+
+
+"""
+
 from vizdoom import DoomGame, Mode, ScreenResolution
 import itertools as it
 import numpy as np
@@ -13,8 +20,16 @@ np.seterr(divide='ignore', invalid='ignore')
 from tqdm import tqdm
 
 class DoomScenario:
+    """
+    DoomScenario class is used to run instances of Vizdoom according to scenario
+    configuration files found in the /src/configs/ folder.
+
+    """
 
     def __init__(self, config):
+        '''
+
+        '''
         self.config = config
         self.game = DoomGame()
         self.game.load_config(config)
@@ -29,11 +44,18 @@ class DoomScenario:
         self.game.new_episode()
 
     def play(self, action):
-        self.game.set_action(self.actions[action])
+        '''
+        '''
+        self.game.set_action(action)
         self.game.advance_action()
         if self.pbar: self.pbar.update(1)
 
     def get_processed_state(self, depth_radius, depth_contrast):
+        '''
+        Method processes the Vizdoom RGB and depth buffer into
+        a composite one channel image that can be used by the DQNs and Hierarchical-DQNs.
+
+        '''
         state = self.game.get_state()
         screen_buffer = np.array(state.screen_buffer).astype('float32')/255
         try:
@@ -107,8 +129,10 @@ class DoomScenario:
         print("Total Score:", score)
         self.game.close()
 
-    def human_play(self):
+    def apprentice_run(self, test=False):
         '''
+        Method runs an apprentice data gathering.
+
         '''
         self.game.close()
         self.game.set_mode(Mode.SPECTATOR)
@@ -119,6 +143,5 @@ class DoomScenario:
 
         self.game.new_episode()
         while not self.game.is_episode_finished():
-            print(self.game.get_total_reward())
             self.game.advance_action()
         self.game.close()

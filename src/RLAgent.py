@@ -85,7 +85,6 @@ class RLAgent:
 		Method preforms Reinforcement Learning on agent's model according to
 		learning parameters.
 
-
 		'''
 		loss_history = []
 		reward_history = []
@@ -124,6 +123,7 @@ class RLAgent:
 					if not game.game.is_episode_finished(): game.play(a)
 
 				# Store transition in memory
+				a = q
 				r = game.game.get_last_reward()
 				S_prime = self.get_state_data(game)
 				game_over = game.game.is_episode_finished()
@@ -179,10 +179,6 @@ class RLAgent:
 			loss_history.append(loss)
 			history.append([loss, total_reward_avg, total_reward_max, total_reward_min, total_reward_std])
 
-		# Save training data to csv
-		history = np.array(history)
-		np.savetxt("../doc/figures/" + self.filename[:-3] + "_training.csv", history, ',')
-
 		# Summarize history for reward
 		plt.plot(reward_history)
 		plt.title('Total Reward')
@@ -198,6 +194,10 @@ class RLAgent:
 		plt.xlabel('epoch')
 		plt.savefig("../doc/figures/" + self.filename[:-3] + "_loss.png")
 		plt.show()
+
+		# Save training data to csv
+		history = np.array(history)
+		np.savetxt("../doc/figures/" + self.filename[:-3] + "_training.csv", history)
 
 class ReplayMemory():
 	"""

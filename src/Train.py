@@ -27,7 +27,7 @@ depth_contrast = 0.9
 learn_param = {
     'learn_algo' : 'dqlearn',
     'exp_policy' : 'e-greedy',
-    'frame_skips' : 3,
+    'frame_skips' : 6,
     'nb_epoch' : 100,
     'steps' : 5000,
     'batch_size' : 40,
@@ -44,6 +44,7 @@ learn_param = {
     'checkpoint' : 1,
     'filename' : 'doors_.h5'
 }
+training = 'DQN'
 
 def train_model():
     '''
@@ -52,7 +53,7 @@ def train_model():
     doom = DoomScenario(scenario)
 
     # Initiates Model
-    model = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=depth_radius, depth_contrast=depth_contrast)
+    model = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], actions=doom.actions, depth_radius=depth_radius, depth_contrast=depth_contrast)
     agent = RLAgent(model, **learn_param)
 
     # Preform Reinforcement Learning on Scenario
@@ -64,12 +65,13 @@ def train_heirarchical_model():
     doom = DoomScenario(scenario)
 
     # Initiates Hierarchical-DQN model and loads Sub-models
-    model_rigid_turning = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=1.0, depth_contrast=0.9)
+    actions = [list(a) for a in it.product([0, 1], repeat=4)]
+    model_rigid_turning = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], actions=actions, depth_radius=1.0, depth_contrast=0.9)
     model_rigid_turning.load_weights('rigid_turning.h5')
-    model_exit_finding = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=1.0, depth_contrast=0.9)
+    model_exit_finding = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], actions=actions, depth_radius=1.0, depth_contrast=0.9)
     model_exit_finding.load_weights('exit_finding.h5')
     models = [model_rigid_turning, model_exit_finding]
-    model = HDQNModel(sub_models=models, skill_frame_skip=6, resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=depth_radius, depth_contrast=depth_contrast)
+    model = HDQNModel(sub_models=models, skill_frame_skip=6, resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], actions=[], depth_radius=depth_radius, depth_contrast=depth_contrast)
     agent = RLAgent(model, **learn_param)
 
     # Preform Reinforcement Learning on Scenario using Hierarchical-DQN model
@@ -77,5 +79,5 @@ def train_heirarchical_model():
     model.save_weights(model_weights)
 
 if __name__ == '__main__':
-    train_model()
-    #train_heirarchical_model()
+    if train == 'DQN': train_model()
+    elif training == 'HDQN': train_heirarchical_model()

@@ -13,7 +13,7 @@ from DoomScenario import DoomScenario
 from Models import DQNModel, HDQNModel
 import matplotlib.pyplot as plt
 import numpy as np
-
+import itertools as it
 """
 This script is used to run test on trained DQN models, trained Hierarchical-DQN models,
 and allow human play to test out scenarios.
@@ -29,7 +29,8 @@ test_param = {
     'frame_skips' : 6,
     'nb_frames' : 3
 }
-nb_runs = 1
+nb_runs = 5
+testing = 'DQN'
 
 def test_model(runs=1):
     '''
@@ -46,7 +47,7 @@ def test_model(runs=1):
     doom = DoomScenario(scenario)
 
     # Load Model and Weights
-    model = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=depth_radius, depth_contrast=depth_contrast)
+    model = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=doom.actions, depth_radius=depth_radius, depth_contrast=depth_contrast)
     model.load_weights(model_weights)
     agent = RLAgent(model, **test_param)
 
@@ -71,12 +72,13 @@ def test_heirarchical_model(runs=1):
     doom = DoomScenario(scenario)
 
     # Load Hierarchical-DQN and Sub-models
-    model_rigid_turning = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=1.0, depth_contrast=0.9)
+    actions = [list(a) for a in it.product([0, 1], repeat=4)]
+    model_rigid_turning = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=actions, depth_radius=1.0, depth_contrast=0.9)
     model_rigid_turning.load_weights('rigid_turning.h5')
-    model_exit_finding = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=1.0, depth_contrast=0.9)
+    model_exit_finding = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=actions, depth_radius=1.0, depth_contrast=0.9)
     model_exit_finding.load_weights('ef_.h5')
     models = [model_rigid_turning, model_exit_finding]
-    model = HDQNModel(sub_models=models, skill_frame_skip=6, resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], nb_actions=0, depth_radius=depth_radius, depth_contrast=depth_contrast)
+    model = HDQNModel(sub_models=models, skill_frame_skip=6, resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=[], depth_radius=depth_radius, depth_contrast=depth_contrast)
     agent = RLAgent(model, **test_param)
 
     # Run Scenario and play replay using Hierarchical-DQN
@@ -92,9 +94,9 @@ def play():
     '''
     #Initiates VizDoom Scenario and play
     doom = DoomScenario(scenario)
-    doom.human_play()
+    doom.apprentice_run()
 
 if __name__ == '__main__':
-    test_model(nb_runs)
-    #test_heirarchical_model(nb_runs)
-    #play()
+    if testing == 'DQN': test_model(nb_runs)
+    if testing == 'HDQN': test_heirarchical_model(nb_runs)
+    if testing == 'human': play()
