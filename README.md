@@ -4,7 +4,7 @@
 
 **Last Updated: March 3, 2016**
 
-**Team:**
+**DeepDoom Team:**
 
 - [Rafael Zamora](https://github.com/rz4) - Team Leader, Lead Programmer, Machine Learning Specialist
 - [Lauren An](https://github.com/AtlasSoft-lsa3) - Programmer, Head of Testing
@@ -16,9 +16,9 @@
 Google DeepMind's landmark paper, [***Playing Atari With Deep Reinforcement
 Learning***](https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf), shows the feasibility of
 game playing using only visual input. This was
-done by combining Deep Convolutional Neural Networks (CNNs) with Q-learning. The Deep
-Q-Networks were used to learn 2D Atari-2600 games such as Pong, Breakout, and Space
-Invaders. There has been research into applying these same techniques in 3D
+done by combining Deep Convolutional Neural Networks (CNNs) with Q-learning. Deep
+Q-Networks (DQNs) were able to learn and play 2D Atari-2600 games such as Pong, Breakout, and Space
+Invaders. Since then, there has been much research into applying these same techniques in 3D
 environments such as [Minecraft](https://www.ijcai.org/Proceedings/16/Papers/643.pdf)
 and Doom.
 
@@ -34,16 +34,16 @@ Levels designed for human players are complex, requiring the player to use multi
 navigational behaviors throughout the level.
 
 We propose a [hierarchical implementation](https://arxiv.org/pdf/1604.07255.pdf) of the Deep Q-Networks in order to solve
-complex navigational problems. DQN models are trained on simple tasks and then
-integrated as sub-models in the Hierarchical-DQN model. This allows knowledge learned
+complex navigational problems. DQN models are trained on simple tasks and are then
+integrated as sub-models in a Hierarchical-DQN model. This allows knowledge learned
 from simple tasks to be used for more complex tasks.
 
 ## DQN and Hierarchical-DQN
-
+> Under Construction
 
 ## Scenarios
 
-We designed a set of scenarios where the agent will learn specific behaviors. These scenarios were created using Doom Builder v2.1+ and ViZDoom. Reward functions are defined via the Doom Builder Script Editor using the Action Code Script (ACS) scripting language. For a quick tutorial, <a href="https://zdoom.org/wiki/ACS" target="_blank">click here</a>.
+We designed a set of scenarios where the agent will learn specific behaviors. These scenarios were created using Doom Builder v2.1+ and ViZDoom. Reward functions are defined via the Doom Builder Script Editor using the Action Code Script (ACS) scripting language. For a quick tutorial, [click here](https://zdoom.org/wiki/ACS).
 
 >***Note: living rewards are defined within the ViZDoom config file.***
 
@@ -187,7 +187,7 @@ The following are descriptions of the scenarios:
 
 ## Results
 
-N/A
+> Under Construction
 
 ## Getting Started
 
@@ -223,7 +223,7 @@ Download or clone repository and install required packages.
 }
 ```
 
-**Wads, ViZdoom Configs, and Model Weights:**
+### Wads, ViZdoom Configs, and Model Weights:
 
 The [`/src/wads/`](src/wads) folder contains the `.wad` files for the scenarios.
 
@@ -239,7 +239,6 @@ weight files.
 You can test out the different trained models by changing the testing parameters
 in [`Test.py`](src/Test.py):
 
-`Test.py`
 ```python
 
 # Testing Parameters
@@ -256,6 +255,7 @@ nb_runs = 10                            # Number of Testing runs done on model
 ```
 > **Caution:** Certain `model_weight` files are not compatible with specific scenarios.
 > Also, make sure `nb_frames` are compatible with *model_weight* file.
+> For more information, please refer to parameter descriptions located in [/doc/parameters/](doc/parameters)
 
 From [`/src/`](src) run [`Test.py`](src/Test.py):
 
@@ -274,3 +274,6 @@ Total Score: 1209.0
 ```
 The following is a screenshot of ViZDoom `test.lmp` replay:
 ![replay_sc](webPhotos/rigid_turning_sc1.png)
+
+## Licence
+Deep Doom Project is under the MIT License.
