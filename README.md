@@ -201,6 +201,34 @@ The following are descriptions of the scenarios:
 
 > Under Construction
 
+The DQN and HDQN models were trained on a machine with the following specs:
+
+```
+TODO: Write Specs Here
+```
+
+The performance of the models are measured by averaging the total reward over 100 test runs after each training 
+epoch. A demonstration of each trained model in their respective training scenario is also provided.
+
+#### Comments and Observations:
+
+- A +1 moving reward helped to prevent agent from spinning in a stationary position.
+- A linear alpha (Q-learning rate) decay helped converge model behavior.
+
+---
+
+### Rigid Turning
+
+Rigid Turning training parameters can be found [here](doc/parameters/rigid_turning.md).
+
+#### Average Total Reward Per Epoch:
+
+![rigid_turing_total_reward](doc/figures/rigid_turning_total_reward.png)
+
+#### Demo:
+
+[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/i4tsydC4u1s/0.jpg)](http://www.youtube.com/watch?v=i4tsydC4u1s)
+
 ## Getting Started
 
 ### Requirements:
