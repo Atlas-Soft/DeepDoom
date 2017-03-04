@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 """
-This script is used to run test on trained DQN models, trained Heirarchical-DQN models,
+This script is used to run test on trained DQN models, trained Hierarchical-DQN models,
 and allow human play to test out scenarios.
 
 """
@@ -58,7 +58,7 @@ def test_model(runs=1):
 
 def test_heirarchical_model(runs=1):
     '''
-    Method used to test Heirarchical-DQN models on VizDoom scenario. Testing run are replayed
+    Method used to test Hierarchical-DQN models on VizDoom scenario. Testing run are replayed
     in higher resolution (800X600).
 
     Param:
@@ -66,11 +66,11 @@ def test_heirarchical_model(runs=1):
     runs - int : number of test runs done on model.
 
     '''
-    print("Testing Heirarchical-DQN:")
+    print("Testing Hierarchical-DQN:")
     # Initiates VizDoom Scenario
     doom = DoomScenario(scenario)
 
-    # Load Heirarchical-DQN and Sub-models
+    # Load Hierarchical-DQN and Sub-models
     model_rigid_turning = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=1.0, depth_contrast=0.9)
     model_rigid_turning.load_weights('rigid_turning.h5')
     model_exit_finding = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=1.0, depth_contrast=0.9)
@@ -79,7 +79,7 @@ def test_heirarchical_model(runs=1):
     model = HDQNModel(sub_models=models, skill_frame_skip=6, resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], nb_actions=0, depth_radius=depth_radius, depth_contrast=depth_contrast)
     agent = RLAgent(model, **test_param)
 
-    # Run Scenario and play replay using Heirarchical-DQN
+    # Run Scenario and play replay using Hierarchical-DQN
     for i in range(runs):
         doom = DoomScenario(scenario)
         doom.run(agent, save_replay='test.lmp', verbose=True)

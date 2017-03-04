@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 """
-This script is used to train DQN models and Heirarchical-DQN models.
+This script is used to train DQN models and Hierarchical-DQN models.
 
 """
 
@@ -63,7 +63,7 @@ def train_heirarchical_model():
     # Initiates VizDoom Scenario
     doom = DoomScenario(scenario)
 
-    # Initiates Heirarchical-DQN model and loads Sub-models
+    # Initiates Hierarchical-DQN model and loads Sub-models
     model_rigid_turning = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=1.0, depth_contrast=0.9)
     model_rigid_turning.load_weights('rigid_turning.h5')
     model_exit_finding = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=1.0, depth_contrast=0.9)
@@ -72,7 +72,7 @@ def train_heirarchical_model():
     model = HDQNModel(sub_models=models, skill_frame_skip=6, resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], nb_actions=len(doom.actions), depth_radius=depth_radius, depth_contrast=depth_contrast)
     agent = RLAgent(model, **learn_param)
 
-    # Preform Reinforcement Learning on Scenario using Heirarchical-DQN model
+    # Preform Reinforcement Learning on Scenario using Hierarchical-DQN model
     agent.train(doom)
     model.save_weights(model_weights)
 

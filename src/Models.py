@@ -73,7 +73,7 @@ class DQNModel:
 
 class HDQNModel:
     """
-    HDQNModel class is used to define Heirarchical-DQN models for the
+    HDQNModel class is used to define Hierarchical-DQN models for the
     Vizdoom environment.
 
     """
