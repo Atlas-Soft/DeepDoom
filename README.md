@@ -1,6 +1,7 @@
 # DeepDoom: Navigating Complex Environments Using Hierarchical Deep Q-Networks
 
-![Current Version](https://img.shields.io/badge/version-0.0.5-red.svg)
+![Current Version](https://img.shields.io/badge/build-alpha-orange.svg)
+![License](https://badges.frapsoft.com/os/mit/mit.svg?v=102)
 
 **Last Updated: March 3, 2016**
 
@@ -10,6 +11,13 @@
 - [Lauren An](https://github.com/AtlasSoft-lsa3) - Programmer, Head of Testing
 - [William Steele](https://github.com/billionthb) - Programmer, Hardware Specialist, Head of Documentation
 - [Joshua Hidayat](https://github.com/Arngeirr) - Programmer, Head of Data Gathering
+
+### Table of Contents:
+1. [Introduction](#introduction)
+2. [DQN and Hierarchical DQN](#dqn-and-hierarchical-dqn)
+3. [Scenarios](#scenarios)
+4. [Results](#results)
+5. [Getting Started](#getting-started)
 
 ## Introduction
 
@@ -43,7 +51,7 @@ from simple tasks to be used for more complex tasks.
 
 ## Scenarios
 
-We designed a set of scenarios where the agent will learn specific behaviors. These scenarios were created using Doom Builder v2.1+ and ViZDoom. Reward functions are defined via the Doom Builder Script Editor using the Action Code Script (ACS) scripting language. For a quick tutorial, [click here](https://zdoom.org/wiki/ACS).
+We designed a set of scenarios where the agent will learn specific behaviors. These scenarios were created using Doom Builder v2.1+ and ViZDoom v1.1+. Reward functions are defined via the Doom Builder Script Editor using the Action Code Script (ACS) scripting language. For a quick tutorial, [click here](https://zdoom.org/wiki/ACS).
 
 >***Note: living rewards are defined within the ViZDoom config file.***
 
@@ -67,7 +75,7 @@ The following are descriptions of the scenarios:
  - [MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
  - This set of actions is the minimum required to complete the rigid turning scenario.
 
-##### Goal Function:
+#### Goal Function:
 
  - **+60** turning linedefs - for turning a 90° corner
  - **+20** walking linedefs - for walking down a corridor
@@ -78,7 +86,7 @@ The following are descriptions of the scenarios:
  - **-10** hitting the walls - for aimlessly bumping into the walls
  - **-1** living reward - ViZDoom config file penalty to encourage faster level completion
 
-##### Files:
+#### Files:
  - [rigid_turning.wad](src/wads/rigid_turning.wad)
  - [rigid_turning.cfg](src/configs/rigid_turning.cfg)
 
@@ -100,7 +108,7 @@ The following are descriptions of the scenarios:
  - [MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
  - This set of actions is the minimum required to complete the exit finding scenario.
 
-##### Goal Function:
+#### Goal Function:
 
  - **+10 * (x)** exit linedefs - for moving closer to the goal while looking at it
  
@@ -112,7 +120,7 @@ The following are descriptions of the scenarios:
  - **-10** hitting the walls - for aimlessly bumping into the walls
  - **-1** living reward - ViZDoom config file penalty to encourage faster level completion
 
-##### Files:
+#### Files:
  - [exit_finding.wad](src/wads/exit_finding.wad)
  - [exit_finding.cfg](src/configs/exit_finding.cfg)
 
@@ -147,7 +155,7 @@ The following are descriptions of the scenarios:
  
  - **-1** living reward - ViZDoom config file penalty to encourage faster level completion
 
-##### Files:
+#### Files:
  - [Switches.wad](src/wads/Switches.wad)
  - [Switches.cfg](src/configs/switches.cfg)
 
@@ -179,7 +187,7 @@ The following are descriptions of the scenarios:
  
  - **-1** living reward - ViZDoom config file penalty to encourage faster level completion
 
-##### Files:
+#### Files:
  - [Doors.wad](src/wads/Doors.wad)
  - [Doors.cfg](src/configs/doors.cfg)
 
@@ -229,7 +237,7 @@ The [`/src/wads/`](src/wads) folder contains the `.wad` files for the scenarios.
 
 The [`/src/configs/`](src/configs) folder contains the `.cfg` files for the scenarios.
 
-The [`/data/model_weights`](data/model_weights) folder contains trained .h5 model
+The [`/data/model_weights`](data/model_weights) folder contains trained `.h5` model
 weight files.
 
 ### Testing Models:
@@ -272,8 +280,8 @@ Running Replay: test.lmp
 Total Score: 1209.0
 
 ```
-The following is a screenshot of ViZDoom `test.lmp` replay:
-![replay_sc](webPhotos/rigid_turning_sc1.png)
+The following is the ViZDoom `test.lmp` replay:
+![replay_gif](webPhotos/rigid_turning_sc1.png)
 
 ## License
 Deep Doom Project is under the MIT License.
