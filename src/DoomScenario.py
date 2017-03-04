@@ -10,7 +10,6 @@ Last Updated: 2/18/17
 This script defines the instance of Vizdoom used to train and test the DQNs and
 Hierarchical-DQNs.
 
-
 """
 
 from vizdoom import DoomGame, Mode, ScreenResolution
@@ -28,6 +27,7 @@ class DoomScenario:
 
     def __init__(self, config):
         '''
+        Method initiates Vizdoom with desired configuration file.
 
         '''
         self.config = config
@@ -45,6 +45,8 @@ class DoomScenario:
 
     def play(self, action):
         '''
+        Method advances state with desired action.
+        
         '''
         self.game.set_action(action)
         self.game.advance_action()

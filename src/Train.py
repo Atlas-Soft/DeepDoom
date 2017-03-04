@@ -20,10 +20,10 @@ This script is used to train DQN models and Hierarchical-DQN models.
 """
 
 # Training Parameters
-scenario = 'configs/exit_finding.cfg'
+scenario = 'configs/doors.cfg'
 model_weights = 'doors.h5'
 depth_radius = 1.0
-depth_contrast = 0.9
+depth_contrast = 0.5
 learn_param = {
     'learn_algo' : 'dqlearn',
     'exp_policy' : 'e-greedy',
@@ -79,5 +79,5 @@ def train_heirarchical_model():
     model.save_weights(model_weights)
 
 if __name__ == '__main__':
-    if train == 'DQN': train_model()
+    if training == 'DQN': train_model()
     elif training == 'HDQN': train_heirarchical_model()

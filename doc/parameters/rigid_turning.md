@@ -29,7 +29,7 @@ training = 'DQN'
 
 ##Testing Parameters for Rigid_Turning
 ```python
-scenario = 'configs/rigid_turning.cfg'  # also compatible with exit_finding.cfg, rigid_turning_validation.cfg, corridors.cfg
+scenario = 'configs/rigid_turning.cfg'  # also compatible with exit_finding.cfg, rigid_turning_validation.cfg, corridors.cfg, curved_turning.cfg
 model_weights = "rigid_turning.h5"
 depth_radius = 1.0
 depth_contrast = 0.9
