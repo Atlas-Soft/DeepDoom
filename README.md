@@ -43,7 +43,7 @@ from simple tasks to be used for more complex tasks.
 
 ## Scenarios
 
-We designed a set of scenarios where the agent will learn specific behaviors. These scenarios were created using Doom Builder v2.1+ and ViZDoom. Reward functions are defined via the Doom Builder Script Editor using the Action Code Script (ACS) scripting language. For a quick tutorial, [click here](https://zdoom.org/wiki/ACS).
+We designed a set of scenarios where the agent will learn specific behaviors. These scenarios were created using Doom Builder v2.1+ and ViZDoom. Reward functions are defined via the Doom Builder Script Editor using the Action Code Script (ACS) scripting language. For a quick tutorial, <a href="https://zdoom.org/wiki/ACS" target="_blank">click here</a>.
 
 >***Note: living rewards are defined within the ViZDoom config file.***
 
