@@ -276,6 +276,7 @@ Total Score: 1209.0
 
 ```
 The following is the ViZDoom `test.lmp` replay:
+
 ![replay_gif](webPhotos/DeepDoom_Rigid_Turning_Demo.gif)
 
 
