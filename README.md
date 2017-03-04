@@ -69,9 +69,7 @@ The following are descriptions of the scenarios:
 #### Description:
  - The purpose of this scenario is to train the AI on navigating through corridors with sharp 90° turns.
  - The map is a rigid 2-shape, with randomly determined ceiling, floor, and wall textures at the time of loading the map.
- 
  - The player is placed at one end of the '2' and is expected to navigate through this shape.
- 
  - The player gets rewarded for walking down a corridor and turning a 90° corner.
  - The player gets penalized for bumping into walls and not moving.
 
@@ -102,9 +100,7 @@ The following are descriptions of the scenarios:
 #### Description:
  - The purpose of this scenario is to train the AI on locating an exit from a room and move towards that exit, which is merely a long hallway branching off of the room.
  - The map is a square room with a long 128-unit-wide corridor leading out of it and randomly determined ceiling, floor, and wall textures at the time of loading the map.
- 
  - The player is placed at a random point inside the room and facing a random direction via a ZDoom ACS script that runs when the player enters the map.
- 
  - The player gets rewarded for moving towards the exit when it is within a 21.6° field of view relative to the player's direction; therefore, the player does not get rewarded for moving towards the exit while facing away.
  - The player gets penalized for bumping into walls and not moving.
 
@@ -136,9 +132,7 @@ The following are descriptions of the scenarios:
 #### Description:
  - The purpose of this scenario is to train the AI on locating a switch on the wall.
  - The map is a square room with a button placed on the south wall and randomly determined ceiling, floor, and wall textures at the time of loading the map.
- 
  - The player is placed at a random point inside the room and facing a random direction via a ZDoom ACS script that runs when the player enters the map.
- 
  - The player gets rewarded for moving towards the switch when it is within a 21.6° field of view relative to the player's direction; therefore, the player does not get rewarded for moving towards the exit while facing away.
  - The player gets penalized for not moving.
 
@@ -171,9 +165,7 @@ The following are descriptions of the scenarios:
 #### Description:
  - The purpose of this scenario is to train the AI on recognizing and opening doors.
  - The map is a straight rectangular corridor with 9 doors placed inside it and randomly determined ceiling, floor, and wall textures at the time of loading the map.
- 
  - The player is placed at one end of this corridor and is expected to proceed straight towards the exit.
- 
  - The player gets rewarded for advancing towards doors, for advancing through opened doors, and for reaching the exit.
  - The player gets penalized for not moving.
 
