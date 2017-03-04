@@ -1,4 +1,4 @@
-# DeepDoom: Navigating Complex Environments Using Heirarchical Deep Q-Networks
+# DeepDoom: Navigating Complex Environments Using Hierarchical Deep Q-Networks
 
 ![Current Version](https://img.shields.io/badge/version-0.0.5-red.svg)
 
@@ -13,14 +13,16 @@
 
 ## Introduction
 
-## DQN and Heirarchical-DQN
+## DQN and Hierarchical-DQN
 
 
 ## Scenarios
 
-We designed a set of scenarios where the agent will learn specific behaviors. These
-scenarios where created using Doom Builder and ViZDoom. The following are descriptions of
-the scenarios:
+We designed a set of scenarios where the agent will learn specific behaviors. These scenarios were created using Doom Builder v2.1+ and ViZDoom. Reward functions are defined via the Doom Builder Script Editor using the Action Code Script (ACS) scripting language. For a quick tutorial, [click here](https://zdoom.org/wiki/ACS).
+
+>***Note: living rewards are defined within the ViZDoom config file.***
+
+The following are descriptions of the scenarios:
 
 ---
 
@@ -28,18 +30,23 @@ the scenarios:
 
 ![rigid_turning_map](webPhotos/rigid_turning.PNG)
 #### Description:
-The purpose of this scenario is to train the AI on navigating through corridors with sharp 90° turns. Map is a rigid S-shape with wall and floor textures that are randomly determined at the time of loading the map. The player gets rewarded for navigating from one end of the 'S' to the other, and gets penalized for bumping into walls and not moving.
+ - The purpose of this scenario is to train the AI on navigating through corridors with sharp 90° turns.
+ - The map is a rigid 2-shape, with randomly determined wall and floor textures at the time of loading the map.
+ 
+ - The player gets rewarded for navigating from one end of the '2' to the other.
+ - The player gets penalized for bumping into walls and not moving.
 
 *Available Actions* : [MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
 
-This set of action are the minimum required to reach the level exit for this scenario.
+This set of action is the minimum required to complete the rigid turning scenario.
 
 ##### Goal Function:
 
-- **+50** reward checkpoints
-- **+100** level exit
-- **-10** hitting walls
-- **-1** living reward
+- **+60** turning checkpoints - reward for turning a 90° corner
+- **+20** walking checkpoints - reward for walking down a corridor
+- **+100** level exit - reward for completing the level
+- **-10** hitting walls - penalty for aimlessly bumping into the walls
+- **-1** living reward - ViZDoom config file penalty to encourage faster level completion
 
 ##### Files:
 - [rigid_turning.wad](src/wads/rigid_turning.wad)
@@ -51,27 +58,24 @@ This set of action are the minimum required to reach the level exit for this sce
 
 ![exit_finding_map](webPhotos/exit_finding.PNG)
 #### Description:
-This scenario is designed to train the AI to spot an exit from a room, in the form of a
-hallway branching off this room, and move into that exit. Map is a square room where
-player starts in, with long 128-unit-wide corridor leading out of it. Player is
-randomly placed at a point inside the square starting room by a ZDoom ACS script that
-runs when player enters the map. The textures of the walls and floors are selected
-randomly by another ACS script from a pool of predefined textures. The player is
-rewarded for moving closer to the exit while looking at it (the exit is within a 21.6°
-field of view relative to player's direction). The player does not receive any reward
-for moving towards the exit while not looking at it. The player is penalized for
-bumping into walls and not moving.
+ - The purpose of this scenario is to train the AI on locating an exit from a room and move towards that exit, which is merely a long hallway branching off of the room.
+ - The map is a square room with a long 128-unit-wide corridor leading out of it, with randomly determined wall and floor textures at the time of loading the map.
+ 
+ - The player is randomly spawned at a point inside the square starting room by a ZDoom ACS script that runs when player enters the map.
+ - The player gets rewarded for moving towards the exit and is within a 21.6° field of view relative to the player's direction; therefore, the player does not get rewarded for moving towards the exit while not looking at it.
+ 
+ - The player gets penalized for bumping into walls and not moving.
 
 *Available Actions* : [MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
 
-This set of action are the minimum required to reach the level exit for this scenario.
+This set of action is the minimum required to complete the exit finding scenario.
 
 ##### Goal Function:
 
 - **+50** reward checkpoints
-- **+100** level exit
-- **-10** hitting walls
-- **-1** living reward
+- **+100** level exit - reward for completing the level
+- **-10** hitting walls - penalty for aimlessly bumping into the walls
+- **-1** living reward - ViZDoom config file penalty to encourage faster level completion
 
 ##### Files:
 - [exit_finding.wad](src/wads/exit_finding.wad)
@@ -87,19 +91,19 @@ N/A
 
 ### Requirements:
 
-Requires Python 3.5.
+Requires Python v3.5+.
 
 Requires the following Python Packages:
 
-- [ViZDoom](https://github.com/Marqt/ViZDoom)
+- [ViZDoom v1.1.1+](https://github.com/Marqt/ViZDoom)
 
 - [Keras](https://github.com/fchollet/keras)
 
-- [TensorFlow](https://tensorflow.org/)
+- [TensorFlow v1.0+](https://tensorflow.org/)
 
-- [H5Py](https://h5py.org/)
+- [H5Py v2.6+](https://h5py.org/)
 
-- [Matplotlib](http://matplotlib.org/)
+- [Matplotlib v2.0+](http://matplotlib.org/)
 
 ### Setup and Installation:
 
