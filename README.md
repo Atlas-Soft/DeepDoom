@@ -16,6 +16,10 @@
 1. [Introduction](#introduction)
 2. [DQN and Hierarchical DQN](#dqn-and-hierarchical-dqn)
 3. [Scenarios](#scenarios)
+ - [Rigid Turning](#scenario-1--rigid-turning)
+ - [Exit Finding](#scenario-2--exit-finding)
+ - [Switches](#scenario-3--switches)
+ - [Doors](#scenario-4--doors)
 4. [Results](#results)
 5. [Getting Started](#getting-started)
 
@@ -41,10 +45,10 @@ is an important part in playing Doom, especially in single-player instances of t
 Levels designed for human players are complex, requiring the player to use multiple
 navigational behaviors throughout the level.
 
-We propose a [hierarchical implementation](https://arxiv.org/pdf/1604.07255.pdf) of the Deep Q-Networks in order to solve
-complex navigational problems. DQN models are trained on simple tasks and are then
-integrated as sub-models in a Hierarchical-DQN model. This allows knowledge learned
-from simple tasks to be used for more complex tasks.
+We propose a [hierarchical implementation](https://arxiv.org/pdf/1604.07255.pdf) of the Deep 
+Q-Networks in order to solve complex navigational problems. DQN models are trained on simple 
+tasks and are then integrated as sub-models in a Hierarchical-DQN model. This allows knowledge 
+learned from simple tasks to be used for more complex tasks.
 
 ## DQN and Hierarchical-DQN
 > Under Construction
@@ -126,7 +130,7 @@ The following are descriptions of the scenarios:
 
 ---
 
-### Scenario 3: Switches
+### Scenario 3 : Switches
 
 ![switches_map](webPhotos/Switches.PNG)
 #### Description:
@@ -161,7 +165,7 @@ The following are descriptions of the scenarios:
 
 ---
 
-### Scenario 4: Doors
+### Scenario 4 : Doors
 
 ![doors_map](webPhotos/Doors.PNG)
 #### Description:
@@ -231,15 +235,6 @@ Download or clone repository and install required packages.
 }
 ```
 
-### Wads, ViZdoom Configs, and Model Weights:
-
-The [`/src/wads/`](src/wads) folder contains the `.wad` files for the scenarios.
-
-The [`/src/configs/`](src/configs) folder contains the `.cfg` files for the scenarios.
-
-The [`/data/model_weights`](data/model_weights) folder contains trained `.h5` model
-weight files.
-
 ### Testing Models:
 
 >*Model Weights currently unavailable*
@@ -281,7 +276,18 @@ Total Score: 1209.0
 
 ```
 The following is the ViZDoom `test.lmp` replay:
-![replay_gif](webPhotos/rigid_turning_sc1.png)
+
+![replay_gif](webPhotos/DeepDoom_Rigid_Turning_Demo.gif)
+
+
+### Wads, ViZdoom Configs, and Model Weights:
+
+The [`/src/wads/`](src/wads) folder contains the `.wad` files for the scenarios.
+
+The [`/src/configs/`](src/configs) folder contains the `.cfg` files for the scenarios.
+
+The [`/data/model_weights`](data/model_weights) folder contains trained `.h5` model
+weight files.
 
 ## License
 Deep Doom Project is under the MIT License.
