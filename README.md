@@ -67,11 +67,11 @@ The following are descriptions of the scenarios:
 
 ![rigid_turning_map](webPhotos/rigid_turning.PNG)
 #### Description:
- - The purpose of this scenario is to train the AI on navigating through corridors with sharp 90° turns.
+ - The purpose of this scenario is to train the agent how to navigate through corridors with sharp 90° turns.
  - The map is a rigid 2-shape, with randomly determined ceiling, floor, and wall textures at the time of loading the map.
- - The player is placed at one end of the '2' and is expected to navigate through this shape.
- - The player gets rewarded for walking down a corridor and turning a 90° corner.
- - The player gets penalized for bumping into walls and not moving.
+ - The agent is placed at one end of the '2' and is expected to navigate through this shape.
+ - The agent gets rewarded for walking down a corridor and turning a 90° corner.
+ - The agent gets penalized for bumping into walls and not moving.
 
 #### Available Actions:
  - [MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
@@ -83,7 +83,7 @@ The following are descriptions of the scenarios:
  - **+20** walking linedefs - for walking down a corridor
  
  - **+100** level exit - for completing the level
- - **+1** moving reward - changes in the player's x,y position to encourage continual movement
+ - **+1** moving reward - changes in the agent's x,y position to encourage continual movement
 
  - **-10** hitting the walls - for aimlessly bumping into the walls
  - **-1** living reward - ViZDoom config file penalty to encourage faster level completion
@@ -98,11 +98,11 @@ The following are descriptions of the scenarios:
 
 ![exit_finding_map](webPhotos/exit_finding.PNG)
 #### Description:
- - The purpose of this scenario is to train the AI on locating an exit from a room and move towards that exit, which is merely a long hallway branching off of the room.
+ - The purpose of this scenario is to train the agent how to locate an exit from a room and move towards that exit, which is merely a long hallway branching off of the room.
  - The map is a square room with a long 128-unit-wide corridor leading out of it and randomly determined ceiling, floor, and wall textures at the time of loading the map.
- - The player is placed at a random point inside the room and facing a random direction via a ZDoom ACS script that runs when the player enters the map.
- - The player gets rewarded for moving towards the exit when it is within a 21.6° field of view relative to the player's direction; therefore, the player does not get rewarded for moving towards the exit while facing away.
- - The player gets penalized for bumping into walls and not moving.
+ - The agent is placed at a random point inside the room and facing a random direction via a ZDoom ACS script that runs when the agent enters the map.
+ - The agent gets rewarded for moving towards the exit when it is within a 21.6° field of view relative to the agent's direction; therefore, the agent does not get rewarded for moving towards the exit while facing away.
+ - The agent gets penalized for bumping into walls and not moving.
 
 #### Available Actions:
  - [MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
@@ -115,7 +115,7 @@ The following are descriptions of the scenarios:
 >***Note: x inversely corresponds to the switch's distance; x decreases as distance increases.***
 
  - **+100** level exit - for completing the level
- - **+1** moving reward - changes in the player's x,y position to encourage continual movement
+ - **+1** moving reward - changes in theagent's x,y position to encourage continual movement
 
  - **-10** hitting the walls - for aimlessly bumping into the walls
  - **-1** living reward - ViZDoom config file penalty to encourage faster level completion
@@ -130,11 +130,11 @@ The following are descriptions of the scenarios:
 
 ![switches_map](webPhotos/Switches.PNG)
 #### Description:
- - The purpose of this scenario is to train the AI on locating a switch on the wall.
+ - The purpose of this scenario is to train the agent how to locate a switch on the wall.
  - The map is a square room with a button placed on the south wall and randomly determined ceiling, floor, and wall textures at the time of loading the map.
- - The player is placed at a random point inside the room and facing a random direction via a ZDoom ACS script that runs when the player enters the map.
- - The player gets rewarded for moving towards the switch when it is within a 21.6° field of view relative to the player's direction; therefore, the player does not get rewarded for moving towards the exit while facing away.
- - The player gets penalized for not moving.
+ - The agent is placed at a random point inside the room and facing a random direction via a ZDoom ACS script that runs when the agent enters the map.
+ - The agent gets rewarded for moving towards the switch when it is within a 21.6° field of view relative to the agent's direction; therefore, the agent does not get rewarded for moving towards the exit while facing away.
+ - The agent gets penalized for not moving.
 
 #### Available Actions:
  - [USE, MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
@@ -149,7 +149,7 @@ The following are descriptions of the scenarios:
 >***Note: x inversely corresponds to the switch's distance; x decreases as distance increases.***
 
  - **+100** pressing the switch - for completing the level
- - **+1** moving reward - changes in the player's x,y position to encourage continual movement
+ - **+1** moving reward - changes in the agent's x,y position to encourage continual movement
  
  - **-1** living reward - ViZDoom config file penalty to encourage faster level completion
 
@@ -163,11 +163,11 @@ The following are descriptions of the scenarios:
 
 ![doors_map](webPhotos/Doors.PNG)
 #### Description:
- - The purpose of this scenario is to train the AI on recognizing and opening doors.
+ - The purpose of this scenario is to train the agent how to recognize and open doors.
  - The map is a straight rectangular corridor with 9 doors placed inside it and randomly determined ceiling, floor, and wall textures at the time of loading the map.
- - The player is placed at one end of this corridor and is expected to proceed straight towards the exit.
- - The player gets rewarded for advancing towards doors, for advancing through opened doors, and for reaching the exit.
- - The player gets penalized for not moving.
+ - The agent is placed at one end of this corridor and is expected to proceed straight towards the exit.
+ - The agent gets rewarded for advancing towards doors, for advancing through opened doors, and for reaching the exit.
+ - The agent gets penalized for not moving.
 
 #### Available Actions:
  - [USE, MOVE_FORWARD]
@@ -179,7 +179,7 @@ The following are descriptions of the scenarios:
  - **+10** walking linedefs - for walking towards the next door
  
  - **+20** level exit - for completing the level
- - **+1** moving reward - changes in the player's x,y position to encourage continual movement
+ - **+1** moving reward - changes in the agent's x,y position to encourage continual movement
  
  - **-1** living reward - ViZDoom config file penalty to encourage faster level completion
 
