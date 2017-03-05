@@ -3,7 +3,7 @@
 ![Current Version](https://img.shields.io/badge/build-alpha-orange.svg)
 ![License](https://badges.frapsoft.com/os/mit/mit.svg?v=102)
 
-**Last Updated: March 3, 2016**
+**Last Updated: March 4, 2016**
 
 **DeepDoom Team:**
 
@@ -61,8 +61,7 @@ sequence of states, actions and rewards:
 - ***s<sub>0</sub>, a<sub>0</sub>, r<sub>0</sub>, ..., s<sub>n</sub>, a<sub>n</sub>, r<sub>n</sub>***
 
 An agent situated in an environment has a set of available actions, each of which transforms the state of the
-environment in some way. The agent must learn the best policy which is a set rules used for choosing actions that 
-will maximize the reward.
+environment in some way. The agent must learn the best policy for choosing actions that will maximize the reward.
 
 A good strategy for agents is to maximize the total future reward from the current time frame:
 
