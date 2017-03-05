@@ -68,14 +68,14 @@ A good strategy for agents is to maximize the total future reward from the curre
 
 - ***R<sub>t</sub> = r<sub>t</sub> + r<sub>t+1</sub> + ... + r<sub>t+n</sub>***
 
-In stochastic environments, its better to use a discounted future reward:
+In stochastic environments, its better to use a discounted total future reward:
 
 - ***R<sub>t</sub> = r<sub>t</sub> + g r<sub>t+1</sub> + ... + g<sup>n-t</sup> r<sub>t+n</sub>***
 
 ***g*** is the discount factor between 0.0 and 1.0. If set to 0.0, the agent will only care about immediate reward.
 
 ***Q-learning*** defines a function ***Q(s,a)*** which represents the maximum possible future reward from preforming 
-action ***a*** on state ***s*** and preforming optimally there after*. In other words, the Q-function gives the 
+action ***a*** on state ***s*** and preforming optimally there after. In other words, the Q-function gives the 
 "quality" of an action at a given state:
 
 - ***Q(s<sub>t</sub>,a<sub>t</sub>) = max R<sub>t</sub>***
@@ -84,7 +84,7 @@ Knowing the Q-values, we can determine policy ***π(s)***:
 
 - ***π(s) = argmax<sub>a</sub> Q(s,a)***
 
-In order to calculate the ***Q(s,a)***, the ***Bellman Equation*** is used:
+In order to approximate the ***Q(s,a)***, the ***Bellman Equation*** is used:
 
 - ***Q(s,a) = Q(s,a) + α (r + g max<sub>a'</sub> Q(s',a') - Q(s,a))***
 
@@ -95,11 +95,11 @@ the function will converge and represent the true Q-values.
 
 ### Approximating Q-function with CNNs:
 
-Earlier implentations of ***Q-learning*** used tables to store Q-values of all possible state-action pairs. This is not
-feasible for large state spaces like Doom. ***Convolutional Neural Networks*** have been very effective in the domain 
-of image recognition. In simple terms, CNNs function by abstracting features from images and using those features to 
-approximate the desired function. Google's Deepmind has shown that CNNs can be used to approximate Q-functions from
-visual pixel data.
+Earlier implementations of ***Q-learning*** used tables to store Q-values of all possible state-action pairs. This is 
+not feasible for large state spaces like Doom. ***Convolutional Neural Networks*** have been very effective in the 
+domain of image recognition. In simple terms, CNNs function by abstracting features from images and using those 
+features to approximate the desired function. Google's Deepmind has shown that CNNs can be used to approximate 
+Q-functions from visual pixel data.
 
 The Deep network architecture implemented for this project is defined below:
 
