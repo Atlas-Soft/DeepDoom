@@ -61,8 +61,8 @@ sequence of states, actions and rewards:
 - ***s<sub>0</sub>, a<sub>0</sub>, r<sub>0</sub>, ..., s<sub>n</sub>, a<sub>n</sub>, r<sub>n</sub>***
 
 An agent situated in an environment has a set of available actions, each of which transforms the state of the
-environment in some way. The agent must learn the best policy which is a set rules used for choosing actions which 
-will maximize the reward recieved.
+environment in some way. The agent must learn the best policy which is a set rules used for choosing actions that 
+will maximize the reward.
 
 A good strategy for agents is to maximize the total future reward from the current time frame:
 
