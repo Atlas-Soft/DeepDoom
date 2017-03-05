@@ -27,12 +27,11 @@
 
 Google DeepMind's landmark paper, [***Playing Atari With Deep Reinforcement
 Learning***](https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf), shows the feasibility of
-game playing using only visual input. This was
-done by combining Deep Convolutional Neural Networks (CNNs) with Q-learning. Deep
-Q-Networks (DQNs) were able to learn and play 2D Atari-2600 games such as Pong, Breakout, and Space
-Invaders. Since then, there has been much research into applying these same techniques in 3D
-environments such as [Minecraft](https://www.ijcai.org/Proceedings/16/Papers/643.pdf)
-and Doom.
+game playing using only visual input. This was done by combining Deep Convolutional 
+Neural Networks (CNNs) with Q-learning. Deep Q-Networks (DQNs) were able to learn and play 
+2D Atari-2600 games such as Pong, Breakout, and Space Invaders. Since then, there has been 
+much research into applying these same techniques in 3D environments such as 
+[Minecraft](https://www.ijcai.org/Proceedings/16/Papers/643.pdf) and Doom.
 
 [ViZDoom](https://arxiv.org/pdf/1605.02097.pdf) is a Doom based AI research platform
 which allows us to test reinforcement learning techniques in Doom's 3D environment.
@@ -46,12 +45,84 @@ Levels designed for human players are complex, requiring the player to use multi
 navigational behaviors throughout the level.
 
 We propose a [hierarchical implementation](https://arxiv.org/pdf/1604.07255.pdf) of the Deep 
-Q-Networks in order to solve complex navigational problems. DQN models are trained on simple 
-tasks and are then integrated as sub-models in a Hierarchical-DQN model. This allows knowledge 
-learned from simple tasks to be used for more complex tasks.
+Q-Networks in order to learn complex navigational problems. DQN models are first trained on simple 
+tasks and then integrated as sub-models in a Hierarchical-DQN model. This allows knowledge 
+learned from the simple tasks to be used in training more complex tasks.
 
 ## DQN and Hierarchical-DQN
 > Under Construction
+
+### Q-Learning:
+
+Reinforcement learning involves learning the best action to take at any given state through rewards recieved
+from the environment. This process is commonly represented as a ***Markov Decision Process*** which is a finite 
+sequence of states, actions and rewards:
+
+- ***s<sub>0</sub>, a<sub>0</sub>, r<sub>0</sub>, ..., s<sub>n</sub>, a<sub>n</sub>, r<sub>n</sub>***
+
+An agent situated in an environment has a set of available actions, each of which transforms the state of the
+environment in some way. The agent must learn the best policy which is a set rules used for choosing actions which 
+will maximize the reward recieved.
+
+A good strategy for agents is to maximize the total future reward from the current time frame:
+
+- ***R<sub>t</sub> = r<sub>t</sub> + r<sub>t+1</sub> + ... + r<sub>t+n</sub>***
+
+In stochastic environments, its better to use a discounted future reward:
+
+- ***R<sub>t</sub> = r<sub>t</sub> + g r<sub>t+1</sub> + ... + g<sup>n-t</sup> r<sub>t+n</sub>***
+
+***g*** is the discount factor between 0.0 and 1.0. If set to 0.0, the agent will only care about immediate reward.
+
+***Q-learning*** defines a function ***Q(s,a)*** which represents the maximum possible future reward from preforming 
+action ***a*** on state ***s*** and preforming optimally there after*. In other words, the Q-function gives the 
+"quality" of an action at a given state:
+
+- ***Q(s<sub>t</sub>,a<sub>t</sub>) = max R<sub>t</sub>***
+
+Knowing the Q-values, we can determine policy ***π(s)***:
+
+- ***π(s) = argmax<sub>a</sub> Q(s,a)***
+
+In order to calculate the ***Q(s,a)***, the ***Bellman Equation*** is used:
+
+- ***Q(s,a) = Q(s,a) + α (r + g max<sub>a'</sub> Q(s',a') - Q(s,a))***
+
+***α*** is the Q-learning rate between 0.0 and 1.0. If set to 0.0, Q-function remains the same.
+Q-learning works by iteratively updating the Q-function using the ***Bellman Equation***.
+In early stages of training the ***Q(s,a)*** approximation can be completely wrong, but given enough time
+the function will converge and represent the true Q-values.
+
+### Approximating Q-function with CNNs:
+
+Earlier implentations of ***Q-learning*** used tables to store Q-values of all possible state-action pairs. This is not
+feasible for large state spaces like Doom. ***Convolutional Neural Networks*** have been very effective in the domain 
+of image recognition. In simple terms, CNNs function by abstracting features from images and using those features to 
+approximate the desired function. Google's Deepmind has shown that CNNs can be used to approximate Q-functions from
+visual pixel data.
+
+The Deep network architecture implemented for this project is defined below:
+
+> TODO: Make Layer Chart
+
+In order to train the network, we used RMSprop as the optimization algorithm and the mean-squared as the loss
+function.
+
+### Replay Memory:
+
+Approximating Q-values using non-linear function like CNNs can be unstable. ***Replay Memory*** reduces the chance
+of getting stuck at a local minimum by using a random batch from a list of ***transitions*** to train the DQN.
+Transitions are defined as:
+
+- *** ( s, a, r, s' ) ***
+
+New Q-values are calculated using the batch and the ***Bellman Equation***, and then used to update the DQN.
+
+### Exploration vs Exploitation:
+
+
+### Hierarchical Q-Learning:
+
 
 ## Scenarios
 
