@@ -266,7 +266,6 @@ The following are descriptions of the scenarios:
 The DQN and HDQN models were trained on a machine with the following specs:
 
 ```
-Testing PC Specifications:
 Intel i7-920
 Asus Rampage GENE II (Intel X58 Chipset)
 12 GB DDR3 10600
