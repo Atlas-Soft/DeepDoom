@@ -269,6 +269,13 @@ The DQN and HDQN models were trained on a machine with the following specs:
 TODO: Write Specs Here
 ```
 
+Testing PC Specifications:
+Intel i7-920
+Asus Rampage GENE II (Intel X58 Chipset)
+12 GB DDR3 10600
+Nvidia GTX 750 Ti (2 GB VRAM)
+SanDisk SSD Plus 240GB
+
 The performance of the models are measured by averaging the total reward over 100 test runs after each training 
 epoch. A demonstration of each trained model in their respective training scenario is also provided.
 
