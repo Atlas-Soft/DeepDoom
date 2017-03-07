@@ -40,6 +40,7 @@ class DQNModel:
         '''
         # Network Parameters
         self.actions = actions
+        self.nb_actions = len(actions)
         self.depth_radius = depth_radius
         self.depth_contrast = depth_contrast
         self.loss_fun = 'mse'
@@ -58,7 +59,7 @@ class DQNModel:
         m = Dropout(0.5)(m)
 
         # Output Layer
-        y0 = Dense(len(self.actions))(m)
+        y0 = Dense(self.nb_actions)(m)
 
         self.online_network = Model(input=x0, output=y0)
         self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
@@ -119,7 +120,7 @@ class HDQNModel:
         self.sub_models = sub_models
         self.sub_model_frames = None
         self.nb_frames = nb_frames
-        self.nb_actions = len(actions)
+        self.nb_actions = len(self.actions) + len(self.sub_models)
         self.last_q = None
         self.skill_frame_skip = skill_frame_skip
         self.skip_count = 0
@@ -143,7 +144,7 @@ class HDQNModel:
         m = Dropout(0.5)(m)
 
         # Output Layer
-        y0 = Dense(len(self.actions) + len(self.sub_models), init='normal')(m)
+        y0 = Dense(self.nb_actions, init='normal')(m)
 
         self.online_network = Model(input=x0, output=y0)
         self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
@@ -173,8 +174,8 @@ class HDQNModel:
 
         # Get predicted action from sub-models or native actions.
         if self.last_q == None:
-            if q >= self.nb_actions:
-                q = q - self.nb_actions
+            if q >= len(self.actions):
+                q = q - len(self.actions)
                 sel_model = self.sub_models[q]
                 S = np.expand_dims(self.sub_model_frames[q], 0)
                 sel_model_q = sel_model.online_network.predict(S)

@@ -111,7 +111,7 @@ class RLAgent:
 				# Exploration Policies
 				if self.exp_policy == 'e-greedy':
 					if np.random.random() < self.epsilon or epoch < self.epislon_wait:
-						q = int(np.random.randint(len(game.actions)))
+						q = int(np.random.randint(self.model.nb_actions))
 						a = self.model.predict(game, q)
 					else:
 						q = self.model.online_network.predict(S)
