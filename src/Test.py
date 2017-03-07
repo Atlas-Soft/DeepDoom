@@ -21,12 +21,12 @@ and allow human play to test out scenarios.
 """
 
 # Testing Parameters
-scenario = 'configs/rigid_turning.cfg'
-model_weights = "rigid_turning.h5"
+scenario = 'configs/exit_finding.cfg'
+model_weights = "exit_finding.h5"
 depth_radius = 1.0
-depth_contrast = 0.9
+depth_contrast = 1.0
 test_param = {
-    'frame_skips' : 6,
+    'frame_skips' : 4,
     'nb_frames' : 3
 }
 nb_runs = 5
@@ -72,13 +72,20 @@ def test_heirarchical_model(runs=1):
     doom = DoomScenario(scenario)
 
     # Load Hierarchical-DQN and Sub-models
-    actions = [list(a) for a in it.product([0, 1], repeat=4)]
-    model_rigid_turning = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=actions, depth_radius=1.0, depth_contrast=0.9)
+    acts = [list(a) for a in it.product([0, 1], repeat=5)]
+    actions_1 = []
+    actions_2 = []
+    for i in range(len(acts)):
+        if i < 16: actions_1.append(acts[i])
+        if i % 8 == 0: actions_2.append(acts[i])
+    model_rigid_turning = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=actions_1, depth_radius=1.0, depth_contrast=0.9)
     model_rigid_turning.load_weights('rigid_turning.h5')
-    model_exit_finding = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=actions, depth_radius=1.0, depth_contrast=0.9)
-    model_exit_finding.load_weights('ef_.h5')
-    models = [model_rigid_turning, model_exit_finding]
-    model = HDQNModel(sub_models=models, skill_frame_skip=6, resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=[], depth_radius=depth_radius, depth_contrast=depth_contrast)
+    model_exit_finding = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=actions_1, depth_radius=1.0, depth_contrast=0.9)
+    model_exit_finding.load_weights('exit_finding.h5')
+    model_doors = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=actions_2, depth_radius=1.0, depth_contrast=0.1)
+    model_doors.load_weights('doors_.h5')
+    models = [model_rigid_turning, model_exit_finding, model_doors]
+    model = HDQNModel(sub_models=models, skill_frame_skip=0, resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=[], depth_radius=depth_radius, depth_contrast=depth_contrast)
     agent = RLAgent(model, **test_param)
 
     # Run Scenario and play replay using Hierarchical-DQN

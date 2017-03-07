@@ -118,6 +118,9 @@ class RLAgent:
 						q = int(np.argmax(q[0]))
 						a = self.model.predict(game, q)
 
+				if self.model.__class__.__name__ == 'HDQNModel':
+					if self.model.last_q != None: q = self.model.last_q
+
 				# Advance Action over frame_skips + 1
 				for i in range(self.frame_skips+1):
 					if not game.game.is_episode_finished(): game.play(a)

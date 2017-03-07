@@ -134,16 +134,16 @@ class HDQNModel:
         x0 = Input(shape=(nb_frames, resolution[0], resolution[1]))
 
         # Convolutional Layer
-        m = Convolution2D(32, 8, 8, subsample = (4,4), activation='relu')(x0)
-        m = Convolution2D(64, 5, 5, subsample = (4,4), activation='relu')(m)
+        m = Convolution2D(32, 8, 8, subsample = (4,4), activation='relu', init='normal')(x0)
+        m = Convolution2D(64, 5, 5, subsample = (4,4), activation='relu', init='normal')(m)
         m = Flatten()(m)
 
         # Fully Connected Layer
-        m = Dense(4032, activation='relu')(m)
+        m = Dense(4032, activation='relu', init='normal')(m)
         m = Dropout(0.5)(m)
 
         # Output Layer
-        y0 = Dense(len(self.actions) + len(self.sub_models))(m)
+        y0 = Dense(len(self.actions) + len(self.sub_models), init='normal')(m)
 
         self.online_network = Model(input=x0, output=y0)
         self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
