@@ -167,7 +167,7 @@ class RLAgent:
 			# Preform test for epoch
 			print("Testing:")
 			pbar.close()
-			pbar = tqdm(total=100)
+			pbar = tqdm(total=self.nb_tests)
 			rewards = []
 			for i in range(self.nb_tests):
 				rewards.append(game.run(self))

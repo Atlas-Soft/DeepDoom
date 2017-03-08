@@ -46,7 +46,7 @@ class DoomScenario:
     def play(self, action):
         '''
         Method advances state with desired action.
-        
+
         '''
         self.game.set_action(action)
         self.game.advance_action()
