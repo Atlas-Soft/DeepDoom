@@ -43,14 +43,14 @@ class DoomScenario:
         self.pbar = None
         self.game.new_episode()
 
-    def play(self, action):
+    def play(self, action, tics):
         '''
         Method advances state with desired action.
 
         '''
         self.game.set_action(action)
-        self.game.advance_action()
-        if self.pbar: self.pbar.update(1)
+        self.game.advance_action(tics, True)
+        if self.pbar: self.pbar.update(int(tics))
 
     def get_processed_state(self, depth_radius, depth_contrast):
         '''
@@ -97,9 +97,7 @@ class DoomScenario:
             q = agent.model.online_network.predict(S)
             q = int(np.argmax(q[0]))
             a = agent.model.predict(self, q)
-            for i in range(agent.frame_skips+1):
-                if not self.game.is_episode_finished():
-                    self.play(a)
+            if not self.game.is_episode_finished(): self.play(a, agent.frame_skips+1)
 
         agent.frames = None
         if agent.model.__class__.__name__ == 'HDQNModel': agent.model.sub_model_frames = None

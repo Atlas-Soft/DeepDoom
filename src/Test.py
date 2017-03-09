@@ -21,16 +21,16 @@ and allow human play to test out scenarios.
 """
 
 # Testing Parameters
-scenario = 'configs/all_skills.cfg'
-model_weights = "all_skills_.h5"
+scenario = 'configs/rigid_turning.cfg'
+model_weights = "rigid_turning.h5"
 depth_radius = 1.0
-depth_contrast = 0.5
+depth_contrast = 0.9
 test_param = {
     'frame_skips' : 6,
     'nb_frames' : 3
 }
 nb_runs = 5
-testing = 'HDQN'
+testing = 'DQN'
 
 def test_model(runs=1):
     '''
@@ -85,7 +85,7 @@ def test_heirarchical_model(runs=1):
     model_doors = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=actions_2, depth_radius=1.0, depth_contrast=0.1)
     model_doors.load_weights('doors.h5')
     models = [model_rigid_turning, model_exit_finding, model_doors]
-    model = HDQNModel(sub_models=models, skill_frame_skip=0, resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=[], depth_radius=depth_radius, depth_contrast=depth_contrast)
+    model = HDQNModel(sub_models=models, skill_frame_skip=2, resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=[], depth_radius=depth_radius, depth_contrast=depth_contrast)
     model.load_weights(model_weights)
     agent = RLAgent(model, **test_param)
 

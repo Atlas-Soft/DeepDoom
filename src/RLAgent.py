@@ -110,7 +110,7 @@ class RLAgent:
 
 				# Exploration Policies
 				if self.exp_policy == 'e-greedy':
-					if np.random.random() < self.epsilon or epoch < self.epislon_wait:
+					if np.random.random() < self.epsilon:
 						q = int(np.random.randint(self.model.nb_actions))
 						a = self.model.predict(game, q)
 					else:
@@ -122,8 +122,7 @@ class RLAgent:
 					if self.model.last_q != None: q = self.model.last_q
 
 				# Advance Action over frame_skips + 1
-				for i in range(self.frame_skips+1):
-					if not game.game.is_episode_finished(): game.play(a)
+				if not game.game.is_episode_finished(): game.play(a, self.frame_skips+1)
 
 				# Store transition in memory
 				a = q
@@ -155,7 +154,7 @@ class RLAgent:
 				pbar.update(1)
 
 			# Save weights at checkpoints
-			if self.checkpoint and ((epoch + 1 - self.epislon_wait) % self.checkpoint == 0 or epoch + 1 == self.nb_epoch):
+			if self.checkpoint and ((epoch + 1 ) % self.checkpoint == 0 or epoch + 1 == self.nb_epoch):
 				self.model.save_weights(self.filename)
 
 			# Decay Epsilon
