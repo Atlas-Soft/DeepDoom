@@ -113,7 +113,7 @@ Approximating Q-values using non-linear function like CNNs can be unstable. ***R
 of getting stuck at a local minimum by using a random batch from a list of ***transitions*** to train the DQN.
 Transitions are defined as:
 
-- *** ( s, a, r, s' ) ***
+- ***( s, a, r, s' )***
 
 New Q-values are calculated using the batch and the ***Bellman Equation***, and then used to update the DQN.
 
@@ -295,7 +295,35 @@ Rigid Turning training parameters can be found [here](doc/parameters/rigid_turni
 
 #### Demo:
 
-[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/i4tsydC4u1s/0.jpg)](http://www.youtube.com/watch?v=i4tsydC4u1s)
+[![Rigid Turning Demo](http://img.youtube.com/vi/i4tsydC4u1s/0.jpg)](http://www.youtube.com/watch?v=i4tsydC4u1s)
+
+---
+
+### Exit Finding
+
+Exit Finding training parameters can be found [here](doc/parameters/exit_finding.md).
+
+#### Average Total Reward Per Epoch:
+
+![exit_finding_total_reward](doc/figures/exit_finding__total_reward.png)
+
+#### Demo:
+
+[![Exit Finding Demo](http://img.youtube.com/vi/3_Cgei2Z3FE/0.jpg)](http://www.youtube.com/watch?v=3_Cgei2Z3FE)
+
+---
+
+### Doors
+
+Doors training parameters can be found [here](doc/parameters/doors.md).
+
+#### Average Total Reward Per Epoch:
+
+![doors_total_reward](doc/figures/doors__total_reward.png)
+
+#### Demo:
+
+[![Doors Demo](http://img.youtube.com/vi/SDnrMJ6Y6JE/0.jpg)](http://www.youtube.com/watch?v=SDnrMJ6Y6JE)
 
 ## Getting Started
 
