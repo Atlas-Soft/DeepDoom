@@ -101,7 +101,7 @@ class DoomScenario:
             if agent.model.__class__.__name__ == 'HDQNModel':
                 if q >= len(agent.model.actions):
                     for i in range(agent.model.skill_frame_skip):
-                        a = self.model.predict(self, q)
+                        a = agent.model.predict(self, q)
                         if not self.game.is_episode_finished(): game.play(a, agent.frame_skips+1)
 
         agent.frames = None

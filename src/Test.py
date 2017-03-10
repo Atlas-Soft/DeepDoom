@@ -4,6 +4,9 @@ Test.py
 Authors: Rafael Zamora
 Last Updated: 3/3/17
 
+Notes:
+-Clipping and Prioritized replay
+
 '''
 
 import os
