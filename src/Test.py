@@ -22,7 +22,7 @@ and allow human play to test out scenarios.
 
 # Testing Parameters
 scenario = 'configs/all_skills.cfg'
-model_weights = "all_skills__.h5"
+model_weights = "all_skills_.h5"
 depth_radius = 1.0
 depth_contrast = 0.5
 test_param = {
@@ -45,6 +45,8 @@ def test_model(runs=1):
     print("Testing DQN-Model:", model_weights)
     # Initiates VizDoom Scenario
     doom = DoomScenario(scenario)
+    plt.imshow(doom.get_processed_state(depth_radius, depth_contrast), interpolation='nearest',cmap='gray')
+    plt.show()
 
     # Load Model and Weights
     model = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=doom.actions, depth_radius=depth_radius, depth_contrast=depth_contrast)
@@ -85,7 +87,7 @@ def test_heirarchical_model(runs=1):
     model_doors = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=actions_2, depth_radius=1.0, depth_contrast=0.1)
     model_doors.load_weights('doors.h5')
     models = [model_rigid_turning, model_exit_finding, model_doors]
-    model = HDQNModel(sub_models=models, skill_frame_skip=4, resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=[], depth_radius=depth_radius, depth_contrast=depth_contrast)
+    model = HDQNModel(sub_models=models, skill_frame_skip=0, resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=[], depth_radius=depth_radius, depth_contrast=depth_contrast)
     model.load_weights(model_weights)
     agent = RLAgent(model, **test_param)
 

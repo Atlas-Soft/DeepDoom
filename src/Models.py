@@ -121,9 +121,7 @@ class HDQNModel:
         self.sub_model_frames = None
         self.nb_frames = nb_frames
         self.nb_actions = len(self.actions) + len(self.sub_models)
-        self.last_q = None
         self.skill_frame_skip = skill_frame_skip
-        self.skip_count = 0
 
         # Network Parameters
         self.depth_radius = depth_radius
@@ -173,27 +171,16 @@ class HDQNModel:
                 self.sub_model_frames[i].pop(0)
 
         # Get predicted action from sub-models or native actions.
-        if self.last_q == None:
-            if q >= len(self.actions):
-                q = q - len(self.actions)
-                sel_model = self.sub_models[q]
-                S = np.expand_dims(self.sub_model_frames[q], 0)
-                sel_model_q = sel_model.online_network.predict(S)
-                sel_model_q = int(np.argmax(sel_model_q[0]))
-                a = sel_model.predict(game, sel_model_q)
-                self.last_q = q
-            else:
-                a = self.actions[q]
-        else:
-            sel_model = self.sub_models[self.last_q]
-            S = np.expand_dims(self.sub_model_frames[self.last_q], 0)
+        if q >= len(self.actions):
+            q = q - len(self.actions)
+            sel_model = self.sub_models[q]
+            S = np.expand_dims(self.sub_model_frames[q], 0)
             sel_model_q = sel_model.online_network.predict(S)
             sel_model_q = int(np.argmax(sel_model_q[0]))
             a = sel_model.predict(game, sel_model_q)
-            if self.skip_count < self.skill_frame_skip: self.skip_count += 1
-            else:
-                self.skip_count = 0
-                self.last_q = None
+            self.last_q = q
+        else:
+            a = self.actions[q]
         return a
 
     def load_weights(self, filename):

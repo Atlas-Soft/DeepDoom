@@ -118,15 +118,20 @@ class RLAgent:
 						q = int(np.argmax(q[0]))
 						a = self.model.predict(game, q)
 
-				if self.model.__class__.__name__ == 'HDQNModel':
-					if self.model.last_q != None: q = self.model.last_q
-
 				# Advance Action over frame_skips + 1
 				if not game.game.is_episode_finished(): game.play(a, self.frame_skips+1)
 
+				r = game.game.get_last_reward()
+
+				if self.model.__class__.__name__ == 'HDQNModel':
+					if q >= len(self.model.actions):
+						for i in range(self.model.skill_frame_skip):
+							a = self.model.predict(game, q)
+							if not game.game.is_episode_finished(): game.play(a, self.frame_skips+1)
+							r += game.game.get_last_reward()
+
 				# Store transition in memory
 				a = q
-				r = game.game.get_last_reward()
 				S_prime = self.get_state_data(game)
 				game_over = game.game.is_episode_finished()
 				transition = [S, a, r, S_prime, a_prime, game_over]

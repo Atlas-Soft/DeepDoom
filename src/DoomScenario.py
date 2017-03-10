@@ -98,6 +98,11 @@ class DoomScenario:
             q = int(np.argmax(q[0]))
             a = agent.model.predict(self, q)
             if not self.game.is_episode_finished(): self.play(a, agent.frame_skips+1)
+            if agent.model.__class__.__name__ == 'HDQNModel':
+                if q >= len(agent.model.actions):
+                    for i in range(agent.model.skill_frame_skip):
+                        a = self.model.predict(self, q)
+                        if not self.game.is_episode_finished(): game.play(a, agent.frame_skips+1)
 
         agent.frames = None
         if agent.model.__class__.__name__ == 'HDQNModel': agent.model.sub_model_frames = None
