@@ -7,10 +7,10 @@
 
 **DeepDoom Team:**
 
-- [Rafael Zamora](https://github.com/rz4) - Team Leader, Lead Programmer, Machine Learning Specialist
-- [Lauren An](https://github.com/AtlasSoft-lsa3) - Programmer, Head of Testing
-- [William Steele](https://github.com/billionthb) - Programmer, Hardware Specialist, Head of Documentation
-- [Joshua Hidayat](https://github.com/Arngeirr) - Programmer, Head of Data Gathering
+- [Rafael Zamora](https://github.com/rz4)
+- [Lauren An](https://github.com/AtlasSoft-lsa3)
+- [William Steele](https://github.com/billionthb) 
+- [Joshua Hidayat](https://github.com/Arngeirr) 
 
 ### Table of Contents:
 1. [Introduction](#introduction)
