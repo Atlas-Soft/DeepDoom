@@ -74,6 +74,25 @@ class DQNModel:
         a = self.actions[q]
         return a
 
+    def softmax_q_values(self, S, actions):
+        '''
+        Method returns softmax of predicted q values indexed according to the
+        desired list of actions.
+
+        '''
+        # Calculate Softmax of Q values
+        q = self.online_network.predict(S)
+        softmax_q = np.exp(q[0] - np.max(q[0]))
+        softmax_q =  softmax_q / softmax_q.sum(axis=0)
+
+        # Index Q values according to inputed list of actions
+        final_softmax_q = [0 for i in range(len(actions))]
+        for j in range(len(self.actions)):
+            for i in range(len(actions)):
+                if self.actions[j] == actions[i]:
+                    final_softmax_q[i] = softmax_q[j]
+        return final_softmax_q
+
     def load_weights(self, filename):
         '''
         Method loads DQN model weights from file located in /data/model_weights/ folder.
@@ -178,10 +197,39 @@ class HDQNModel:
             sel_model_q = sel_model.online_network.predict(S)
             sel_model_q = int(np.argmax(sel_model_q[0]))
             a = sel_model.predict(game, sel_model_q)
-            self.last_q = q
         else:
             a = self.actions[q]
         return a
+
+    def softmax_q_values(self, S, actions):
+        '''
+        Method returns softmax of predicted q values indexed according to the
+        desired list of actions.
+
+        '''
+        # Calculate Softmax of Q values
+        q = self.online_network.predict(S)
+        max_q = int(np.argmax(q[0]))
+        if max_q >= len(self.actions):
+            max_q = max_q - len(self.actions)
+            sel_model = self.sub_models[max_q]
+            S = np.expand_dims(self.sub_model_frames[max_q], 0)
+            q = sel_model.online_network.predict(S)
+            model_actions = sel_model.actions
+        else:
+            model_actions = self.actions
+            q = q[:len(self.actions)]
+
+        softmax_q = np.exp(q[0] - np.max(q[0]))
+        softmax_q =  softmax_q / softmax_q.sum(axis=0)
+
+        # Index Q values according to inputed list of actions
+        final_softmax_q = [0 for i in range(len(actions))]
+        for j in range(len(model_actions)):
+            for i in range(len(actions)):
+                if model_actions[j] == actions[i]:
+                    final_softmax_q[i] = softmax_q[j]
+        return final_softmax_q
 
     def load_weights(self, filename):
         '''

@@ -206,6 +206,116 @@ class RLAgent:
 		history = np.array(history)
 		np.savetxt("../doc/figures/" + self.filename[:-3] + "_training.csv", history)
 
+	def distill_train(self, student_agent, game):
+		'''
+		Method preforms transfer learning from agent model to desired student model.
+
+		'''
+		loss_history = []
+		reward_history = []
+		history = []
+
+		# Transfer Learning Loop
+		print("\nTransfer Training:", game.config)
+		print("Teacher Model:", self.model.__class__.__name__)
+		print("Student Model:", student_agent.model.__class__.__name__)
+		epsilon = self.final_epsilon
+		for epoch in range(self.nb_epoch):
+			pbar = tqdm(total=self.steps)
+			step = 0
+			loss = 0.
+			total_reward = 0
+			game.game.new_episode()
+			self.frames = None
+			S = self.get_state_data(game)
+			a_prime = 0
+
+			# Preform learning step
+			while step < self.steps:
+
+				# Exploration Policies
+				if self.exp_policy == 'e-greedy':
+					if np.random.random() < epsilon:
+						q = int(np.random.randint(self.model.nb_actions))
+						a = self.model.predict(game, q)
+					else:
+						q = self.model.online_network.predict(S)
+						q = int(np.argmax(q[0]))
+						a = self.model.predict(game, q)
+
+				targets = self.model.softmax_q_values(S, student_agent.model.actions)
+				targets = targets.reshape((1, ) + targets.shape)
+				inputs = S.reshape((1, ) + S.shape)
+				loss += float(student_agent.model.online_network.train_on_batch(inputs, targets))
+
+				# Advance Action over frame_skips + 1
+				if not game.game.is_episode_finished(): game.play(a, self.frame_skips+1)
+
+				if self.model.__class__.__name__ == 'HDQNModel':
+					if q >= len(self.model.actions):
+						for i in range(self.model.skill_frame_skip):
+							S = self.get_state_data(game)
+							a = self.model.predict(game, q)
+							targets = self.model.softmax_q_values(S, student_agent.model.actions)
+							targets = targets.reshape((1, ) + targets.shape)
+							inputs = S.reshape((1, ) + S.shape)
+							loss += float(student_agent.model.online_network.train_on_batch(inputs, targets))
+							if not game.game.is_episode_finished(): game.play(a, self.frame_skips+1)
+
+				S = self.get_state_data(game)
+				if game_over:
+					if self.model.__class__.__name__ == 'HDQNModel': self.model.sub_model_frames = None
+					game.game.new_episode()
+					self.frames = None
+					S = self.get_state_data(game)
+				step += 1
+				pbar.update(1)
+
+			# Save weights at checkpoints
+			if self.checkpoint and ((epoch + 1 ) % self.checkpoint == 0 or epoch + 1 == self.nb_epoch):
+				student_agent.model.save_weights(self.filename)
+
+			# Decay Epsilon
+			if epsilon < self.epsilon and epoch >= self.epislon_wait: epsilon += self.delta_epsilon
+
+			# Preform test for epoch
+			print("Testing:")
+			pbar.close()
+			pbar = tqdm(total=self.nb_tests)
+			rewards = []
+			for i in range(self.nb_tests):
+				rewards.append(game.run(student_agent))
+				pbar.update(1)
+			rewards = np.array(rewards)
+			total_reward_avg = np.mean(rewards)
+			total_reward_max = np.max(rewards)
+			total_reward_min = np.min(rewards)
+			total_reward_std = np.std(rewards)
+			print("Epoch {:03d}/{:03d} | Loss {:.4f} | Epsilon {:.3f} | Average Reward {}".format(epoch + 1, self.nb_epoch, loss, epsilon, total_reward_avg))
+			reward_history.append(total_reward_avg)
+			loss_history.append(loss)
+			history.append([loss, total_reward_avg, total_reward_max, total_reward_min, total_reward_std])
+
+		# Summarize history for reward
+		plt.plot(reward_history)
+		plt.title('Total Reward')
+		plt.ylabel('reward')
+		plt.xlabel('epoch')
+		plt.savefig("../doc/figures/" + self.filename[:-3] + "_total_reward.png")
+		plt.figure()
+
+		# summarize history for loss
+		plt.plot(loss_history)
+		plt.title('Model Loss')
+		plt.ylabel('loss')
+		plt.xlabel('epoch')
+		plt.savefig("../doc/figures/" + self.filename[:-3] + "_loss.png")
+		plt.show()
+
+		# Save training data to csv
+		history = np.array(history)
+		np.savetxt("../doc/figures/" + self.filename[:-3] + "distill_training.csv", history)
+
 class ReplayMemory():
 	"""
 	ReplayMemory class used to stores transition data and generate batces for Q-learning.
