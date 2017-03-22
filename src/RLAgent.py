@@ -89,6 +89,7 @@ class RLAgent:
 		loss_history = []
 		reward_history = []
 		history = []
+		best_score = 0
 
 		# Q-Learning Loop
 		print("\nTraining:", game.config)
@@ -186,6 +187,11 @@ class RLAgent:
 			loss_history.append(loss)
 			history.append([loss, total_reward_avg, total_reward_max, total_reward_min, total_reward_std])
 
+			if total_reward_avg > best_score:
+				student_agent.model.save_weights("best_" + filename)
+				best_score = total_reward_avg
+
+		print("Training Finished.\nBest Average Reward:", best_score)
 		# Summarize history for reward
 		plt.plot(reward_history)
 		plt.title('Total Reward')
@@ -214,12 +220,12 @@ class RLAgent:
 		loss_history = []
 		reward_history = []
 		history = []
+		best_score = 0
 
 		# Transfer Learning Loop
 		print("\nTransfer Training:", game.config)
 		print("Teacher Model:", self.model.__class__.__name__)
 		print("Student Model:", student_agent.model.__class__.__name__)
-		epsilon = self.final_epsilon
 		for epoch in range(self.nb_epoch):
 			pbar = tqdm(total=self.steps)
 			step = 0
@@ -227,26 +233,28 @@ class RLAgent:
 			total_reward = 0
 			game.game.new_episode()
 			self.frames = None
+			if self.model.__class__.__name__ == 'HDQNModel': self.model.sub_model_frames = None
 			S = self.get_state_data(game)
 			a_prime = 0
 
 			# Preform learning step
 			while step < self.steps:
+				if self.model.__class__.__name__ == 'HDQNModel': self.model.update_submodel_frames(game)
 
 				# Exploration Policies
 				if self.exp_policy == 'e-greedy':
-					if np.random.random() < epsilon:
+					if np.random.random() < self.epsilon:
 						q = int(np.random.randint(self.model.nb_actions))
-						a = self.model.predict(game, q)
 					else:
-						q = self.model.online_network.predict(S)
-						q = int(np.argmax(q[0]))
-						a = self.model.predict(game, q)
+						q = None
 
-				targets = self.model.softmax_q_values(S, student_agent.model.actions)
-				targets = targets.reshape((1, ) + targets.shape)
-				inputs = S.reshape((1, ) + S.shape)
-				loss += float(student_agent.model.online_network.train_on_batch(inputs, targets))
+				targets = []
+				inputs = []
+
+				t, q = self.model.softmax_q_values(S, student_agent.model.actions, q_=q)
+				targets.append(t)
+				inputs.append(S[0])
+				a = student_agent.model.actions[int(np.argmax(t))]
 
 				# Advance Action over frame_skips + 1
 				if not game.game.is_episode_finished(): game.play(a, self.frame_skips+1)
@@ -254,16 +262,21 @@ class RLAgent:
 				if self.model.__class__.__name__ == 'HDQNModel':
 					if q >= len(self.model.actions):
 						for i in range(self.model.skill_frame_skip):
+							self.model.update_submodel_frames(game)
 							S = self.get_state_data(game)
-							a = self.model.predict(game, q)
-							targets = self.model.softmax_q_values(S, student_agent.model.actions)
-							targets = targets.reshape((1, ) + targets.shape)
-							inputs = S.reshape((1, ) + S.shape)
-							loss += float(student_agent.model.online_network.train_on_batch(inputs, targets))
+							t, q = self.model.softmax_q_values(S, student_agent.model.actions, q_=q)
+							targets.append(t)
+							inputs.append(S[0])
+							a = student_agent.model.actions[int(np.argmax(t))]
 							if not game.game.is_episode_finished(): game.play(a, self.frame_skips+1)
 
+				inputs = np.array(inputs)
+				targets = np.array(targets)
+				loss += float(student_agent.model.online_network.train_on_batch(inputs, targets))
+
 				S = self.get_state_data(game)
-				if game_over:
+				if game.game.is_episode_finished():
+					break
 					if self.model.__class__.__name__ == 'HDQNModel': self.model.sub_model_frames = None
 					game.game.new_episode()
 					self.frames = None
@@ -276,7 +289,7 @@ class RLAgent:
 				student_agent.model.save_weights(self.filename)
 
 			# Decay Epsilon
-			if epsilon < self.epsilon and epoch >= self.epislon_wait: epsilon += self.delta_epsilon
+			if self.final_epsilon < self.epsilon and epoch >= self.epislon_wait: self.epsilon -= self.delta_epsilon
 
 			# Preform test for epoch
 			print("Testing:")
@@ -291,11 +304,16 @@ class RLAgent:
 			total_reward_max = np.max(rewards)
 			total_reward_min = np.min(rewards)
 			total_reward_std = np.std(rewards)
-			print("Epoch {:03d}/{:03d} | Loss {:.4f} | Epsilon {:.3f} | Average Reward {}".format(epoch + 1, self.nb_epoch, loss, epsilon, total_reward_avg))
+			print("Epoch {:03d}/{:03d} | Loss {:.4f} | Epsilon {:.3f} | Average Reward {}".format(epoch + 1, self.nb_epoch, loss, self.epsilon, total_reward_avg))
 			reward_history.append(total_reward_avg)
 			loss_history.append(loss)
 			history.append([loss, total_reward_avg, total_reward_max, total_reward_min, total_reward_std])
 
+			if total_reward_avg > best_score:
+				student_agent.model.save_weights("best_" + filename)
+				best_score = total_reward_avg
+
+		print("Training Finished.\nBest Average Reward:", best_score)
 		# Summarize history for reward
 		plt.plot(reward_history)
 		plt.title('Total Reward')

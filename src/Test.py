@@ -25,15 +25,15 @@ and allow human play to test out scenarios.
 
 # Testing Parameters
 scenario = 'configs/all_skills.cfg'
-model_weights = "all_skills_.h5"
+model_weights = "distilled_all_skills.h5"
 depth_radius = 1.0
 depth_contrast = 0.5
 test_param = {
     'frame_skips' : 6,
     'nb_frames' : 3
 }
-nb_runs = 5
-testing = 'HDQN'
+nb_runs = 1
+testing = 'DQN'
 
 def test_model(runs=1):
     '''
@@ -48,8 +48,6 @@ def test_model(runs=1):
     print("Testing DQN-Model:", model_weights)
     # Initiates VizDoom Scenario
     doom = DoomScenario(scenario)
-    plt.imshow(doom.get_processed_state(depth_radius, depth_contrast), interpolation='nearest',cmap='gray')
-    plt.show()
 
     # Load Model and Weights
     model = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=test_param['nb_frames'], actions=doom.actions, depth_radius=depth_radius, depth_contrast=depth_contrast)

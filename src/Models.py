@@ -13,10 +13,12 @@ Keras uses TensorFlow and Theano as back-ends.
 
 """
 import numpy as np
+np.set_printoptions(precision=3)
 import keras.backend as K
 from keras.models import Model
 from keras.layers import *
 from keras.optimizers import RMSprop, SGD
+from sklearn.preprocessing import normalize
 
 class DQNModel:
     """
@@ -25,7 +27,7 @@ class DQNModel:
 
     """
 
-    def __init__(self, resolution=(120, 160), nb_frames=1, actions=[], depth_radius=1.0, depth_contrast=0.8):
+    def __init__(self, resolution=(120, 160), nb_frames=1, actions=[], depth_radius=1.0, depth_contrast=0.8, distilled=False):
         '''
         DQN models have the following network architecture:
         - Input : (# of previous frames, img_width, img_length)
@@ -59,7 +61,10 @@ class DQNModel:
         m = Dropout(0.5)(m)
 
         # Output Layer
-        y0 = Dense(self.nb_actions)(m)
+        if distilled:
+            y0 = Dense(self.nb_actions, activation='softmax')(m)
+        else:
+            y0 = Dense(self.nb_actions)(m)
 
         self.online_network = Model(input=x0, output=y0)
         self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
@@ -74,7 +79,7 @@ class DQNModel:
         a = self.actions[q]
         return a
 
-    def softmax_q_values(self, S, actions):
+    def softmax_q_values(self, S, actions, q_=None):
         '''
         Method returns softmax of predicted q values indexed according to the
         desired list of actions.
@@ -82,16 +87,20 @@ class DQNModel:
         '''
         # Calculate Softmax of Q values
         q = self.online_network.predict(S)
-        softmax_q = np.exp(q[0] - np.max(q[0]))
-        softmax_q =  softmax_q / softmax_q.sum(axis=0)
+        q = normalize(q)
 
         # Index Q values according to inputed list of actions
-        final_softmax_q = [0 for i in range(len(actions))]
+        final_q = [0 for i in range(len(actions))]
         for j in range(len(self.actions)):
             for i in range(len(actions)):
                 if self.actions[j] == actions[i]:
-                    final_softmax_q[i] = softmax_q[j]
-        return final_softmax_q
+                    final_q[i] = q[j]
+
+        final_q = np.array(final_q)
+        softmax_q = np.exp(final_q - np.max(final_q))
+        softmax_q =  softmax_q / softmax_q.sum(axis=0)
+
+        return softmax_q, q_
 
     def load_weights(self, filename):
         '''
@@ -99,7 +108,7 @@ class DQNModel:
 
         '''
         self.online_network.load_weights('../data/model_weights/' + filename)
-        self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun, metrics=['accuracy'])
+        self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
 
     def save_weights(self, filename):
         '''
@@ -167,12 +176,7 @@ class HDQNModel:
         self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
         #self.online_network.summary()
 
-    def predict(self, game, q):
-        '''
-        Method selects predicted action from set of available actions using the
-        max-arg q value.
-
-        '''
+    def update_submodel_frames(self, game):
         # Keep track of sub-model frames for predictions
         # Each sub-model requires their own specifically processed frames.
         if self.sub_model_frames == None:
@@ -189,6 +193,14 @@ class HDQNModel:
                 self.sub_model_frames[i].append(frame)
                 self.sub_model_frames[i].pop(0)
 
+    def predict(self, game, q):
+        '''
+        Method selects predicted action from set of available actions using the
+        max-arg q value.
+
+        '''
+        self.update_submodel_frames(game)
+
         # Get predicted action from sub-models or native actions.
         if q >= len(self.actions):
             q = q - len(self.actions)
@@ -201,7 +213,7 @@ class HDQNModel:
             a = self.actions[q]
         return a
 
-    def softmax_q_values(self, S, actions):
+    def softmax_q_values(self, S, actions, q_=None):
         '''
         Method returns softmax of predicted q values indexed according to the
         desired list of actions.
@@ -210,6 +222,7 @@ class HDQNModel:
         # Calculate Softmax of Q values
         q = self.online_network.predict(S)
         max_q = int(np.argmax(q[0]))
+        if q_: max_q = q_
         if max_q >= len(self.actions):
             max_q = max_q - len(self.actions)
             sel_model = self.sub_models[max_q]
@@ -220,16 +233,20 @@ class HDQNModel:
             model_actions = self.actions
             q = q[:len(self.actions)]
 
-        softmax_q = np.exp(q[0] - np.max(q[0]))
-        softmax_q =  softmax_q / softmax_q.sum(axis=0)
-
+        #q = normalize(q, norm='max')
         # Index Q values according to inputed list of actions
-        final_softmax_q = [0 for i in range(len(actions))]
+        final_q = [0 for i in range(len(actions))]
         for j in range(len(model_actions)):
             for i in range(len(actions)):
                 if model_actions[j] == actions[i]:
-                    final_softmax_q[i] = softmax_q[j]
-        return final_softmax_q
+                    final_q[i] = q[0][j]
+
+        final_q = np.array(final_q)
+        softmax_q = np.exp((final_q)/0.15)
+        softmax_q =  softmax_q / softmax_q.sum(axis=0)
+        #print(softmax_q)
+
+        return softmax_q, max_q
 
     def load_weights(self, filename):
         '''
