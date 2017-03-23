@@ -49,7 +49,7 @@ class DQNModel:
         self.optimizer = RMSprop(lr=0.0001)
 
         # Input Layers
-        x0 = Input(shape=(nb_frames, resolution[0], resolution[1]))
+        self.x0 = Input(shape=(nb_frames, resolution[0], resolution[1]))
 
         # Convolutional Layer
         m = Convolution2D(32, 8, 8, subsample = (4,4), activation='relu')(x0)
@@ -62,12 +62,13 @@ class DQNModel:
 
         # Output Layer
         if distilled:
-            y0 = Dense(self.nb_actions, activation='softmax')(m)
+            self.y0 = Dense(self.nb_actions, activation='softmax')(m)
         else:
-            y0 = Dense(self.nb_actions)(m)
+            self.y0 = Dense(self.nb_actions)(m)
 
         self.online_network = Model(input=x0, output=y0)
         self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
+        self.target_network = None
         #self.online_network.summary()
 
     def predict(self, game, q):
@@ -158,7 +159,7 @@ class HDQNModel:
         self.optimizer = RMSprop(lr=0.0001)
 
         # Input Layers
-        x0 = Input(shape=(nb_frames, resolution[0], resolution[1]))
+        self.x0 = Input(shape=(nb_frames, resolution[0], resolution[1]))
 
         # Convolutional Layer
         m = Convolution2D(32, 8, 8, subsample = (4,4), activation='relu')(x0)
@@ -170,10 +171,11 @@ class HDQNModel:
         m = Dropout(0.5)(m)
 
         # Output Layer
-        y0 = Dense(self.nb_actions)(m)
+        self.y0 = Dense(self.nb_actions)(m)
 
         self.online_network = Model(input=x0, output=y0)
         self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
+        self.target_network = None
         #self.online_network.summary()
 
     def update_submodel_frames(self, game):

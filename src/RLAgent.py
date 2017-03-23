@@ -16,6 +16,7 @@ Citation: Code is based on code from qlearning4k github project
 import numpy as np
 from random import sample
 from keras import backend as K
+from keras.models import Model
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import os
@@ -33,7 +34,7 @@ class RLAgent:
 
 	"""
 
-	def __init__(self, model, learn_algo = 'qlearn', exp_policy='e-greedy', nb_tests=100, frame_skips=4, nb_epoch=1000, steps=1000, batch_size=50, memory_size=1000, nb_frames=1, alpha = [1.0,0.1], alpha_rate=1.0, alpha_wait=0, gamma=0.9, epsilon=[1., .1], epsilon_rate=1.0, epislon_wait=0, checkpoint=None, filename='w_.h5'):
+	def __init__(self, model, learn_algo = 'qlearn', exp_policy='e-greedy', nb_tests=100, frame_skips=4, nb_epoch=1000, steps=1000, target_update=100, batch_size=50, memory_size=1000, nb_frames=1, alpha = [1.0,0.1], alpha_rate=1.0, alpha_wait=0, gamma=0.9, epsilon=[1., .1], epsilon_rate=1.0, epislon_wait=0, checkpoint=None, filename='w_.h5'):
 		'''
 		Method initiates learning parameters for Reinforcement Learner.
 
@@ -65,6 +66,12 @@ class RLAgent:
 		self.epislon_wait = epislon_wait
 		self.delta_epsilon =  ((epsilon[0] - epsilon[1]) / (nb_epoch * epsilon_rate))
 
+		if self.learn_algo == "double_qlearn":
+			self.model.target_network = Model(input=self.model.x0, output=self.model.y0)
+			self.model.target_network.set_weights(self.model.online_network.get_weights())
+	        self.model.target_network.compile(optimizer=self.model.optimizer, loss=self.model.loss_fun)
+			self.target_update = target_update
+			
 	def get_state_data(self, game):
 		'''
 		Method returns model ready state data. The buffers from Vizdoom are
@@ -145,6 +152,8 @@ class RLAgent:
 					batch = self.memory.get_batch_dqlearn(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
 				elif self.learn_algo == 'sarsa':
 					batch = self.memory.get_batch_sarsa(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
+				elif self.learn_algo == 'ddqlearn':
+					batch = self.memory.get_batch_ddqlearn(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
 
 				# Train model online network
 				if batch:
@@ -158,6 +167,10 @@ class RLAgent:
 					S = self.get_state_data(game)
 				step += 1
 				pbar.update(1)
+
+				# Update Target Network weights (DDQ-Learning)
+				if self.model.target_network and step % self.target_update == 0:
+					self.model.target_network.set_weights(self.model.online_network.get_weights())
 
 			# Save weights at checkpoints
 			if self.checkpoint and ((epoch + 1 ) % self.checkpoint == 0 or epoch + 1 == self.nb_epoch):
@@ -396,7 +409,7 @@ class ReplayMemory():
 
 	def get_batch_sarsa(self, model, batch_size, alpha=1.0, gamma=0.9):
 		'''
-		Method generates batch for Deep SARSA training.
+		Method generates batch for Deep Double Q-learn training.
 
 		'''
 		if len(self.memory) < batch_size:
@@ -415,6 +428,38 @@ class ReplayMemory():
 		S = S.reshape((batch_size, ) + self.input_shape)
 		S_prime = S_prime.reshape((batch_size, ) + self.input_shape)
 		X = np.concatenate([S, S_prime], axis=0)
+		Y = model.online_network.predict(X)
+		Qsa = np.max(Y[batch_size:], axis=1).repeat(nb_actions).reshape((batch_size, nb_actions))
+		delta = np.zeros((batch_size, nb_actions))
+		a = np.cast['int'](a)
+		delta[np.arange(batch_size), a] = 1
+		targets = ((1 - delta) * Y[:batch_size]) + ((alpha * ((delta * (r + (gamma * (1 - game_over) * Qsa))) - (delta * Y[:batch_size]))) + (delta * Y[:batch_size]))
+		return S, targets
+
+	def get_batch_ddqlearn(self, model, batch_size, alpha=0.01, gamma=0.9):
+		'''
+		Method generates batch for Double Deep Q-learn training.
+		'''
+		if len(self.memory) < batch_size:
+			batch_size = len(self.memory)
+		nb_actions = model.online_network.output_shape[-1]
+		samples = np.array(sample(self.memory, batch_size))
+		input_dim = np.prod(self.input_shape)
+		S = samples[:, 0 : input_dim]
+		a = samples[:, input_dim]
+		r = samples[:, input_dim + 1]
+		S_prime = samples[:, input_dim + 2 : 2 * input_dim + 2]
+		a_prime = samples[:, 2 * input_dim + 2]
+		game_over = samples[:, 2 * input_dim + 3]
+		r = r.repeat(nb_actions).reshape((batch_size, nb_actions))
+		game_over = game_over.repeat(nb_actions).reshape((batch_size, nb_actions))
+		S = S.reshape((batch_size, ) + self.input_shape)
+		S_prime = S_prime.reshape((batch_size, ) + self.input_shape)
+		X = np.concatenate([S, S_prime], axis=0)
+		Y = model.online_network.predict(X)
+		best = np.argmax(Y[batch_size:], axis = 1)
+		YY = model.target_network.predict(X)
+		Qsa = YY[np.arange(len(best)), best].repeat(nb_actions).reshape((batch_size, nb_actions))
 		Y = model.online_network.predict(X)
 		Qsa = np.max(Y[batch_size:], axis=1).repeat(nb_actions).reshape((batch_size, nb_actions))
 		delta = np.zeros((batch_size, nb_actions))
