@@ -66,12 +66,12 @@ class RLAgent:
 		self.epislon_wait = epislon_wait
 		self.delta_epsilon =  ((epsilon[0] - epsilon[1]) / (nb_epoch * epsilon_rate))
 
-		if self.learn_algo == "double_qlearn":
+		if self.learn_algo == "double_dqlearn":
 			self.model.target_network = Model(input=self.model.x0, output=self.model.y0)
 			self.model.target_network.set_weights(self.model.online_network.get_weights())
-	        self.model.target_network.compile(optimizer=self.model.optimizer, loss=self.model.loss_fun)
+			self.model.target_network.compile(optimizer=self.model.optimizer, loss=self.model.loss_fun)
 			self.target_update = target_update
-			
+
 	def get_state_data(self, game):
 		'''
 		Method returns model ready state data. The buffers from Vizdoom are
@@ -152,7 +152,7 @@ class RLAgent:
 					batch = self.memory.get_batch_dqlearn(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
 				elif self.learn_algo == 'sarsa':
 					batch = self.memory.get_batch_sarsa(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
-				elif self.learn_algo == 'ddqlearn':
+				elif self.learn_algo == 'double_dqlearn':
 					batch = self.memory.get_batch_ddqlearn(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
 
 				# Train model online network
@@ -201,7 +201,7 @@ class RLAgent:
 			history.append([loss, total_reward_avg, total_reward_max, total_reward_min, total_reward_std])
 
 			if total_reward_avg > best_score:
-				student_agent.model.save_weights("best_" + filename)
+				self.model.save_weights("best_" + filename)
 				best_score = total_reward_avg
 
 		print("Training Finished.\nBest Average Reward:", best_score)
