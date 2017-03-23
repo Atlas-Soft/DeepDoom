@@ -200,8 +200,11 @@ class RLAgent:
 			loss_history.append(loss)
 			history.append([loss, total_reward_avg, total_reward_max, total_reward_min, total_reward_std])
 
+			# Save training data to csv
+			np.savetxt("../doc/figures/" + self.filename[:-3] + "_training.csv", np.array(history))
+
 			if total_reward_avg > best_score:
-				self.model.save_weights("best_" + filename)
+				self.model.save_weights("best_" + self.filename)
 				best_score = total_reward_avg
 
 		print("Training Finished.\nBest Average Reward:", best_score)
@@ -220,10 +223,6 @@ class RLAgent:
 		plt.xlabel('epoch')
 		plt.savefig("../doc/figures/" + self.filename[:-3] + "_loss.png")
 		plt.show()
-
-		# Save training data to csv
-		history = np.array(history)
-		np.savetxt("../doc/figures/" + self.filename[:-3] + "_training.csv", history)
 
 	def distill_train(self, student_agent, game):
 		'''

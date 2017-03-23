@@ -15,6 +15,7 @@ Keras uses TensorFlow and Theano as back-ends.
 import numpy as np
 np.set_printoptions(precision=3)
 import keras.backend as K
+K.set_image_data_format("channels_first")
 from keras.models import Model
 from keras.layers import *
 from keras.optimizers import RMSprop, SGD
@@ -52,7 +53,7 @@ class DQNModel:
         self.x0 = Input(shape=(nb_frames, resolution[0], resolution[1]))
 
         # Convolutional Layer
-        m = Conv2D(32, (8, 8), strides = (4,4), activation='relu')(self.x0)
+        m = Conv2D(32, (8, 8), strides = (4,4), activation='relu', )(self.x0)
         m = Conv2D(64, (5, 5), strides = (4,4), activation='relu')(m)
         m = Flatten()(m)
 

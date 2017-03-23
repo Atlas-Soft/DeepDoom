@@ -9,8 +9,8 @@
 
 - [Rafael Zamora](https://github.com/rz4)
 - [Lauren An](https://github.com/AtlasSoft-lsa3)
-- [William Steele](https://github.com/billionthb) 
-- [Joshua Hidayat](https://github.com/Arngeirr) 
+- [William Steele](https://github.com/billionthb)
+- [Joshua Hidayat](https://github.com/Arngeirr)
 
 ### Table of Contents:
 1. [Introduction](#introduction)
@@ -18,8 +18,7 @@
 3. [Scenarios](#scenarios)
  - [Rigid Turning](#scenario-1--rigid-turning)
  - [Exit Finding](#scenario-2--exit-finding)
- - [Switches](#scenario-3--switches)
- - [Doors](#scenario-4--doors)
+ - [Doors](#scenario-3--doors)
 4. [Results](#results)
 5. [Getting Started](#getting-started)
 
@@ -27,10 +26,10 @@
 
 Google DeepMind's landmark paper, [***Playing Atari With Deep Reinforcement
 Learning***](https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf), shows the feasibility of
-game playing using only visual input. This was done by combining Deep Convolutional 
-Neural Networks (CNNs) with Q-learning. Deep Q-Networks (DQNs) were able to learn and play 
-2D Atari-2600 games such as Pong, Breakout, and Space Invaders. Since then, there has been 
-much research into applying these same techniques in 3D environments such as 
+game playing using only visual input. This was done by combining Deep Convolutional
+Neural Networks (CNNs) with Q-learning. Deep Q-Networks (DQNs) were able to learn and play
+2D Atari-2600 games such as Pong, Breakout, and Space Invaders. Since then, there has been
+much research into applying these same techniques in 3D environments such as
 [Minecraft](https://www.ijcai.org/Proceedings/16/Papers/643.pdf) and Doom.
 
 [ViZDoom](https://arxiv.org/pdf/1605.02097.pdf) is a Doom based AI research platform
@@ -44,9 +43,9 @@ is an important part in playing Doom, especially in single-player instances of t
 Levels designed for human players are complex, requiring the player to use multiple
 navigational behaviors throughout the level.
 
-We propose a [hierarchical implementation](https://arxiv.org/pdf/1604.07255.pdf) of the Deep 
-Q-Networks in order to learn complex navigational problems. DQN models are first trained on simple 
-tasks and then integrated as sub-models in a Hierarchical-DQN model. This allows knowledge 
+We propose a [hierarchical implementation](https://arxiv.org/pdf/1604.07255.pdf) of the Deep
+Q-Networks in order to learn complex navigational problems. DQN models are first trained on simple
+tasks and then integrated as sub-models in a Hierarchical-DQN model. This allows knowledge
 learned from the simple tasks to be used in training more complex tasks.
 
 ## DQN and Hierarchical-DQN
@@ -55,7 +54,7 @@ learned from the simple tasks to be used in training more complex tasks.
 ### Q-Learning:
 
 Reinforcement learning involves learning the best action to take at any given state through rewards recieved
-from the environment. This process is commonly represented as a ***Markov Decision Process*** which is a finite 
+from the environment. This process is commonly represented as a ***Markov Decision Process*** which is a finite
 sequence of states, actions and rewards:
 
 - ***s<sub>0</sub>, a<sub>0</sub>, r<sub>0</sub>, ..., s<sub>n</sub>, a<sub>n</sub>, r<sub>n</sub>***
@@ -73,8 +72,8 @@ In stochastic environments, its better to use a discounted total future reward:
 
 ***g*** is the discount factor between 0.0 and 1.0. If set to 0.0, the agent will only care about immediate reward.
 
-***Q-learning*** defines a function ***Q(s,a)*** which represents the maximum possible future reward from preforming 
-action ***a*** on state ***s*** and preforming optimally there after. In other words, the Q-function gives the 
+***Q-learning*** defines a function ***Q(s,a)*** which represents the maximum possible future reward from preforming
+action ***a*** on state ***s*** and preforming optimally there after. In other words, the Q-function gives the
 "quality" of an action at a given state:
 
 - ***Q(s<sub>t</sub>,a<sub>t</sub>) = max R<sub>t</sub>***
@@ -94,10 +93,10 @@ the function will converge and represent the true Q-values.
 
 ### Approximating Q-function with CNNs:
 
-Earlier implementations of ***Q-learning*** used tables to store Q-values of all possible state-action pairs. This is 
-not feasible for large state spaces like Doom. ***Convolutional Neural Networks*** have been very effective in the 
-domain of image recognition. In simple terms, CNNs function by abstracting features from images and using those 
-features to approximate the desired function. Google's Deepmind has shown that CNNs can be used to approximate 
+Earlier implementations of ***Q-learning*** used tables to store Q-values of all possible state-action pairs. This is
+not feasible for large state spaces like Doom. ***Convolutional Neural Networks*** have been very effective in the
+domain of image recognition. In simple terms, CNNs function by abstracting features from images and using those
+features to approximate the desired function. Google's Deepmind has shown that CNNs can be used to approximate
 Q-functions from visual pixel data.
 
 The Deep network architecture implemented for this project is defined below:
@@ -151,7 +150,7 @@ The following are descriptions of the scenarios:
 
  - **+60** turning linedefs - for turning a 90° corner
  - **+20** walking linedefs - for walking down a corridor
- 
+
  - **+100** level exit - for completing the level
  - **+1** moving reward - changes in the agent's x,y position to encourage continual movement
 
@@ -181,7 +180,7 @@ The following are descriptions of the scenarios:
 #### Goal Function:
 
  - **+10 * (x)** exit linedefs - for moving closer to the goal while looking at it
- 
+
 >***Note: x inversely corresponds to the switch's distance; x decreases as distance increases.***
 
  - **+100** level exit - for completing the level
@@ -196,40 +195,7 @@ The following are descriptions of the scenarios:
 
 ---
 
-### Scenario 3 : Switches
-
-![switches_map](webPhotos/Switches.PNG)
-#### Description:
- - The purpose of this scenario is to train the agent how to locate a switch on the wall.
- - The map is a square room with a button placed on the south wall and randomly determined ceiling, floor, and wall textures at the time of loading the map.
- - The agent is placed at a random point inside the room and facing a random direction via a ZDoom ACS script that runs when the agent enters the map.
- - The agent gets rewarded for moving towards the switch when it is within a 21.6° field of view relative to the agent's direction; therefore, the agent does not get rewarded for moving towards the exit while facing away.
- - The agent gets penalized for not moving.
-
-#### Available Actions:
- - [USE, MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT]
- - This set of actions is the minimum required to complete the switches scenario.
- 
->***Note: the USE action is defined at the beginning of the action list to ensure indexing consistency.***
-
-#### Goal Function:
-
- - **+10 * (x)** exit linedefs - for moving closer to the goal while looking at it
- 
->***Note: x inversely corresponds to the switch's distance; x decreases as distance increases.***
-
- - **+100** pressing the switch - for completing the level
- - **+1** moving reward - changes in the agent's x,y position to encourage continual movement
- 
- - **-1** living reward - ViZDoom config file penalty to encourage faster level completion
-
-#### Files:
- - [Switches.wad](src/wads/Switches.wad)
- - [Switches.cfg](src/configs/switches.cfg)
-
----
-
-### Scenario 4 : Doors
+### Scenario 3 : Doors
 
 ![doors_map](webPhotos/Doors.PNG)
 #### Description:
@@ -247,10 +213,10 @@ The following are descriptions of the scenarios:
 
  - **+50** door linedefs - for passing through an open door
  - **+10** walking linedefs - for walking towards the next door
- 
+
  - **+20** level exit - for completing the level
  - **+1** moving reward - changes in the agent's x,y position to encourage continual movement
- 
+
  - **-1** living reward - ViZDoom config file penalty to encourage faster level completion
 
 #### Files:
@@ -275,7 +241,7 @@ SanDisk SSD Plus 240GB
 
 
 
-The performance of the models are measured by averaging the total reward over 100 test runs after each training 
+The performance of the models are measured by averaging the total reward over 100 test runs after each training
 epoch. A demonstration of each trained model in their respective training scenario is also provided.
 
 #### Comments and Observations:
@@ -346,18 +312,6 @@ Requires the following Python Packages:
 ### Setup and Installation:
 
 Download or clone repository and install required packages.
-
->**Important:** keras.json configuration file (located in ~/.keras/) should be set to
->the following:
-
-```json
-{
-    "floatx": "float32",
-    "epsilon": 1e-07,
-    "backend": "tensorflow",
-    "image_dim_ordering": "th"
-}
-```
 
 ### Testing Models:
 
