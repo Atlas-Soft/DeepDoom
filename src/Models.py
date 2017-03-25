@@ -42,6 +42,7 @@ class DQNModel:
 
         '''
         # Network Parameters
+        self.resolution = resolution
         self.actions = actions
         self.nb_actions = len(actions)
         self.depth_radius = depth_radius
@@ -70,6 +71,7 @@ class DQNModel:
         self.online_network = Model(input=self.x0, output=self.y0)
         self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
         self.target_network = None
+        self.state_predictor = None
         #self.online_network.summary()
 
     def predict(self, game, q):
@@ -89,20 +91,21 @@ class DQNModel:
         '''
         # Calculate Softmax of Q values
         q = self.online_network.predict(S)
-        q = normalize(q)
+        max_q = int(np.argmax(q[0]))
 
         # Index Q values according to inputed list of actions
         final_q = [0 for i in range(len(actions))]
-        for j in range(len(self.actions)):
+        for j in range(len(model_actions)):
             for i in range(len(actions)):
-                if self.actions[j] == actions[i]:
-                    final_q[i] = q[j]
+                if model_actions[j] == actions[i]:
+                    final_q[i] = q[0][j]
 
+        # ASk dr. Pierce about sharpening data points.
         final_q = np.array(final_q)
-        softmax_q = np.exp(final_q - np.max(final_q))
+        softmax_q = np.exp((final_q)/0.15)
         softmax_q =  softmax_q / softmax_q.sum(axis=0)
 
-        return softmax_q, q_
+        return softmax_q, max_q
 
     def load_weights(self, filename):
         '''
@@ -124,7 +127,7 @@ class HDQNModel:
     HDQNModel class is used to define Hierarchical-DQN models for the
     Vizdoom environment.
 
-    Hierarchical-DQN models can be set to use only submodels by setting by not
+    Hierarchical-DQN models can be set to use only submodels by not
     passing list of available native actions.
 
     skill_frames_skip allows for mulitple consecutive uses of sub-model predictions
@@ -146,6 +149,7 @@ class HDQNModel:
         The optimizer is RMSprop with a learning rate of 0.0001
 
         '''
+        self.resolution = resolution
         self.actions = actions
         self.sub_models = sub_models
         self.sub_model_frames = None
@@ -177,6 +181,7 @@ class HDQNModel:
         self.online_network = Model(input=self.x0, output=self.y0)
         self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
         self.target_network = None
+        self.state_predictor = None
         #self.online_network.summary()
 
     def update_submodel_frames(self, game):
@@ -222,7 +227,7 @@ class HDQNModel:
         desired list of actions.
 
         '''
-        # Calculate Softmax of Q values
+        # Calculate Softmax of Q values from Selected DQN
         q = self.online_network.predict(S)
         max_q = int(np.argmax(q[0]))
         if q_: max_q = q_
@@ -244,6 +249,8 @@ class HDQNModel:
                 if model_actions[j] == actions[i]:
                     final_q[i] = q[0][j]
 
+        # ASk dr. Pierce about sharpening data points.
+        # Sharpen q values using Softmax
         final_q = np.array(final_q)
         softmax_q = np.exp((final_q)/0.15)
         softmax_q =  softmax_q / softmax_q.sum(axis=0)
@@ -257,7 +264,7 @@ class HDQNModel:
 
         '''
         self.online_network.load_weights('../data/model_weights/' + filename)
-        self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun, metrics=['accuracy'])
+        self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
 
     def save_weights(self, filename):
         '''
@@ -265,3 +272,63 @@ class HDQNModel:
 
         '''
         self.online_network.save_weights('../data/model_weights/' + filename, overwrite=True)
+
+class StatePredictionModel:
+
+    def __init__(self, resolution=(120, 160), nb_frames=1, actions=[], depth_radius=1.0, depth_contrast=0.8):
+        '''
+        Method initializes the State Prediction Model used to predict future states
+        of the Doom environment.
+        '''
+        #Parameters
+        self.resolution = resolution
+        self.actions = actions
+        self.nb_actions = len(actions)
+        self.depth_radius = depth_radius
+        self.depth_contrast = depth_contrast
+        self.optimizer = RMSprop(lr=0.0005)
+        self.loss_fun = 'mse'
+
+        #Input Layers
+        x0 = Input(shape=(nb_frames, resolution[0], resolution[1]))
+        x1 = Input(shape=(self.nb_actions,))
+
+        #Convolutional Layers
+        m = Conv2D(64, (5, 5), stride=(2,2), padding='same', activation='relu')(x0)
+        m = BatchNormalization()(m)
+        m = Conv2D(32, (5, 5), stride=(2,2), padding='same', activation='relu')(m)
+        m = BatchNormalization()(m)
+        m = Conv2D(8, (5, 5), stride=(2,2), padding='same', activation='relu')(m)
+        m = BatchNormalization()(m)
+        m = Flatten()(m)
+
+        #Tranformation Layers
+        z= Dense(2400)(m)
+        t = Dense(2400)(x1)
+        m = merge([z, t], mode='mul')
+
+        #Deconvolution Layers
+        m = Dense(2400, activation='relu')(m)
+        m = Reshape((8, 15, 20))(m)
+        m = Conv2DTranspose(32, (5, 5), activation='relu', padding='same', stride=(2,2))(m)
+        m = BatchNormalization()(m)
+        m = Conv2DTranspose(64, (5, 5), activation='relu', padding='same', stride=(2,2))(m)
+        m = BatchNormalization()(m)
+        y0 = Conv2DTranspose(1, (5, 5), activation='sigmoid', padding='same', stride=(2,2))(m)
+
+        self.autoencoder_network = Model(input=[x0, x1], output=[y0,])
+        self.autoencoder_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
+        self.autoencoder_network.summary()
+
+    def load_weights(self, filename):
+        '''
+        Method loads .h5 weight files from /data/ai_model_weights.
+        '''
+        self.autoencoder_network.load_weights('../data/model_weights/' + filename)
+        self.autoencoder_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
+
+    def save_weights(self, filename):
+        '''
+        Method saves .h5 weight files to /data/ai_model_weights.
+        '''
+        self.autoencoder_network.save_weights('../data/model_weights/' + filename, overwrite=True)

@@ -24,15 +24,15 @@ and allow human play to test out scenarios.
 """
 
 # Testing Parameters
-scenario = 'configs/all_skills.cfg'
-model_weights = "distilled_all_skills.h5"
+scenario = 'configs/rigid_turning.cfg'
+model_weights = "best_ddql_rt_.h5"
 depth_radius = 1.0
-depth_contrast = 0.5
+depth_contrast = 1.0
 test_param = {
-    'frame_skips' : 6,
+    'frame_skips' : 4,
     'nb_frames' : 3
 }
-nb_runs = 1
+nb_runs = 10
 testing = 'DQN'
 
 def test_model(runs=1):

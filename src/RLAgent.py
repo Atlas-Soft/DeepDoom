@@ -10,10 +10,9 @@ Last Updated: 3/3/17
 Script defines the interface between the DQN models and the Vizdoom
 environment.
 
-Citation: Code is based on code from qlearning4k github project
-
 """
 import numpy as np
+from Models.py import *
 from random import sample
 from keras import backend as K
 from keras.models import Model
@@ -34,7 +33,7 @@ class RLAgent:
 
 	"""
 
-	def __init__(self, model, learn_algo = 'qlearn', exp_policy='e-greedy', nb_tests=100, frame_skips=4, nb_epoch=1000, steps=1000, target_update=100, batch_size=50, memory_size=1000, nb_frames=1, alpha = [1.0,0.1], alpha_rate=1.0, alpha_wait=0, gamma=0.9, epsilon=[1., .1], epsilon_rate=1.0, epislon_wait=0, checkpoint=None, filename='w_.h5'):
+	def __init__(self, model, learn_algo = 'qlearn', exp_policy='e-greedy', nb_tests=100, frame_skips=4, nb_epoch=1000, steps=1000, target_update=100, batch_size=50, memory_size=1000, nb_frames=1, alpha = [1.0,0.1], alpha_rate=1.0, alpha_wait=0, gamma=0.9, epsilon=[1., .1], epsilon_rate=1.0, epislon_wait=0, state_predictor_watch=0, checkpoint=None, filename='w_.h5'):
 		'''
 		Method initiates learning parameters for Reinforcement Learner.
 
@@ -72,6 +71,12 @@ class RLAgent:
 			self.model.target_network.compile(optimizer=self.model.optimizer, loss=self.model.loss_fun)
 			self.target_update = target_update
 
+		if self.learn_algo == "dispersed_double_dqlearn":
+			self.state_predictor_watch = state_predictor_watch
+			self.state_predictor_loss = 0
+			self.state_predictor_batch = None
+			self.model.state_predictor = StatePredictionModel(resolution=self.model.resolution, nb_frames=self.model.nb_frames, actions=self.nb_actions, depth_radius=self.model.depth_radius, depth_contrast=self.model.depth_contrast)
+
 	def get_state_data(self, game):
 		'''
 		Method returns model ready state data. The buffers from Vizdoom are
@@ -93,12 +98,10 @@ class RLAgent:
 		learning parameters.
 
 		'''
-		loss_history = []
-		reward_history = []
-		history = []
+		training_data = []
 		best_score = 0
 
-		# Q-Learning Loop
+		# Reinforcement Learning Loop
 		print("\nTraining:", game.config)
 		print("Model:", self.model.__class__.__name__)
 		print("Algorithm:", self.learn_algo)
@@ -154,11 +157,22 @@ class RLAgent:
 					batch = self.memory.get_batch_sarsa(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
 				elif self.learn_algo == 'double_dqlearn':
 					batch = self.memory.get_batch_ddqlearn(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
+				elif self.learn_algo == 'dispersed_double_dqlearn':
+					if epoch >= self.state_predictor_watch:
+						batch = self.memory.get_batch_dddqlearn(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
+						self.state_predictor_batch = self.memory.get_batch_state_predictor(batch_size=self.batch_size, actions=self.model.nb_actions)
+					else:
+						batch = self.memory.get_batch_ddqlearn(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
 
 				# Train model online network
 				if batch:
 					inputs, targets = batch
 					loss += float(self.model.online_network.train_on_batch(inputs, targets))
+
+				# Train State Prediction Model (dispersed DDQ-Learning)
+				if self.state_predictor_batch:
+					inputs, targets = self.state_predictor_batch
+					self.state_predictor_loss += float(self.model.state_predictor.train_on_batch(inputs, targets))
 
 				if game_over:
 					if self.model.__class__.__name__ == 'HDQNModel': self.model.sub_model_frames = None
@@ -175,6 +189,7 @@ class RLAgent:
 			# Save weights at checkpoints
 			if self.checkpoint and ((epoch + 1 ) % self.checkpoint == 0 or epoch + 1 == self.nb_epoch):
 				self.model.save_weights(self.filename)
+				if self.model.state_predictor: self.model.state_predictor.save_weights('sp_'+self.filename)
 
 			# Decay Epsilon
 			if self.epsilon > self.final_epsilon and epoch >= self.epislon_wait: self.epsilon -= self.delta_epsilon
@@ -195,43 +210,30 @@ class RLAgent:
 			total_reward_max = np.max(rewards)
 			total_reward_min = np.min(rewards)
 			total_reward_std = np.std(rewards)
-			print("Epoch {:03d}/{:03d} | Loss {:.4f} | Alpha {:.3f} | Epsilon {:.3f} | Average Reward {}".format(epoch + 1, self.nb_epoch, loss, self.alpha, self.epsilon, total_reward_avg))
-			reward_history.append(total_reward_avg)
-			loss_history.append(loss)
-			history.append([loss, total_reward_avg, total_reward_max, total_reward_min, total_reward_std])
+			if self.learn_algo == 'dispersed_double_dqlearn':
+				print("Epoch {:03d}/{:03d} | Loss {:.4f} | SP-Loss {:.4f} | Alpha {:.3f} | Epsilon {:.3f} | Average Reward {}".format(epoch + 1, self.nb_epoch, loss, self.state_predictor_loss, self.alpha, self.epsilon, total_reward_avg))
+			else:
+				print("Epoch {:03d}/{:03d} | Loss {:.4f} | Alpha {:.3f} | Epsilon {:.3f} | Average Reward {}".format(epoch + 1, self.nb_epoch, loss, self.alpha, self.epsilon, total_reward_avg))
+
+			training_data.append([loss, total_reward_avg, total_reward_max, total_reward_min, total_reward_std])
 
 			# Save training data to csv
-			np.savetxt("../doc/figures/" + self.filename[:-3] + "_training.csv", np.array(history))
+			np.savetxt("../data/results/" + self.filename[:-3] + "_training.csv", np.array(training_data))
 
+			# Save best weights
 			if total_reward_avg > best_score:
 				self.model.save_weights("best_" + self.filename)
+				if self.model.state_predictor: self.model.state_predictor.save_weights('best_sp_'+self.filename)
 				best_score = total_reward_avg
 
 		print("Training Finished.\nBest Average Reward:", best_score)
-		# Summarize history for reward
-		plt.plot(reward_history)
-		plt.title('Total Reward')
-		plt.ylabel('reward')
-		plt.xlabel('epoch')
-		plt.savefig("../doc/figures/" + self.filename[:-3] + "_total_reward.png")
-		plt.figure()
-
-		# summarize history for loss
-		plt.plot(loss_history)
-		plt.title('Model Loss')
-		plt.ylabel('loss')
-		plt.xlabel('epoch')
-		plt.savefig("../doc/figures/" + self.filename[:-3] + "_loss.png")
-		plt.show()
 
 	def distill_train(self, student_agent, game):
 		'''
 		Method preforms transfer learning from agent model to desired student model.
 
 		'''
-		loss_history = []
-		reward_history = []
-		history = []
+		training_data = []
 		best_score = 0
 
 		# Transfer Learning Loop
@@ -317,34 +319,17 @@ class RLAgent:
 			total_reward_min = np.min(rewards)
 			total_reward_std = np.std(rewards)
 			print("Epoch {:03d}/{:03d} | Loss {:.4f} | Epsilon {:.3f} | Average Reward {}".format(epoch + 1, self.nb_epoch, loss, self.epsilon, total_reward_avg))
-			reward_history.append(total_reward_avg)
-			loss_history.append(loss)
-			history.append([loss, total_reward_avg, total_reward_max, total_reward_min, total_reward_std])
+			training_data.append([loss, total_reward_avg, total_reward_max, total_reward_min, total_reward_std])
 
+			# Save training data to csv
+			np.savetxt("../data/results/" + self.filename[:-3] + "_distill_training.csv", np.array(training_data))
+
+			# Save best weights
 			if total_reward_avg > best_score:
 				student_agent.model.save_weights("best_" + filename)
 				best_score = total_reward_avg
 
 		print("Training Finished.\nBest Average Reward:", best_score)
-		# Summarize history for reward
-		plt.plot(reward_history)
-		plt.title('Total Reward')
-		plt.ylabel('reward')
-		plt.xlabel('epoch')
-		plt.savefig("../doc/figures/" + self.filename[:-3] + "_total_reward.png")
-		plt.figure()
-
-		# summarize history for loss
-		plt.plot(loss_history)
-		plt.title('Model Loss')
-		plt.ylabel('loss')
-		plt.xlabel('epoch')
-		plt.savefig("../doc/figures/" + self.filename[:-3] + "_loss.png")
-		plt.show()
-
-		# Save training data to csv
-		history = np.array(history)
-		np.savetxt("../doc/figures/" + self.filename[:-3] + "distill_training.csv", history)
 
 class ReplayMemory():
 	"""
@@ -411,11 +396,15 @@ class ReplayMemory():
 		Method generates batch for Deep Double Q-learn training.
 
 		'''
+		nb_actions = model.online_network.output_shape[-1]
+		input_dim = np.prod(self.input_shape)
+
+		# Generate Sample
+		samples = np.array(sample(self.memory, batch_size))
 		if len(self.memory) < batch_size:
 			batch_size = len(self.memory)
-		nb_actions = model.online_network.output_shape[-1]
-		samples = np.array(sample(self.memory, batch_size))
-		input_dim = np.prod(self.input_shape)
+
+		# Restructure Data
 		S = samples[:, 0 : input_dim]
 		a = samples[:, input_dim]
 		r = samples[:, input_dim + 1]
@@ -426,24 +415,35 @@ class ReplayMemory():
 		game_over = game_over.repeat(nb_actions).reshape((batch_size, nb_actions))
 		S = S.reshape((batch_size, ) + self.input_shape)
 		S_prime = S_prime.reshape((batch_size, ) + self.input_shape)
+
+		# Predict Q-Values
 		X = np.concatenate([S, S_prime], axis=0)
 		Y = model.online_network.predict(X)
+
+		# Get max Q-value
 		Qsa = np.max(Y[batch_size:], axis=1).repeat(nb_actions).reshape((batch_size, nb_actions))
 		delta = np.zeros((batch_size, nb_actions))
 		a = np.cast['int'](a)
 		delta[np.arange(batch_size), a] = 1
+
+		# Get target Q-Values
 		targets = ((1 - delta) * Y[:batch_size]) + ((alpha * ((delta * (r + (gamma * (1 - game_over) * Qsa))) - (delta * Y[:batch_size]))) + (delta * Y[:batch_size]))
 		return S, targets
 
 	def get_batch_ddqlearn(self, model, batch_size, alpha=0.01, gamma=0.9):
 		'''
 		Method generates batch for Double Deep Q-learn training.
+
 		'''
+		nb_actions = model.online_network.output_shape[-1]
+		input_dim = np.prod(self.input_shape)
+
+		# Generate Sample
+		samples = np.array(sample(self.memory, batch_size))
 		if len(self.memory) < batch_size:
 			batch_size = len(self.memory)
-		nb_actions = model.online_network.output_shape[-1]
-		samples = np.array(sample(self.memory, batch_size))
-		input_dim = np.prod(self.input_shape)
+
+		# Restructure Data
 		S = samples[:, 0 : input_dim]
 		a = samples[:, input_dim]
 		r = samples[:, input_dim + 1]
@@ -454,15 +454,90 @@ class ReplayMemory():
 		game_over = game_over.repeat(nb_actions).reshape((batch_size, nb_actions))
 		S = S.reshape((batch_size, ) + self.input_shape)
 		S_prime = S_prime.reshape((batch_size, ) + self.input_shape)
+
+		# Predict Q-Values
 		X = np.concatenate([S, S_prime], axis=0)
 		Y = model.online_network.predict(X)
 		best = np.argmax(Y[batch_size:], axis = 1)
 		YY = model.target_network.predict(X)
 		Qsa = YY[np.arange(len(best)), best].repeat(nb_actions).reshape((batch_size, nb_actions))
 		Y = model.online_network.predict(X)
+
+		# Get max Q-value
 		Qsa = np.max(Y[batch_size:], axis=1).repeat(nb_actions).reshape((batch_size, nb_actions))
 		delta = np.zeros((batch_size, nb_actions))
 		a = np.cast['int'](a)
 		delta[np.arange(batch_size), a] = 1
+
+		# Get target Q-Values
 		targets = ((1 - delta) * Y[:batch_size]) + ((alpha * ((delta * (r + (gamma * (1 - game_over) * Qsa))) - (delta * Y[:batch_size]))) + (delta * Y[:batch_size]))
 		return S, targets
+
+	def get_batch_dddqlearn(self, model, batch_size, alpha=0.01, gamma=0.9):
+		'''
+		Method generates batch for Dispersed Double Deep Q-learn training.
+
+		'''
+		nb_actions = model.online_network.output_shape[-1]
+		input_dim = np.prod(self.input_shape)
+
+		# Generate Sample
+		samples = np.array(sample(self.memory, batch_size))
+		if len(self.memory) < batch_size:
+			batch_size = len(self.memory)
+
+		# Restructure Data
+		S = samples[:, 0 : input_dim]
+		a = samples[:, input_dim]
+		r = samples[:, input_dim + 1]
+		S_prime = samples[:, input_dim + 2 : 2 * input_dim + 2]
+		a_prime = samples[:, 2 * input_dim + 2]
+		game_over = samples[:, 2 * input_dim + 3]
+		r = r.repeat(nb_actions).reshape((batch_size, nb_actions))
+		game_over = game_over.repeat(nb_actions).reshape((batch_size, nb_actions))
+		S = S.reshape((batch_size, ) + self.input_shape)
+		S_prime = S_prime.reshape((batch_size, ) + self.input_shape)
+
+		# Predict Q-Values
+		X = np.concatenate([S, S_prime], axis=0)
+		Y = model.online_network.predict(X)
+		best = np.argmax(Y[batch_size:], axis = 1)
+		YY = model.target_network.predict(X)
+		Qsa = YY[np.arange(len(best)), best].repeat(nb_actions).reshape((batch_size, nb_actions))
+		Y = model.online_network.predict(X)
+
+		# Get max Q-value
+		Qsa = np.max(Y[batch_size:], axis=1).repeat(nb_actions).reshape((batch_size, nb_actions))
+		delta = np.zeros((batch_size, nb_actions))
+		a = np.cast['int'](a)
+		delta[np.arange(batch_size), a] = 1
+
+		# Get target Q-Values
+		targets = ((1 - delta) * Y[:batch_size]) + ((alpha * ((delta * (r + (gamma * (1 - game_over) * Qsa))) - (delta * Y[:batch_size]))) + (delta * Y[:batch_size]))
+		return S, targets
+
+	def get_batch_state_predictor(self, batch_size, actions):
+		'''
+		Method generates batch for Dispersed Double Deep Q-learn training.
+
+		'''
+		# Generate Sample
+		samples = np.array(sample(self.memory, batch_size))
+		if len(self.memory) < batch_size:
+			batch_size = len(self.memory)
+
+		# Restructure Data
+		S = samples[:, 0 : input_dim]
+		a = samples[:, input_dim]
+		S_prime = samples[:, input_dim + 2 : 2 * input_dim + 2]
+		S = S.reshape((batch_size, ) + self.input_shape)
+		for i in range(len(a)):
+			temp = [0 for j in range(len(actions))]
+			temp[i] = 1
+			a[i] = np.array(temp)
+		a = a.reshape((batch_size, ) + a.shape)
+		S_prime = S_prime.reshape((batch_size, ) + self.input_shape)
+
+		inputs = [S, a]
+
+		return inputs, S_prime
