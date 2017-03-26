@@ -23,32 +23,30 @@ This script is used to train DQN models and Hierarchical-DQN models.
 """
 
 # Training Parameters
-scenario = 'configs/all_skills.cfg'
-model_weights = 'distilled_all_skills_.h5'
+scenario = 'configs/exit_finding.cfg'
+model_weights = None
 depth_radius = 1.0
-depth_contrast = 0.5
+depth_contrast = 0.9
 learn_param = {
-    'learn_algo' : 'dqlearn',
+    'learn_algo' : 'double_dqlearn',
     'exp_policy' : 'e-greedy',
-    'frame_skips' : 6,
+    'frame_skips' : 4,
     'nb_epoch' : 100,
     'steps' : 5000,
     'batch_size' : 40,
     'memory_size' : 10000,
     'nb_frames' : 3,
-    'alpha' : [0.1, 0.1],
-    'alpha_rate' : 1.0,
+    'alpha' : [1.0, 0.1],
+    'alpha_rate' : 0.7,
     'alpha_wait' : 10,
-    'gamma' : 0.99,
-    'epsilon' : [0.01, 0.01],
-    'epsilon_rate' : 1.0,
-    'epislon_wait' : 0,
-    'nb_tests' : 30,
-    'checkpoint' : None,
-    'filename' : 'distilled_all_skills_.h5'
+    'gamma' : 0.9,
+    'epsilon' : [1.0, 0.1],
+    'epsilon_rate' : 0.7,
+    'epislon_wait' : 10,
+    'nb_tests' : 50,
 }
 training = 'DQN'
-training_arg = []
+training_arg = [4,]
 
 
 def train_model():
@@ -61,11 +59,11 @@ def train_model():
 
     # Initiates Model
     model = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], actions=doom.actions, depth_radius=depth_radius, depth_contrast=depth_contrast)
+    if model_weights: model.load_weights(model_weights)
     agent = RLAgent(model, **learn_param)
 
     # Preform Reinforcement Learning on Scenario
     agent.train(doom)
-    model.save_weights(model_weights)
 
 def train_heirarchical_model():
     '''
@@ -90,11 +88,11 @@ def train_heirarchical_model():
     model_doors.load_weights('doors.h5')
     models = [model_rigid_turning, model_exit_finding, model_doors]
     model = HDQNModel(sub_models=models, skill_frame_skip=training_arg[0], resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], actions=[], depth_radius=depth_radius, depth_contrast=depth_contrast)
+    if model_weights: model.load_weights(model_weights)
     agent = RLAgent(model, **learn_param)
 
     # Preform Reinforcement Learning on Scenario using Hierarchical-DQN model
     agent.train(doom)
-    model.save_weights(model_weights)
 
 def train_distilled_model():
     '''
@@ -132,8 +130,7 @@ def train_distilled_model():
     student_agent = RLAgent(student_model, **learn_param)
 
     # Preform Transfer Learning on Scenario by distilling Hierarchical-DQN model
-    teacher_agent.distill_train(student_agent, doom)
-    student_model.save_weights(model_weights)
+    teacher_agent.transfer_train(student_agent, doom)
 
 if __name__ == '__main__':
     if training == 'DQN': train_model()

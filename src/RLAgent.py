@@ -2,17 +2,17 @@
 '''
 RLAgent.py
 Authors: Rafael Zamora
-Last Updated: 3/3/17
+Last Updated: 3/26/17
 
 '''
 
 """
-Script defines the interface between the DQN models and the Vizdoom
-environment.
+This script defines the interface between the Models and the Vizdoom
+environment used to train and test Reinforcement Learning Models.
 
 """
 import numpy as np
-from Models.py import *
+from Models import *
 from random import sample
 from keras import backend as K
 from keras.models import Model
@@ -23,26 +23,34 @@ import datetime
 
 class RLAgent:
 	"""
-	RLAgent class used to interface models with Vizdoom game and
-	preform training. Currently, we have defined the Deep Q-learning and SARSA
-	algorithms for reinforcement learning.
+	RLAgent class interfaces Models with Vizdoom game and preforms training.
 
-	E-greedy is the only exploration policy implemented at the moment.
+	The following are learning algorithms implemented:
+
+	* Deep Q-Learning					(learn_algo = dqlearn)
+	* Deep SARSA						(learn_algo = sarsa)
+	* Double Deep Q-Learning			(learn_algo = double_dqlearn)
+	* Dispersed Double Deep Q-Learning 	(learn_algo = dispersed_double_dqlearn)
+
+
+	The following are exploration policies implemented:
+
+	* Epsilon-Greedy	(exp_policy = e-greedy)
 
 	Linear alpha (Reinforcement Learning rate) decay is implemented.
 
 	"""
 
-	def __init__(self, model, learn_algo = 'qlearn', exp_policy='e-greedy', nb_tests=100, frame_skips=4, nb_epoch=1000, steps=1000, target_update=100, batch_size=50, memory_size=1000, nb_frames=1, alpha = [1.0,0.1], alpha_rate=1.0, alpha_wait=0, gamma=0.9, epsilon=[1., .1], epsilon_rate=1.0, epislon_wait=0, state_predictor_watch=0, checkpoint=None, filename='w_.h5'):
+	def __init__(self, model, learn_algo = 'dqlearn', exp_policy='e-greedy', nb_tests=100, frame_skips=4, nb_epoch=1000, steps=1000, target_update=100,
+		batch_size=50, memory_size=1000, nb_frames=1, alpha = [1.0,0.1], alpha_rate=1.0, alpha_wait=0, gamma=0.9, epsilon=[1., .1], epsilon_rate=1.0,
+		epislon_wait=0, state_predictor_watch=0):
 		'''
 		Method initiates learning parameters for Reinforcement Learner.
 
 		'''
 		self.model = model
 		self.memory = ReplayMemory(memory_size)
-		self.frames = None
-		self.checkpoint = checkpoint
-		self.filename = filename
+		self.prev_frames = None
 		self.nb_tests = nb_tests
 
 		# Learning Parameters
@@ -53,29 +61,34 @@ class RLAgent:
 		self.batch_size = batch_size
 		self.nb_frames = nb_frames
 		self.frame_skips = frame_skips
+
+		# Set Gamma
 		self.gamma = gamma
 
-		# Set Alpha and Alpha decay
+		# Set Alpha and linear Alpha decay
 		self.alpha, self.final_alpha = alpha
 		self.alpha_wait = alpha_wait
 		self.delta_alpha = ((alpha[0] - alpha[1]) / (nb_epoch * alpha_rate))
 
-		# Set Epsilon and Epsilon decay
+		# Set Epsilon and linear Epsilon decay
 		self.epsilon, self.final_epsilon = epsilon
 		self.epislon_wait = epislon_wait
 		self.delta_epsilon =  ((epsilon[0] - epsilon[1]) / (nb_epoch * epsilon_rate))
 
+		# Set Double Deep Q-Learning parameters
 		if self.learn_algo == "double_dqlearn":
 			self.model.target_network = Model(input=self.model.x0, output=self.model.y0)
 			self.model.target_network.set_weights(self.model.online_network.get_weights())
 			self.model.target_network.compile(optimizer=self.model.optimizer, loss=self.model.loss_fun)
 			self.target_update = target_update
 
+		# Set Dispersed Double Deep Q-Learning parameters
 		if self.learn_algo == "dispersed_double_dqlearn":
 			self.state_predictor_watch = state_predictor_watch
 			self.state_predictor_loss = 0
 			self.state_predictor_batch = None
-			self.model.state_predictor = StatePredictionModel(resolution=self.model.resolution, nb_frames=self.model.nb_frames, actions=self.nb_actions, depth_radius=self.model.depth_radius, depth_contrast=self.model.depth_contrast)
+			if self.model.state_predictor is None:
+				self.model.state_predictor = StatePredictionModel(resolution=self.model.resolution, nb_frames=self.model.nb_frames, actions=self.nb_actions, depth_radius=self.model.depth_radius, depth_contrast=self.model.depth_contrast)
 
 	def get_state_data(self, game):
 		'''
@@ -85,12 +98,12 @@ class RLAgent:
 
 		'''
 		frame = game.get_processed_state(self.model.depth_radius, self.model.depth_contrast)
-		if self.frames is None:
-			self.frames = [frame] * self.nb_frames
+		if self.prev_frames is None:
+			self.prev_frames = [frame] * self.nb_frames
 		else:
-			self.frames.append(frame)
-			self.frames.pop(0)
-		return np.expand_dims(self.frames, 0)
+			self.prev_frames.append(frame)
+			self.prev_frames.pop(0)
+		return np.expand_dims(self.prev_frames, 0)
 
 	def train(self, game):
 		'''
@@ -98,21 +111,29 @@ class RLAgent:
 		learning parameters.
 
 		'''
-		training_data = []
-		best_score = 0
-
-		# Reinforcement Learning Loop
 		print("\nTraining:", game.config)
 		print("Model:", self.model.__class__.__name__)
+		print("Number of Previous Frames Used", self.nb_frames)
+		print("Frame Skips:", self.frame_skips)
 		print("Algorithm:", self.learn_algo)
 		print("Exploration_Policy:", self.exp_policy, '\n')
+		print("Batch Size:", self.batch_size)
+		if self.learn_algo == 'dispersed_double_dqlearn':
+			print("Epoch {:03d}/{:03d} | Loss {:.4f} | SP-Loss {:.4f} | Alpha {:.3f} | Epsilon {:.3f} | Average Reward {}".format(0, self.nb_epoch, 0, self.state_predictor_loss, self.alpha, self.epsilon, 0))
+		else:
+			print("Epoch {:03d}/{:03d} | Loss {:.4f} | Alpha {:.3f} | Epsilon {:.3f} | Average Reward {}".format(0, self.nb_epoch, 0, self.alpha, self.epsilon, 0))
+
+		# Reinforcement Learning Loop
+		training_data = []
+		best_score = 0
 		for epoch in range(self.nb_epoch):
 			pbar = tqdm(total=self.steps)
 			step = 0
-			loss = 0.
+			loss = 0
 			total_reward = 0
 			game.game.new_episode()
-			self.frames = None
+			self.prev_frames = None
+			if self.model.__class__.__name__ == 'HDQNModel': self.model.sub_model_frames = None
 			S = self.get_state_data(game)
 			a_prime = 0
 
@@ -174,22 +195,17 @@ class RLAgent:
 					inputs, targets = self.state_predictor_batch
 					self.state_predictor_loss += float(self.model.state_predictor.train_on_batch(inputs, targets))
 
-				if game_over:
-					if self.model.__class__.__name__ == 'HDQNModel': self.model.sub_model_frames = None
-					game.game.new_episode()
-					self.frames = None
-					S = self.get_state_data(game)
-				step += 1
-				pbar.update(1)
-
 				# Update Target Network weights (DDQ-Learning)
 				if self.model.target_network and step % self.target_update == 0:
 					self.model.target_network.set_weights(self.model.online_network.get_weights())
 
-			# Save weights at checkpoints
-			if self.checkpoint and ((epoch + 1 ) % self.checkpoint == 0 or epoch + 1 == self.nb_epoch):
-				self.model.save_weights(self.filename)
-				if self.model.state_predictor: self.model.state_predictor.save_weights('sp_'+self.filename)
+				if game_over:
+					if self.model.__class__.__name__ == 'HDQNModel': self.model.sub_model_frames = None
+					game.game.new_episode()
+					self.prev_frames = None
+					S = self.get_state_data(game)
+				step += 1
+				pbar.update(1)
 
 			# Decay Epsilon
 			if self.epsilon > self.final_epsilon and epoch >= self.epislon_wait: self.epsilon -= self.delta_epsilon
@@ -197,7 +213,7 @@ class RLAgent:
 			# Decay Alpha
 			if self.alpha > self.final_alpha and epoch >= self.alpha_wait: self.alpha -= self.delta_alpha
 
-			# Preform test for epoch
+			# Run Tests
 			print("Testing:")
 			pbar.close()
 			pbar = tqdm(total=self.nb_tests)
@@ -206,47 +222,46 @@ class RLAgent:
 				rewards.append(game.run(self))
 				pbar.update(1)
 			rewards = np.array(rewards)
-			total_reward_avg = np.mean(rewards)
-			total_reward_max = np.max(rewards)
-			total_reward_min = np.min(rewards)
-			total_reward_std = np.std(rewards)
+			training_data.append([loss, np.mean(rewards), np.max(rewards), np.min(rewards), np.std(rewards)])
+			np.savetxt("../data/results/"+ self.learn_algo+'_'+ self.model.__class__.__name__+'_'+ + game.config[:-4] + ".csv", np.array(training_data))
+
+			# Save best weights
+			total_reward_avg = training_data[-1][1]
+			if total_reward_avg > best_score:
+				self.model.save_weights(self.learn_algo+'_'+ self.model.__class__.__name__+'_'+ game.config[:-4] + ".h5")
+				if self.model.state_predictor: self.model.state_predictor.save_weights(self.learn_algo+'_'+ self.model.__class__.__name__+'_sp_'+ game.config[:-4] + ".h5")
+				best_score = total_reward_avg
+
+			# Print Epoch Summary
 			if self.learn_algo == 'dispersed_double_dqlearn':
 				print("Epoch {:03d}/{:03d} | Loss {:.4f} | SP-Loss {:.4f} | Alpha {:.3f} | Epsilon {:.3f} | Average Reward {}".format(epoch + 1, self.nb_epoch, loss, self.state_predictor_loss, self.alpha, self.epsilon, total_reward_avg))
 			else:
 				print("Epoch {:03d}/{:03d} | Loss {:.4f} | Alpha {:.3f} | Epsilon {:.3f} | Average Reward {}".format(epoch + 1, self.nb_epoch, loss, self.alpha, self.epsilon, total_reward_avg))
 
-			training_data.append([loss, total_reward_avg, total_reward_max, total_reward_min, total_reward_std])
-
-			# Save training data to csv
-			np.savetxt("../data/results/" + self.filename[:-3] + "_training.csv", np.array(training_data))
-
-			# Save best weights
-			if total_reward_avg > best_score:
-				self.model.save_weights("best_" + self.filename)
-				if self.model.state_predictor: self.model.state_predictor.save_weights('best_sp_'+self.filename)
-				best_score = total_reward_avg
-
 		print("Training Finished.\nBest Average Reward:", best_score)
 
-	def distill_train(self, student_agent, game):
+	def transfer_train(self, student_agent, game):
 		'''
 		Method preforms transfer learning from agent model to desired student model.
 
 		'''
-		training_data = []
-		best_score = 0
-
-		# Transfer Learning Loop
 		print("\nTransfer Training:", game.config)
 		print("Teacher Model:", self.model.__class__.__name__)
 		print("Student Model:", student_agent.model.__class__.__name__)
+		print("Number of Previous Frames Used", self.nb_frames)
+		print("Frame Skips:", self.frame_skips)
+		print("Batch Size:", self.batch_size)
+
+		# Transfer Learning Loop
+		training_data = []
+		best_score = 0
 		for epoch in range(self.nb_epoch):
 			pbar = tqdm(total=self.steps)
 			step = 0
 			loss = 0.
 			total_reward = 0
 			game.game.new_episode()
-			self.frames = None
+			self.prev_frames = None
 			if self.model.__class__.__name__ == 'HDQNModel': self.model.sub_model_frames = None
 			S = self.get_state_data(game)
 			a_prime = 0
@@ -262,9 +277,9 @@ class RLAgent:
 					else:
 						q = None
 
+				# Gather Data
 				targets = []
 				inputs = []
-
 				t, q = self.model.softmax_q_values(S, student_agent.model.actions, q_=q)
 				targets.append(t)
 				inputs.append(S[0])
@@ -293,14 +308,10 @@ class RLAgent:
 					break
 					if self.model.__class__.__name__ == 'HDQNModel': self.model.sub_model_frames = None
 					game.game.new_episode()
-					self.frames = None
+					self.prev_frames = None
 					S = self.get_state_data(game)
 				step += 1
 				pbar.update(1)
-
-			# Save weights at checkpoints
-			if self.checkpoint and ((epoch + 1 ) % self.checkpoint == 0 or epoch + 1 == self.nb_epoch):
-				student_agent.model.save_weights(self.filename)
 
 			# Decay Epsilon
 			if self.final_epsilon < self.epsilon and epoch >= self.epislon_wait: self.epsilon -= self.delta_epsilon
@@ -314,20 +325,17 @@ class RLAgent:
 				rewards.append(game.run(student_agent))
 				pbar.update(1)
 			rewards = np.array(rewards)
-			total_reward_avg = np.mean(rewards)
-			total_reward_max = np.max(rewards)
-			total_reward_min = np.min(rewards)
-			total_reward_std = np.std(rewards)
-			print("Epoch {:03d}/{:03d} | Loss {:.4f} | Epsilon {:.3f} | Average Reward {}".format(epoch + 1, self.nb_epoch, loss, self.epsilon, total_reward_avg))
-			training_data.append([loss, total_reward_avg, total_reward_max, total_reward_min, total_reward_std])
-
-			# Save training data to csv
-			np.savetxt("../data/results/" + self.filename[:-3] + "_distill_training.csv", np.array(training_data))
+			training_data.append([loss, np.mean(rewards), np.max(rewards), np.min(rewards), np.std(rewards)])
+			np.savetxt("../data/results/"+'distilled_'+ self.model.__class__.__name__+'_'+ + game.config[:-4] + ".csv", np.array(training_data))
 
 			# Save best weights
+			total_reward_avg = training_data[-1][1]
 			if total_reward_avg > best_score:
-				student_agent.model.save_weights("best_" + filename)
+				self.model.save_weights('distilled_'+ self.model.__class__.__name__+'_'+ game.config[:-4] + ".h5")
 				best_score = total_reward_avg
+
+			# Print Epoch Summary
+			print("Epoch {:03d}/{:03d} | Loss {:.4f} | Epsilon {:.3f} | Average Reward {}".format(epoch + 1, self.nb_epoch, loss, self.epsilon, total_reward_avg))
 
 		print("Training Finished.\nBest Average Reward:", best_score)
 

@@ -2,50 +2,51 @@
 '''
 DoomScenario.py
 Authors: Rafael Zamora
-Last Updated: 2/18/17
+Last Updated: 3/26/17
 
 '''
 
 """
-This script defines the instance of Vizdoom used to train and test the DQNs and
-Hierarchical-DQNs.
+This script defines the instance of Vizdoom used to train and test
+Reinforcement Learning Models.
 
 """
 
 from vizdoom import DoomGame, Mode, ScreenResolution
 import itertools as it
 import numpy as np
-np.seterr(divide='ignore', invalid='ignore')
 from tqdm import tqdm
 
 class DoomScenario:
     """
-    DoomScenario class is used to run instances of Vizdoom according to scenario
-    configuration files found in the /src/configs/ folder.
+    DoomScenario class runs instances of Vizdoom according to scenario
+    configuration (.cfg) files.
+
+    Scenario Configuration files for this project are located in
+    the /src/configs/ folder.
 
     """
 
-    def __init__(self, config):
+    def __init__(self, config_filename):
         '''
         Method initiates Vizdoom with desired configuration file.
 
         '''
-        self.config = config
+        self.config_filename = config_filename
         self.game = DoomGame()
-        self.game.load_config(config)
+        self.game.load_config(config_filename)
         self.game.set_window_visible(False)
         self.game.init()
 
         self.res = (self.game.get_screen_height(), self.game.get_screen_width())
+        self.actions = [list(a) for a in it.product([0, 1], repeat=self.game.get_available_buttons_size())]
 
-        button_count = self.game.get_available_buttons_size()
-        self.actions = [list(a) for a in it.product([0, 1], repeat=button_count)]
         self.pbar = None
         self.game.new_episode()
 
     def play(self, action, tics):
         '''
-        Method advances state with desired action.
+        Method advances state with desired action for a number of tics.
 
         '''
         self.game.set_action(action)
@@ -55,7 +56,14 @@ class DoomScenario:
     def get_processed_state(self, depth_radius, depth_contrast):
         '''
         Method processes the Vizdoom RGB and depth buffer into
-        a composite one channel image that can be used by the DQNs and Hierarchical-DQNs.
+        a composite one channel image that can be used by the Models.
+
+        depth_radius defines how far the depth buffer sees with 1.0 being
+        as far as ViZDoom allows.
+
+        depth_contrast defines how much of the depth buffer is in the final
+        processed image as compared to the greyscaled RGB buffer.
+        **processed = (1-depth_contrast)* grey_buffer + depth_contrast*depth_buffer
 
         '''
         state = self.game.get_state()
@@ -83,15 +91,19 @@ class DoomScenario:
         Method runs a instance of DoomScenario.
 
         '''
+        if verbose:
+            print("\nRunning Simulation:", self.config_filename)
+            self.pbar = tqdm(total=self.game.get_episode_timeout())
+
+        # Initiate New Instance
         self.game.close()
         self.game.set_window_visible(False)
         self.game.add_game_args("+vid_forcesurface 1 -nomonsters")
         self.game.init()
-        if verbose: print("\nRunning Simulation:", self.config)
-
         if save_replay != '': self.game.new_episode("../data/replay_data/" + save_replay)
         else: self.game.new_episode()
-        if verbose: self.pbar = tqdm(total=self.game.get_episode_timeout())
+
+        # Run Simulation
         while not self.game.is_episode_finished():
             S = agent.get_state_data(self)
             q = agent.model.online_network.predict(S)
@@ -104,6 +116,7 @@ class DoomScenario:
                         a = agent.model.predict(self, q)
                         if not self.game.is_episode_finished(): self.play(a, agent.frame_skips+1)
 
+        # Reset Agent and Return Score
         agent.frames = None
         if agent.model.__class__.__name__ == 'HDQNModel': agent.model.sub_model_frames = None
         score = self.game.get_total_reward()
@@ -114,22 +127,26 @@ class DoomScenario:
 
     def replay(self, filename, verbose=False):
         '''
-        Method runs a replay of the simulations at 800 x 600 simulation.
+        Method runs a replay of the simulations at 800 x 600 resolution.
 
         '''
+        print("\nRunning Replay:", filename)
+
+        # Initiate Replay
         self.game.close()
         self.game.set_screen_resolution(ScreenResolution.RES_800X600)
         self.game.set_window_visible(True)
         self.game.set_ticrate(60)
         self.game.add_game_args("+vid_forcesurface 1")
-
         self.game.init()
-        print("\nRunning Replay:", filename)
         self.game.replay_episode("../data/replay_data/" + filename)
+
+        # Run Replay
         while not self.game.is_episode_finished():
             if verbose: print("Reward:", self.game.get_last_reward())
             self.game.advance_action()
 
+        # Print Score
         score = self.game.get_total_reward()
         print("Total Score:", score)
         self.game.close()
@@ -139,14 +156,16 @@ class DoomScenario:
         Method runs an apprentice data gathering.
 
         '''
+        # Initiate New Instance
         self.game.close()
         self.game.set_mode(Mode.SPECTATOR)
         self.game.set_screen_resolution(ScreenResolution.RES_800X600)
         self.game.set_window_visible(True)
         self.game.set_ticrate(30)
         self.game.init()
-
         self.game.new_episode()
+
+        # Run Simulation
         while not self.game.is_episode_finished():
             self.game.advance_action()
         self.game.close()

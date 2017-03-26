@@ -13,7 +13,7 @@ if __name__ == '__main__':
         plt.plot(max_, color='#e6e6e6')
         plt.fill_between(list(range(len(avg_))), min_,max_,interpolate=True,color='#e6e6e6')
         plt.plot(avg_, color='blue')
-        plt.title('Average Reward on ' + filename[:-13])
+        plt.title('Training Reward on ' + filename[:-13])
         plt.ylabel('Average Reward Per Epoch')
         plt.xlabel('Training Epochs')
         plt.savefig("../doc/figures/" + filename[:-13] + "_training_results.png")

@@ -14,8 +14,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from RLAgent import RLAgent
 from DoomScenario import DoomScenario
 from Models import DQNModel, HDQNModel
-import matplotlib.pyplot as plt
-import numpy as np
 import itertools as it
 """
 This script is used to run test on trained DQN models, trained Hierarchical-DQN models,
@@ -24,15 +22,15 @@ and allow human play to test out scenarios.
 """
 
 # Testing Parameters
-scenario = 'configs/rigid_turning.cfg'
+scenario = 'configs/rigid_turning_maze.cfg'
 model_weights = "best_ddql_rt_.h5"
 depth_radius = 1.0
-depth_contrast = 1.0
+depth_contrast = 0.9
 test_param = {
     'frame_skips' : 4,
     'nb_frames' : 3
 }
-nb_runs = 10
+nb_runs = 5
 testing = 'DQN'
 
 def test_model(runs=1):
