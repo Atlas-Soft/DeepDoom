@@ -45,6 +45,7 @@ class DQNModel:
         self.resolution = resolution
         self.actions = actions
         self.nb_actions = len(actions)
+        self.nb_frames = nb_frames
         self.depth_radius = depth_radius
         self.depth_contrast = depth_contrast
         self.loss_fun = 'mse'
@@ -275,15 +276,14 @@ class HDQNModel:
 
 class StatePredictionModel:
 
-    def __init__(self, resolution=(120, 160), nb_frames=1, actions=[], depth_radius=1.0, depth_contrast=0.8):
+    def __init__(self, resolution=(120, 160), nb_frames=1, nb_actions=0, depth_radius=1.0, depth_contrast=0.8):
         '''
         Method initializes the State Prediction Model used to predict future states
         of the Doom environment.
         '''
         #Parameters
         self.resolution = resolution
-        self.actions = actions
-        self.nb_actions = len(actions)
+        self.nb_actions = nb_actions
         self.depth_radius = depth_radius
         self.depth_contrast = depth_contrast
         self.optimizer = RMSprop(lr=0.0005)
@@ -294,31 +294,34 @@ class StatePredictionModel:
         x1 = Input(shape=(self.nb_actions,))
 
         #Convolutional Layers
-        m = Conv2D(64, (5, 5), stride=(2,2), padding='same', activation='relu')(x0)
+        m = Conv2D(16, (8, 8), strides=(2,2), padding='same', activation='relu')(x0)
         m = BatchNormalization()(m)
-        m = Conv2D(32, (5, 5), stride=(2,2), padding='same', activation='relu')(m)
+        m = Conv2D(32, (6, 6), strides=(2,2), padding='same', activation='relu')(m)
         m = BatchNormalization()(m)
-        m = Conv2D(8, (5, 5), stride=(2,2), padding='same', activation='relu')(m)
+        m = Conv2D(32, (6, 6), strides=(3,2), padding='same', activation='relu')(m)
+        m = BatchNormalization()(m)
+        m = Conv2D(32, (4, 4), strides=(2,2), padding='same', activation='relu')(m)
         m = BatchNormalization()(m)
         m = Flatten()(m)
 
         #Tranformation Layers
-        z= Dense(2400)(m)
-        t = Dense(2400)(x1)
+        z = Dense(1600)(m)
+        t = Dense(1600)(x1)
         m = merge([z, t], mode='mul')
 
         #Deconvolution Layers
-        m = Dense(2400, activation='relu')(m)
-        m = Reshape((8, 15, 20))(m)
-        m = Conv2DTranspose(32, (5, 5), activation='relu', padding='same', stride=(2,2))(m)
+        m = Dense(1600, activation='relu')(m)
+        m = Reshape((32, 5, 10))(m)
+        m = Conv2DTranspose(32, (4, 4), activation='relu', padding='same', strides=(2,2), data_format="channels_first")(m)
         m = BatchNormalization()(m)
-        m = Conv2DTranspose(64, (5, 5), activation='relu', padding='same', stride=(2,2))(m)
+        m = Conv2DTranspose(32, (6, 6), activation='relu', padding='same', strides=(3,2), data_format="channels_first")(m)
         m = BatchNormalization()(m)
-        y0 = Conv2DTranspose(1, (5, 5), activation='sigmoid', padding='same', stride=(2,2))(m)
+        m = Conv2DTranspose(16, (6, 6), activation='relu', padding='same', strides=(2,2), data_format="channels_first")(m)
+        m = BatchNormalization()(m)
+        y0 = Conv2DTranspose(1, (8, 8), padding='same', strides=(2,2), data_format="channels_first")(m)
 
         self.autoencoder_network = Model(input=[x0, x1], output=[y0,])
         self.autoencoder_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
-        self.autoencoder_network.summary()
 
     def load_weights(self, filename):
         '''

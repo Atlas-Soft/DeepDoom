@@ -76,7 +76,7 @@ class RLAgent:
 		self.delta_epsilon =  ((epsilon[0] - epsilon[1]) / (nb_epoch * epsilon_rate))
 
 		# Set Double Deep Q-Learning parameters
-		if self.learn_algo == "double_dqlearn":
+		if self.learn_algo == "double_dqlearn" or self.learn_algo == "dispersed_double_dqlearn":
 			self.model.target_network = Model(input=self.model.x0, output=self.model.y0)
 			self.model.target_network.set_weights(self.model.online_network.get_weights())
 			self.model.target_network.compile(optimizer=self.model.optimizer, loss=self.model.loss_fun)
@@ -88,7 +88,7 @@ class RLAgent:
 			self.state_predictor_loss = 0
 			self.state_predictor_batch = None
 			if self.model.state_predictor is None:
-				self.model.state_predictor = StatePredictionModel(resolution=self.model.resolution, nb_frames=self.model.nb_frames, actions=self.nb_actions, depth_radius=self.model.depth_radius, depth_contrast=self.model.depth_contrast)
+				self.model.state_predictor = StatePredictionModel(resolution=self.model.resolution, nb_frames=self.model.nb_frames, nb_actions=self.model.nb_actions, depth_radius=self.model.depth_radius, depth_contrast=self.model.depth_contrast)
 
 	def get_state_data(self, game):
 		'''
@@ -111,21 +111,17 @@ class RLAgent:
 		learning parameters.
 
 		'''
-		print("\nTraining:", game.config)
+		print("\nTraining:", game.config_filename)
 		print("Model:", self.model.__class__.__name__)
-		print("Number of Previous Frames Used", self.nb_frames)
-		print("Frame Skips:", self.frame_skips)
 		print("Algorithm:", self.learn_algo)
-		print("Exploration_Policy:", self.exp_policy, '\n')
-		print("Batch Size:", self.batch_size)
-		if self.learn_algo == 'dispersed_double_dqlearn':
-			print("Epoch {:03d}/{:03d} | Loss {:.4f} | SP-Loss {:.4f} | Alpha {:.3f} | Epsilon {:.3f} | Average Reward {}".format(0, self.nb_epoch, 0, self.state_predictor_loss, self.alpha, self.epsilon, 0))
-		else:
-			print("Epoch {:03d}/{:03d} | Loss {:.4f} | Alpha {:.3f} | Epsilon {:.3f} | Average Reward {}".format(0, self.nb_epoch, 0, self.alpha, self.epsilon, 0))
+		print("Exploration_Policy:", self.exp_policy)
+		print("Frame Skips:", self.frame_skips)
+		print("Number of Previous Frames Used:", self.nb_frames)
+		print("Batch Size:", self.batch_size, '\n')
 
 		# Reinforcement Learning Loop
 		training_data = []
-		best_score = 0
+		best_score = None
 		for epoch in range(self.nb_epoch):
 			pbar = tqdm(total=self.steps)
 			step = 0
@@ -180,10 +176,10 @@ class RLAgent:
 					batch = self.memory.get_batch_ddqlearn(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
 				elif self.learn_algo == 'dispersed_double_dqlearn':
 					if epoch >= self.state_predictor_watch:
-						batch = self.memory.get_batch_dddqlearn(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
-						self.state_predictor_batch = self.memory.get_batch_state_predictor(batch_size=self.batch_size, actions=self.model.nb_actions)
+						batch = self.memory.get_batch_dddqlearn(model=self.model, batch_size=int(self.batch_size/self.model.nb_actions)+1, alpha=self.alpha, gamma=self.gamma)
 					else:
 						batch = self.memory.get_batch_ddqlearn(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
+					self.state_predictor_batch = self.memory.get_batch_state_predictor(model=self.model, batch_size=10)
 
 				# Train model online network
 				if batch:
@@ -191,9 +187,10 @@ class RLAgent:
 					loss += float(self.model.online_network.train_on_batch(inputs, targets))
 
 				# Train State Prediction Model (dispersed DDQ-Learning)
-				if self.state_predictor_batch:
-					inputs, targets = self.state_predictor_batch
-					self.state_predictor_loss += float(self.model.state_predictor.train_on_batch(inputs, targets))
+				if self.learn_algo == 'dispersed_double_dqlearn':
+					if self.state_predictor_batch:
+						inputs, targets = self.state_predictor_batch
+						self.state_predictor_loss += float(self.model.state_predictor.autoencoder_network.train_on_batch(inputs, targets))
 
 				# Update Target Network weights (DDQ-Learning)
 				if self.model.target_network and step % self.target_update == 0:
@@ -223,14 +220,15 @@ class RLAgent:
 				pbar.update(1)
 			rewards = np.array(rewards)
 			training_data.append([loss, np.mean(rewards), np.max(rewards), np.min(rewards), np.std(rewards)])
-			np.savetxt("../data/results/"+ self.learn_algo+'_'+ self.model.__class__.__name__+'_'+ + game.config[:-4] + ".csv", np.array(training_data))
+			np.savetxt("../data/results/"+ self.learn_algo.replace("_","-")+'_'+ self.model.__class__.__name__+'_'+ game.config_filename[:-4].replace("_","-") + ".csv", np.array(training_data))
 
 			# Save best weights
 			total_reward_avg = training_data[-1][1]
-			if total_reward_avg > best_score:
-				self.model.save_weights(self.learn_algo+'_'+ self.model.__class__.__name__+'_'+ game.config[:-4] + ".h5")
-				if self.model.state_predictor: self.model.state_predictor.save_weights(self.learn_algo+'_'+ self.model.__class__.__name__+'_sp_'+ game.config[:-4] + ".h5")
+			if best_score is None or (best_score and total_reward_avg > best_score):
+				self.model.save_weights(self.learn_algo+'_'+ self.model.__class__.__name__+'_'+ game.config_filename[:-4] + ".h5")
 				best_score = total_reward_avg
+
+			if self.model.state_predictor: self.model.state_predictor.save_weights('sp_' + self.learn_algo+'_'+ self.model.__class__.__name__+'_'+ game.config_filename[:-4] + ".h5")
 
 			# Print Epoch Summary
 			if self.learn_algo == 'dispersed_double_dqlearn':
@@ -245,16 +243,16 @@ class RLAgent:
 		Method preforms transfer learning from agent model to desired student model.
 
 		'''
-		print("\nTransfer Training:", game.config)
+		print("\nTransfer Training:", game.config_filename)
 		print("Teacher Model:", self.model.__class__.__name__)
 		print("Student Model:", student_agent.model.__class__.__name__)
-		print("Number of Previous Frames Used", self.nb_frames)
 		print("Frame Skips:", self.frame_skips)
+		print("Number of Previous Frames Used", self.nb_frames)
 		print("Batch Size:", self.batch_size)
 
 		# Transfer Learning Loop
 		training_data = []
-		best_score = 0
+		best_score = None
 		for epoch in range(self.nb_epoch):
 			pbar = tqdm(total=self.steps)
 			step = 0
@@ -326,12 +324,12 @@ class RLAgent:
 				pbar.update(1)
 			rewards = np.array(rewards)
 			training_data.append([loss, np.mean(rewards), np.max(rewards), np.min(rewards), np.std(rewards)])
-			np.savetxt("../data/results/"+'distilled_'+ self.model.__class__.__name__+'_'+ + game.config[:-4] + ".csv", np.array(training_data))
+			np.savetxt("../data/results/"+'distilled_'+ self.model.__class__.__name__+'_'+ game.config_filename[:-4].replace("_","-") + ".csv", np.array(training_data))
 
 			# Save best weights
 			total_reward_avg = training_data[-1][1]
-			if total_reward_avg > best_score:
-				self.model.save_weights('distilled_'+ self.model.__class__.__name__+'_'+ game.config[:-4] + ".h5")
+			if best_score is None or (best_score and total_reward_avg > best_score):
+				self.model.save_weights('distilled_'+ self.model.__class__.__name__+'_'+ game.config_filename[:-4] + ".h5")
 				best_score = total_reward_avg
 
 			# Print Epoch Summary
@@ -408,9 +406,9 @@ class ReplayMemory():
 		input_dim = np.prod(self.input_shape)
 
 		# Generate Sample
-		samples = np.array(sample(self.memory, batch_size))
 		if len(self.memory) < batch_size:
 			batch_size = len(self.memory)
+		samples = np.array(sample(self.memory, batch_size))
 
 		# Restructure Data
 		S = samples[:, 0 : input_dim]
@@ -447,9 +445,9 @@ class ReplayMemory():
 		input_dim = np.prod(self.input_shape)
 
 		# Generate Sample
-		samples = np.array(sample(self.memory, batch_size))
 		if len(self.memory) < batch_size:
 			batch_size = len(self.memory)
+		samples = np.array(sample(self.memory, batch_size))
 
 		# Restructure Data
 		S = samples[:, 0 : input_dim]
@@ -467,12 +465,10 @@ class ReplayMemory():
 		X = np.concatenate([S, S_prime], axis=0)
 		Y = model.online_network.predict(X)
 		best = np.argmax(Y[batch_size:], axis = 1)
-		YY = model.target_network.predict(X)
-		Qsa = YY[np.arange(len(best)), best].repeat(nb_actions).reshape((batch_size, nb_actions))
-		Y = model.online_network.predict(X)
+		YY = model.target_network.predict(S_prime)
 
 		# Get max Q-value
-		Qsa = np.max(Y[batch_size:], axis=1).repeat(nb_actions).reshape((batch_size, nb_actions))
+		Qsa = YY.flatten()[np.arange(batch_size)*nb_actions + best].repeat(nb_actions).reshape((batch_size, nb_actions))
 		delta = np.zeros((batch_size, nb_actions))
 		a = np.cast['int'](a)
 		delta[np.arange(batch_size), a] = 1
@@ -490,9 +486,9 @@ class ReplayMemory():
 		input_dim = np.prod(self.input_shape)
 
 		# Generate Sample
-		samples = np.array(sample(self.memory, batch_size))
 		if len(self.memory) < batch_size:
 			batch_size = len(self.memory)
+		samples = np.array(sample(self.memory, batch_size))
 
 		# Restructure Data
 		S = samples[:, 0 : input_dim]
@@ -506,45 +502,60 @@ class ReplayMemory():
 		S = S.reshape((batch_size, ) + self.input_shape)
 		S_prime = S_prime.reshape((batch_size, ) + self.input_shape)
 
+		S_ = S.repeat(nb_actions).reshape((batch_size*nb_actions, S.shape[1], S.shape[2], S.shape[3]))
+		acts = np.zeros((batch_size*nb_actions, nb_actions))
+		acts[np.arange(batch_size*nb_actions), np.arange(batch_size*nb_actions)%nb_actions] = 1
+		inputs = [S_, acts]
+		pred = model.state_predictor.autoencoder_network.predict(inputs)
+		S_ = np.concatenate([S_, pred], axis=1)
+		S_ = np.delete(S_, 0, 1)
+		mask = np.arange(batch_size) * nb_actions + a
+		mask = np.cast['int'](mask)
+		S_[mask] = S_prime
+
 		# Predict Q-Values
-		X = np.concatenate([S, S_prime], axis=0)
+		X = np.concatenate([S, S_], axis=0)
 		Y = model.online_network.predict(X)
 		best = np.argmax(Y[batch_size:], axis = 1)
-		YY = model.target_network.predict(X)
-		Qsa = YY[np.arange(len(best)), best].repeat(nb_actions).reshape((batch_size, nb_actions))
-		Y = model.online_network.predict(X)
+		YY = model.target_network.predict(S_)
 
 		# Get max Q-value
-		Qsa = np.max(Y[batch_size:], axis=1).repeat(nb_actions).reshape((batch_size, nb_actions))
+		Qsa = YY.flatten()[np.arange(batch_size*nb_actions)*nb_actions + best].reshape((batch_size, nb_actions))
 		delta = np.zeros((batch_size, nb_actions))
 		a = np.cast['int'](a)
 		delta[np.arange(batch_size), a] = 1
 
 		# Get target Q-Values
-		targets = ((1 - delta) * Y[:batch_size]) + ((alpha * ((delta * (r + (gamma * (1 - game_over) * Qsa))) - (delta * Y[:batch_size]))) + (delta * Y[:batch_size]))
+		targets = Y[:batch_size] + (alpha * (((delta * r) + (gamma * (1 - (delta * game_over)) * Qsa)) - Y[:batch_size]))
 		return S, targets
 
-	def get_batch_state_predictor(self, batch_size, actions):
+	def get_batch_state_predictor(self, model, batch_size):
 		'''
 		Method generates batch for Dispersed Double Deep Q-learn training.
 
 		'''
+		nb_actions = model.online_network.output_shape[-1]
+		input_dim = np.prod(self.input_shape)
+
 		# Generate Sample
-		samples = np.array(sample(self.memory, batch_size))
 		if len(self.memory) < batch_size:
 			batch_size = len(self.memory)
+		samples = np.array(sample(self.memory, batch_size))
 
 		# Restructure Data
 		S = samples[:, 0 : input_dim]
 		a = samples[:, input_dim]
 		S_prime = samples[:, input_dim + 2 : 2 * input_dim + 2]
 		S = S.reshape((batch_size, ) + self.input_shape)
-		for i in range(len(a)):
-			temp = [0 for j in range(len(actions))]
-			temp[i] = 1
-			a[i] = np.array(temp)
-		a = a.reshape((batch_size, ) + a.shape)
+
+		delta = np.zeros((batch_size, nb_actions))
+		a = np.cast['int'](a)
+		delta[np.arange(batch_size), a] = 1
+		a = delta
+
 		S_prime = S_prime.reshape((batch_size, ) + self.input_shape)
+		S_prime = S_prime[np.arange(batch_size), -1]
+		S_prime = S_prime.reshape(S_prime.shape[0], 1, S_prime.shape[1], S_prime.shape[2])
 
 		inputs = [S, a]
 

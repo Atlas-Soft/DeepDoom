@@ -8,6 +8,7 @@ Last Updated: 3/3/17
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 from RLAgent import RLAgent
 from DoomScenario import DoomScenario
 from Models import DQNModel, HDQNModel
@@ -23,17 +24,18 @@ This script is used to train DQN models and Hierarchical-DQN models.
 """
 
 # Training Parameters
-scenario = 'configs/exit_finding.cfg'
+scenario = 'rigid_turning.cfg'
 model_weights = None
 depth_radius = 1.0
 depth_contrast = 0.9
 learn_param = {
-    'learn_algo' : 'double_dqlearn',
+    'learn_algo' : 'dispersed_double_dqlearn',
     'exp_policy' : 'e-greedy',
     'frame_skips' : 4,
     'nb_epoch' : 100,
     'steps' : 5000,
     'batch_size' : 40,
+    'state_predictor_watch' : 15,
     'memory_size' : 10000,
     'nb_frames' : 3,
     'alpha' : [1.0, 0.1],
@@ -136,3 +138,4 @@ if __name__ == '__main__':
     if training == 'DQN': train_model()
     elif training == 'HDQN': train_heirarchical_model()
     elif training == 'Distilled-HDQN': train_distilled_model()
+    import gc; gc.collect()

@@ -15,6 +15,7 @@ Reinforcement Learning Models.
 from vizdoom import DoomGame, Mode, ScreenResolution
 import itertools as it
 import numpy as np
+np.seterr(divide='ignore', invalid='ignore')
 from tqdm import tqdm
 
 class DoomScenario:
@@ -34,7 +35,7 @@ class DoomScenario:
         '''
         self.config_filename = config_filename
         self.game = DoomGame()
-        self.game.load_config(config_filename)
+        self.game.load_config("configs/" + config_filename)
         self.game.set_window_visible(False)
         self.game.init()
 
@@ -86,11 +87,14 @@ class DoomScenario:
             processed_buffer = np.zeros(self.res[-2:])
         return processed_buffer
 
-    def run(self, agent, save_replay='', verbose=False):
+    def run(self, agent, save_replay='', verbose=False, return_data=False):
         '''
         Method runs a instance of DoomScenario.
 
         '''
+        if return_data:
+            data_S = []
+            data_a = []
         if verbose:
             print("\nRunning Simulation:", self.config_filename)
             self.pbar = tqdm(total=self.game.get_episode_timeout())
@@ -109,6 +113,12 @@ class DoomScenario:
             q = agent.model.online_network.predict(S)
             q = int(np.argmax(q[0]))
             a = agent.model.predict(self, q)
+            if return_data:
+                delta = np.zeros((len(self.actions)))
+                a_ = np.cast['int'](a)
+                delta[a_] = 1
+                data_S.append(S.reshape(S.shape[1], S.shape[2], S.shape[3]))
+                data_a.append(delta)
             if not self.game.is_episode_finished(): self.play(a, agent.frame_skips+1)
             if agent.model.__class__.__name__ == 'HDQNModel':
                 if q >= len(agent.model.actions):
@@ -123,6 +133,10 @@ class DoomScenario:
         if verbose:
             self.pbar.close()
             print("Total Score:", score)
+        if return_data:
+            data_S = np.array(data_S)
+            data_a = np.array(data_a)
+            return [data_S, data_a]
         return score
 
     def replay(self, filename, verbose=False):
