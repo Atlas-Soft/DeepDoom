@@ -24,12 +24,12 @@ This script is used to train DQN models and Hierarchical-DQN models.
 """
 
 # Training Parameters
-scenario = 'rigid_turning.cfg'
+scenario = 'exit_finding.cfg'
 model_weights = None
 depth_radius = 1.0
 depth_contrast = 0.9
 learn_param = {
-    'learn_algo' : 'dispersed_double_dqlearn',
+    'learn_algo' : 'double_dqlearn',
     'exp_policy' : 'e-greedy',
     'frame_skips' : 4,
     'nb_epoch' : 100,
@@ -43,7 +43,7 @@ learn_param = {
     'alpha_wait' : 10,
     'gamma' : 0.9,
     'epsilon' : [1.0, 0.1],
-    'epsilon_rate' : 0.7,
+    'epsilon_rate' : 0.4,
     'epislon_wait' : 10,
     'nb_tests' : 50,
 }

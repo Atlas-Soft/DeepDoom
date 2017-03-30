@@ -30,7 +30,7 @@ class RLAgent:
 	* Deep Q-Learning					(learn_algo = dqlearn)
 	* Deep SARSA						(learn_algo = sarsa)
 	* Double Deep Q-Learning			(learn_algo = double_dqlearn)
-	* Dispersed Double Deep Q-Learning 	(learn_algo = dispersed_double_dqlearn)
+	* Dispersed Double Deep Q-Learning 	(learn_algo = dispersed_double_dqlearn) ***Not Working
 
 
 	The following are exploration policies implemented:
