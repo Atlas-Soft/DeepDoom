@@ -18,14 +18,14 @@ str DoorTexture = "BIGDOOR1";
 script 1 (void)
 {
     Generic_Door(0, 34, 0, 16, 0);
-    reward += 50.0;
+    //reward += 50.0;
 }
 
 //Open Door Reward Reverse
 script 2 (void)
 {
     Generic_Door(0, 34, 0, 16, 0);
-    reward += 5.0;
+    //reward += 5.0;
 }
 
 //Exit Reward
@@ -35,6 +35,29 @@ script 3 (void)
     Exit_Normal(0);
 }
 
+//Reward for moving through doors
+script 4 (void){
+    reward += 50.0;
+    //print(f:reward);
+}
+
+//Reward for moving through corridors
+script 5 (void){
+    reward += 10.0;
+    //print(f:reward);
+}
+
+//Randomizes player starting angle
+script 6 ENTER 
+{
+SetActorAngle(0, random(0.30, 0.70));
+}
+
+//Wall Bump Penalty
+script 7 (void) 
+{
+    reward -= 10.0;
+}
 // randomly chooses a ceiling texture per entering the level
 script 20 ENTER {
     switch (Random(1,3)) {
