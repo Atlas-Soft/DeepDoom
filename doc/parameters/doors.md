@@ -1,13 +1,13 @@
 ## Training Parameters for Doors
 ```python
-scenario = 'configs/doors.cfg'
-model_weights = 'doors.h5'
+scenario = 'doors.cfg'
+model_weights = None
 depth_radius = 1.0
-depth_contrast = 0.5
+depth_contrast = 0.1
 learn_param = {
     'learn_algo' : 'dqlearn',
     'exp_policy' : 'e-greedy',
-    'frame_skips' : 6,
+    'frame_skips' : 4,
     'nb_epoch' : 100,
     'steps' : 5000,
     'batch_size' : 40,
@@ -20,23 +20,23 @@ learn_param = {
     'epsilon' : [1.0, 0.1],
     'epsilon_rate' : 0.7,
     'epislon_wait' : 10,
-    'nb_tests' : 100,
-    'checkpoint' : 1,
-    'filename' : 'doors_.h5'
+    'nb_tests' : 50
 }
 training = 'DQN'
+training_arg = []
 ```
 
 ##Testing Parameters for Doors
 ```python
-scenario = 'configs/doors.cfg'
-model_weights = "doors.h5"
+scenario = 'doors.cfg'
+model_weights = "double_dqlearn_DQNModel_doors.h5"
 depth_radius = 1.0
-depth_contrast = 0.5
+depth_contrast = 0.1
 test_param = {
-    'frame_skips' : 6,
+    'frame_skips' : 4,
     'nb_frames' : 3
 }
 nb_runs = 1
 testing = 'DQN'
+test_state_prediction = False
 ```

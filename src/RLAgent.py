@@ -28,7 +28,7 @@ class RLAgent:
 	The following are learning algorithms implemented:
 
 	* Deep Q-Learning					(learn_algo = dqlearn)
-	* Deep SARSA						(learn_algo = sarsa)
+	* Deep SARSA						(learn_algo = sarsa) ***Not Working
 	* Double Deep Q-Learning			(learn_algo = double_dqlearn)
 	* Dispersed Double Deep Q-Learning 	(learn_algo = dispersed_double_dqlearn) ***Not Working
 

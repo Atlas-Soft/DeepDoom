@@ -1,13 +1,13 @@
-## Training Parameters for Switches
+## Training Parameters for Distilling All Skills
 ```python
-scenario = 'configs/switches.cfg'
-model_weights = 'switches.h5'
+scenario = 'all_skills.cfg'
+model_weights = None
 depth_radius = 1.0
 depth_contrast = 0.5
 learn_param = {
     'learn_algo' : 'dqlearn',
     'exp_policy' : 'e-greedy',
-    'frame_skips' : 6,
+    'frame_skips' : 4,
     'nb_epoch' : 100,
     'steps' : 5000,
     'batch_size' : 40,
@@ -20,23 +20,23 @@ learn_param = {
     'epsilon' : [1.0, 0.1],
     'epsilon_rate' : 0.7,
     'epislon_wait' : 10,
-    'nb_tests' : 100,
-    'checkpoint' : 1,
-    'filename' : 'switches_.h5'
+    'nb_tests' : 50
 }
-training = 'DQN'
+training = 'Distilled-HDQN'
+training_arg = []
 ```
 
-##Testing Parameters for Switches
+##Testing Parameters for All Skills
 ```python
-scenario = 'configs/switches.cfg'
-model_weights = "switches.h5"
+scenario = 'all_skills.cfg'
+model_weights = "distilled_HDQNModel_all_skills.h5"
 depth_radius = 1.0
 depth_contrast = 0.5
 test_param = {
-    'frame_skips' : 6,
+    'frame_skips' : 4,
     'nb_frames' : 3
 }
 nb_runs = 1
-testing = 'DQN'
+testing = 'Distilled-HDQN'
+test_state_prediction = False
 ```

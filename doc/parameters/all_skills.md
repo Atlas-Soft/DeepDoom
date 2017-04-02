@@ -1,9 +1,9 @@
-## Training Parameters for Exit_Finding
+## Training Parameters for All Skills
 ```python
-scenario = 'exit_finding.cfg'
+scenario = 'all_skills.cfg'
 model_weights = None
 depth_radius = 1.0
-depth_contrast = 0.9
+depth_contrast = 0.5
 learn_param = {
     'learn_algo' : 'dqlearn',
     'exp_policy' : 'e-greedy',
@@ -22,21 +22,21 @@ learn_param = {
     'epislon_wait' : 10,
     'nb_tests' : 50
 }
-training = 'DQN'
+training = 'HDQN'
 training_arg = []
 ```
 
-##Testing Parameters for Exit_Finding
+##Testing Parameters for All Skills
 ```python
-scenario = 'exit_finding.cfg'  # also compatible with exit_finding.cfg, rigid_turning_validation.cfg, corridors.cfg
-model_weights = "double_dqlearn_DQNModel_exit_finding.h5"
+scenario = 'all_skills.cfg'
+model_weights = "double_dqlearn_HDQNModel_all_skills.h5"
 depth_radius = 1.0
-depth_contrast = 0.9
+depth_contrast = 0.5
 test_param = {
     'frame_skips' : 4,
     'nb_frames' : 3
 }
 nb_runs = 1
-testing = 'DQN'
+testing = 'HDQN'
 test_state_prediction = False
 ```
