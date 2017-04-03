@@ -1,9 +1,9 @@
-# DeepDoom: Navigating Complex Environments Using Hierarchical Deep Q-Networks
+# DeepDoom: Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks
 
 ![Current Version](https://img.shields.io/badge/build-alpha-orange.svg)
 ![License](https://badges.frapsoft.com/os/mit/mit.svg?v=102)
 
-**Last Updated: March 4, 2016**
+**Last Updated: April 2, 2016**
 
 **DeepDoom Team:**
 
@@ -14,117 +14,58 @@
 
 ### Table of Contents:
 1. [Introduction](#introduction)
-2. [DQN and Hierarchical DQN](#dqn-and-hierarchical-dqn)
-3. [Scenarios](#scenarios)
+2. [Scenarios](#scenarios)
  - [Rigid Turning](#scenario-1--rigid-turning)
  - [Exit Finding](#scenario-2--exit-finding)
  - [Doors](#scenario-3--doors)
-4. [Results](#results)
-5. [Getting Started](#getting-started)
+3. [Results](#results)
+4. [Getting Started](#getting-started)
 
 ## Introduction
 
-Google DeepMind's landmark paper, [***Playing Atari With Deep Reinforcement
-Learning***](https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf), shows the feasibility of
-game playing using only visual input. This was done by combining Deep Convolutional
-Neural Networks (CNNs) with Q-learning. Deep Q-Networks (DQNs) were able to learn and play
-2D Atari-2600 games such as Pong, Breakout, and Space Invaders. Since then, there has been
-much research into applying these same techniques in 3D environments such as
-[Minecraft](https://www.ijcai.org/Proceedings/16/Papers/643.pdf) and Doom.
+Despite improvements to game-playing Artificial Intelligence (AI), AIs rely on looking
+“under the hood” of their respective games in order to gain access to the various internal variables,
+thus holding an unfair advantage over their human counterparts. However, ally and enemy NPCs (non-playable characters)
+are typically designed to keep the human player engaged with a fair challenge. When set on easier difficulty settings,
+AIs are typically considered “pushovers,” while on harder difficulty settings, AIs are capable of playing near “perfect.”
+In order to design a more balanced and enjoyable experience, it may be more suitable for agents to behave similar to
+a human player using the same available environmental information.
 
-[ViZDoom](https://arxiv.org/pdf/1605.02097.pdf) is a Doom based AI research platform
-which allows us to test reinforcement learning techniques in Doom's 3D environment.
-ViZDoom's Visual Doom AI Competition shows that AIs can be taught to play sufficiently
-in the Doom environment using DQNs.
+Google DeepMind’s paper, [Playing Atari With Deep Reinforcement Learning](https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf),
+shows the feasibility of game playing using only visual input. This was done by combining Deep Convolutional Neural
+Networks (CNNs) with Q-Learning, forming Deep Q-Networks (DQNs). Agents trained via DQNs were able to learn and play
+two-dimensional (2D) Atari 2600 games such as Pong, Breakout, and Space Invaders. In other words, DQNs guided the agent
+towards the best policy using positive or negative responses from the game’s respective environments. Since then, there
+has been an ample amount of research into applying these same reinforcement learning techniques to train agents within
+three-dimensional (3D) environments such as [Minecraft](https://www.ijcai.org/Proceedings/16/Papers/643.pdf) and Doom.
 
-[Previous research](https://arxiv.org/pdf/1609.05521.pdf) done using ViZDoom has mainly
-focused on combat with only a minor focus on navigation (*item/health pickups*). Navigation
-is an important part in playing Doom, especially in single-player instances of the game.
-Levels designed for human players are complex, requiring the player to use multiple
-navigational behaviors throughout the level.
+The Doom series began in 1993 with the release of the first game, DOOM, and it has since sparked
+countless adaptations of 3D first-person shooter (FPS) games. These environments heightened the level design complexity
+with the incorporation of depth, providing another factor when designing agents. The relevancy of Doom with Artificial
+Intelligence can be contributed to the AI research platform [ViZDoom](https://arxiv.org/pdf/1605.02097.pdf) alongside
+the scenario customization software Doom Builder and Slade (of which we used Doom Builder). ViZDoom allows programmers
+to test reinforcement learning techniques within the environment of Doom. Its Visual Doom AI Competitions, as well as
+[previous research](https://arxiv.org/pdf/1609.05521.pdf), proved the feasibility of teaching agents to sufficiently
+play Doom using DQNs. However, they mainly focused on the combat aspect of Doom, with only a minor focus on the
+navigation aspect (via item and health pickups).
 
-We propose a [hierarchical implementation](https://arxiv.org/pdf/1604.07255.pdf) of the Deep
-Q-Networks in order to learn complex navigational problems. DQN models are first trained on simple
-tasks and then integrated as sub-models in a Hierarchical-DQN model. This allows knowledge
-learned from the simple tasks to be used in training more complex tasks.
+For our capstone project, we propose to create an agent capable of solving complex navigational problems using a
+[hierarchical implementation](https://arxiv.org/pdf/1604.07255.pdf) of the Deep Q-Networks, expanding on ViZDoom’s
+experimentations except with a heavier focus on navigation. We will first utilize DQN models to separately train
+simple tasks (such as turning and finding exits) and then integrate these as sub-models in a Hierarchical
+Deep Q-Network (h-DQN) model. In addition, we will investigate distilling, or compressing, trained h-DQN models
+into the simple DQN architecture for a more resource-efficient execution. Increasingly-complex behaviors can then
+be achieved by incrementally-aggregating distilled h-DQN models with other skills into other Hierarchical-DQN models,
+thus reflecting our goal of developing a more proficient Doom-playing Artificial Intelligence.
 
-## DQN and Hierarchical-DQN
-> Under Construction
-
-### Q-Learning:
-
-Reinforcement learning involves learning the best action to take at any given state through rewards recieved
-from the environment. This process is commonly represented as a ***Markov Decision Process*** which is a finite
-sequence of states, actions and rewards:
-
-- ***s<sub>0</sub>, a<sub>0</sub>, r<sub>0</sub>, ..., s<sub>n</sub>, a<sub>n</sub>, r<sub>n</sub>***
-
-An agent situated in an environment has a set of available actions, each of which transforms the state of the
-environment in some way. The agent must learn the best policy for choosing actions that will maximize the reward.
-
-A good strategy for agents is to maximize the total future reward from the current time frame:
-
-- ***R<sub>t</sub> = r<sub>t</sub> + r<sub>t+1</sub> + ... + r<sub>t+n</sub>***
-
-In stochastic environments, its better to use a discounted total future reward:
-
-- ***R<sub>t</sub> = r<sub>t</sub> + g r<sub>t+1</sub> + ... + g<sup>n-t</sup> r<sub>t+n</sub>***
-
-***g*** is the discount factor between 0.0 and 1.0. If set to 0.0, the agent will only care about immediate reward.
-
-***Q-learning*** defines a function ***Q(s,a)*** which represents the maximum possible future reward from preforming
-action ***a*** on state ***s*** and preforming optimally there after. In other words, the Q-function gives the
-"quality" of an action at a given state:
-
-- ***Q(s<sub>t</sub>,a<sub>t</sub>) = max R<sub>t</sub>***
-
-Knowing the Q-values, we can determine policy ***π(s)***:
-
-- ***π(s) = argmax<sub>a</sub> Q(s,a)***
-
-In order to approximate the ***Q(s,a)***, the ***Bellman Equation*** is used:
-
-- ***Q(s,a) = Q(s,a) + α (r + g max<sub>a'</sub> Q(s',a') - Q(s,a))***
-
-***α*** is the Q-learning rate between 0.0 and 1.0. If set to 0.0, Q-function remains the same.
-Q-learning works by iteratively updating the Q-function using the ***Bellman Equation***.
-In early stages of training the ***Q(s,a)*** approximation can be completely wrong, but given enough time
-the function will converge and represent the true Q-values.
-
-### Approximating Q-function with CNNs:
-
-Earlier implementations of ***Q-learning*** used tables to store Q-values of all possible state-action pairs. This is
-not feasible for large state spaces like Doom. ***Convolutional Neural Networks*** have been very effective in the
-domain of image recognition. In simple terms, CNNs function by abstracting features from images and using those
-features to approximate the desired function. Google's Deepmind has shown that CNNs can be used to approximate
-Q-functions from visual pixel data.
-
-The Deep network architecture implemented for this project is defined below:
-
-> TODO: Make Layer Chart
-
-In order to train the network, we used RMSprop as the optimization algorithm and the mean-squared as the loss
-function.
-
-### Replay Memory:
-
-Approximating Q-values using non-linear function like CNNs can be unstable. ***Replay Memory*** reduces the chance
-of getting stuck at a local minimum by using a random batch from a list of ***transitions*** to train the DQN.
-Transitions are defined as:
-
-- ***( s, a, r, s' )***
-
-New Q-values are calculated using the batch and the ***Bellman Equation***, and then used to update the DQN.
-
-### Exploration vs Exploitation:
-
-
-### Hierarchical Q-Learning:
-
+For more information, [DeepDoom: Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks](DeepDoom - Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks.pdf)
 
 ## Scenarios
 
-We designed a set of scenarios where the agent will learn specific behaviors. These scenarios were created using Doom Builder v2.1+ and ViZDoom v1.1+. Reward functions are defined via the Doom Builder Script Editor using the Action Code Script (ACS) scripting language. For a quick tutorial, [click here](https://zdoom.org/wiki/ACS).
+We designed a set of scenarios where the agent will learn specific behaviors.
+These scenarios were created using Doom Builder v2.1+ and ViZDoom v1.1+.
+Reward functions are defined via the Doom Builder Script Editor using the Action Code Script (ACS) scripting language.
+For a quick tutorial, [click here](https://zdoom.org/wiki/ACS).
 
 >***Note: living rewards are defined within the ViZDoom config file.***
 
@@ -239,8 +180,6 @@ Nvidia GTX 750 Ti (2 GB VRAM)
 SanDisk SSD Plus 240GB
 ```
 
-
-
 The performance of the models are measured by averaging the total reward over 100 test runs after each training
 epoch. A demonstration of each trained model in their respective training scenario is also provided.
 
@@ -257,7 +196,7 @@ Rigid Turning training parameters can be found [here](doc/parameters/rigid_turni
 
 #### Average Total Reward Per Epoch:
 
-![rigid_turing_total_reward](doc/figures/rigid_turning_total_reward.png)
+![rigid_turing_total_reward](doc/figures/double-dqlearn_DQNModel_rigid-turning_training_results.png)
 
 #### Demo:
 
@@ -271,7 +210,7 @@ Exit Finding training parameters can be found [here](doc/parameters/exit_finding
 
 #### Average Total Reward Per Epoch:
 
-![exit_finding_total_reward](doc/figures/exit_finding__total_reward.png)
+![exit_finding_total_reward](doc/figures/double-dqlearn_DQNModel_exit-finding_training_results.png)
 
 #### Demo:
 
@@ -285,7 +224,7 @@ Doors training parameters can be found [here](doc/parameters/doors.md).
 
 #### Average Total Reward Per Epoch:
 
-![doors_total_reward](doc/figures/doors__total_reward.png)
+![doors_total_reward](doc/figures/double-dqlearn_DQNModel_doors_training_results.png)
 
 #### Demo:
 
@@ -324,7 +263,7 @@ in [`Test.py`](src/Test.py):
 
 # Testing Parameters
 scenario = 'configs/rigid_turning.cfg'  # Vizdoom Scenario
-model_weights = "rigid_turning.h5"      # DQN Model Weights .h5 file
+model_weights = "double_dqlearn_DQNModel_rigid_turning.h5"      # DQN Model Weights .h5 file
 depth_radius = 1.0                      # Depth Buffer Radius (recommended to keep at 1.0)  
 depth_contrast = 0.9                    # Depth Buffer contrast on Greyscaled image
 test_param = {
@@ -341,7 +280,7 @@ nb_runs = 10                            # Number of Testing runs done on model
 From [`/src/`](src) run [`Test.py`](src/Test.py):
 
 ```
-$python3 Test.py
+/DeepDoom/src $python3 Test.py
 Using TensorFlow backend.
 Testing DQN-Model: rigid_turning.h5
 

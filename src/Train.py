@@ -45,7 +45,7 @@ learn_param = {
     'epsilon' : [1.0, 0.1],
     'epsilon_rate' : 0.7,
     'epislon_wait' : 10,
-    'nb_tests' : 50,
+    'nb_tests' : 20,
 }
 training = 'HDQN'
 training_arg = [4,]
@@ -98,7 +98,7 @@ def train_heirarchical_model():
 
 def train_distilled_model():
     '''
-    Method trains distlled primitve DQN-Model from Hierarchical-DQN model.
+    Method trains distlled DQN-Model from Hierarchical-DQN model.
 
     '''
     # Initiates VizDoom Scenario
