@@ -58,7 +58,7 @@ into the simple DQN architecture for a more resource-efficient execution. Increa
 be achieved by incrementally-aggregating distilled h-DQN models with other skills into other Hierarchical-DQN models,
 thus reflecting our goal of developing a more proficient Doom-playing Artificial Intelligence.
 
-For more information, [DeepDoom: Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks](DeepDoom - Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks.pdf)
+For more information, [DeepDoom: Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks](DeepDoom_Paper.pdf)
 
 ## Scenarios
 
