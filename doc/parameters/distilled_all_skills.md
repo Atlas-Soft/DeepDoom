@@ -18,12 +18,12 @@ learn_param = {
     'alpha_wait' : 10,
     'gamma' : 0.9,
     'epsilon' : [1.0, 0.1],
-    'epsilon_rate' : 0.7,
+    'epsilon_rate' : 0.35,
     'epislon_wait' : 10,
     'nb_tests' : 50
 }
 training = 'Distilled-HDQN'
-training_arg = []
+training_arg = [4,]
 ```
 
 ##Testing Parameters for All Skills
