@@ -12,6 +12,7 @@ Models are built using the Keras high-level neural network library.
 Keras uses TensorFlow and Theano as back-ends.
 
 """
+import itertools as it
 import numpy as np
 np.set_printoptions(precision=3)
 import keras.backend as K
@@ -253,7 +254,7 @@ class HDQNModel:
         # ASk dr. Pierce about sharpening data points.
         # Sharpen q values using Softmax
         final_q = np.array(final_q)
-        softmax_q = np.exp((final_q)/0.15)
+        softmax_q = np.exp((final_q)/1.0)
         softmax_q =  softmax_q / softmax_q.sum(axis=0)
         #print(softmax_q)
 
@@ -335,3 +336,39 @@ class StatePredictionModel:
         Method saves .h5 weight files to /data/ai_model_weights.
         '''
         self.autoencoder_network.save_weights('../data/model_weights/' + filename, overwrite=True)
+
+def all_skills_HDQN(resolution, skill_frame_skips, depth_radius, depth_contrast, param):
+    '''
+    '''
+    acts = [list(a) for a in it.product([0, 1], repeat=5)]
+    actions_1 = []
+    actions_2 = []
+    for i in range(len(acts)):
+        if i < 16: actions_1.append(acts[i])
+        if acts[i][2] != 1: actions_2.append(acts[i])
+    model_rigid_turning = DQNModel(resolution=resolution, nb_frames=param['nb_frames'], actions=actions_1, depth_radius=1.0, depth_contrast=0.9)
+    model_rigid_turning.load_weights('double_dqlearn_DQNModel_rigid_turning.h5')
+    model_exit_finding = DQNModel(resolution=resolution, nb_frames=param['nb_frames'], actions=actions_1, depth_radius=1.0, depth_contrast=0.9)
+    model_exit_finding.load_weights('double_dqlearn_DQNModel_exit_finding.h5')
+    model_doors = DQNModel(resolution=resolution, nb_frames=param['nb_frames'], actions=actions_2, depth_radius=1.0, depth_contrast=0.5)
+    model_doors.load_weights('double_dqlearn_DQNModel_doors.h5')
+    models = [model_rigid_turning, model_exit_finding, model_doors]
+    model = HDQNModel(sub_models=models, skill_frame_skip=skill_frame_skips, resolution=resolution, nb_frames=param['nb_frames'], actions=[], depth_radius=depth_radius, depth_contrast=depth_contrast)
+    return model
+
+def all_skills_shooting_HDQN(resolution, skill_frame_skips, depth_radius, depth_contrast, param):
+    '''
+    '''
+    acts = [list(a) for a in it.product([0, 1], repeat=6)]
+    actions_1 = []
+    actions_2 = []
+    for i in range(len(acts)):
+        if i < 32: actions_1.append(acts[i])
+        if acts[i][1] != 1 and acts[i][2] != 1 and acts[i][3] != 1: actions_2.append(acts[i])
+    model_all_skills = DQNModel(resolution=resolution, nb_frames=param['nb_frames'], actions=actions_1, depth_radius=1.0, depth_contrast=0.5)
+    model_all_skills.load_weights('distilled_HDQNModel_all_skills.h5')
+    model_shooting = DQNModel(resolution=resolution, nb_frames=param['nb_frames'], actions=actions_2, depth_radius=1.0, depth_contrast=0.75)
+    model_shooting.load_weights('double_dqlearn_DQNModel_shooting.h5')
+    models = [model_all_skills, model_shooting]
+    model = HDQNModel(sub_models=models, skill_frame_skip=skill_frame_skips, resolution=resolution, nb_frames=param['nb_frames'], actions=[], depth_radius=depth_radius, depth_contrast=depth_contrast)
+    return model

@@ -1,4 +1,4 @@
-# DeepDoom: Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks
+# DeepDoom: Navigating 3D Environments Visually Using Hierarchical Deep Q-Networks and Distilled Knowledge
 
 ![Current Version](https://img.shields.io/badge/build-alpha-orange.svg)
 ![License](https://badges.frapsoft.com/os/mit/mit.svg?v=102)
@@ -23,7 +23,7 @@
 
 ## Introduction
 
-Despite improvements to game-playing Artificial Intelligence (AI), AIs rely on looking
+Despite improvements to game-playing Artificial Intelligence (AI), game AI rely on looking
 “under the hood” of their respective games in order to gain access to the various internal variables,
 thus holding an unfair advantage over their human counterparts. However, ally and enemy NPCs (non-playable characters)
 are typically designed to keep the human player engaged with a fair challenge. When set on easier difficulty settings,
@@ -49,14 +49,14 @@ to test reinforcement learning techniques within the environment of Doom. Its Vi
 play Doom using DQNs. However, they mainly focused on the combat aspect of Doom, with only a minor focus on the
 navigation aspect (via item and health pickups).
 
-For our capstone project, we propose to create an agent capable of solving complex navigational problems using a
+For our capstone project, we created an agent capable of solving complex navigational problems using a
 [hierarchical implementation](https://arxiv.org/pdf/1604.07255.pdf) of the Deep Q-Networks, expanding on ViZDoom’s
-experimentations except with a heavier focus on navigation. We will first utilize DQN models to separately train
-simple tasks (such as turning and finding exits) and then integrate these as sub-models in a Hierarchical
-Deep Q-Network (h-DQN) model. In addition, we will investigate distilling, or compressing, trained h-DQN models
-into the simple DQN architecture for a more resource-efficient execution. Increasingly-complex behaviors can then
-be achieved by incrementally-aggregating distilled h-DQN models with other skills into other Hierarchical-DQN models,
-thus reflecting our goal of developing a more proficient Doom-playing Artificial Intelligence.
+experimentations except with a heavier focus on navigation. We first utilized DQN models to separately train
+simple tasks (such as turning and finding exits) and then integrated these as sub-models in a Hierarchical
+Deep Q-Network (h-DQN) model. In addition, we distilled, or compressed, trained h-DQN models
+into the simple DQN architecture for a more resource-efficient execution. Increasingly-complex behaviors were achieved 
+by incrementally-aggregating distilled h-DQN models with other skills into other Hierarchical-DQN models,
+reflecting our goal of developing a more visually fit Doom-playing Artificial Intelligence.
 
 For more information, [DeepDoom: Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks](DeepDoom_Paper.pdf)
 
@@ -147,7 +147,7 @@ The following are descriptions of the scenarios:
  - The agent gets penalized for not moving.
 
 #### Available Actions:
- - [USE, MOVE_FORWARD]
+ - [USE, MOVE_FORWARD, TURN_LEFT, TURN_RIGHT]
  - This set of actions is the minimum required to complete the doors scenario.
 
 #### Goal Function:
@@ -229,6 +229,42 @@ Doors training parameters can be found [here](doc/parameters/doors.md).
 #### Demo:
 
 [![Doors Demo](http://img.youtube.com/vi/SDnrMJ6Y6JE/0.jpg)](http://www.youtube.com/watch?v=SDnrMJ6Y6JE)
+
+---
+
+### All Navigation Skills
+
+All Navigation Skills training parameters can be found [here](doc/parameters/all_skills.md).
+
+#### Average Total Reward Per Epoch:
+
+![all_skills_total_reward](doc/figures/double-dqlearn_HDQNModel_all-skills_training_results.png)
+
+#### Demo:
+
+---
+
+### Distilled All Navigation Skills
+
+Distilled All Navigation Skills training parameters can be found [here](doc/parameters/distilled_all_skills.md).
+
+#### Average Total Reward Per Epoch:
+
+![distilled_all_skills_total_reward](doc/figures/distilled_HDQNModel_all-skills_training_results.png)
+
+#### Demo:
+
+---
+
+### Shooting
+
+Shooting training parameters can be found [here](doc/parameters/shooting.md).
+
+#### Average Total Reward Per Epoch:
+
+![shooting_total_reward](doc/figures/double-dqlearn_DQNModel_shooting_training_results.png)
+
+#### Demo:
 
 ## Getting Started
 

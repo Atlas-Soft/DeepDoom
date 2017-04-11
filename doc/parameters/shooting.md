@@ -1,9 +1,9 @@
-## Training Parameters for Doors
+## Training Parameters for Shooting
 ```python
-scenario = 'doors.cfg'
+scenario = 'shooting.cfg'
 model_weights = None
 depth_radius = 1.0
-depth_contrast = 0.5
+depth_contrast = 0.75
 learn_param = {
     'learn_algo' : 'dqlearn',
     'exp_policy' : 'e-greedy',
@@ -13,7 +13,7 @@ learn_param = {
     'batch_size' : 40,
     'memory_size' : 10000,
     'nb_frames' : 3,
-    'alpha' : [1.0, 0.1],
+    'alpha' : [1.0, 1.0],
     'alpha_rate' : 0.7,
     'alpha_wait' : 10,
     'gamma' : 0.9,
@@ -26,12 +26,12 @@ training = 'DQN'
 training_arg = []
 ```
 
-##Testing Parameters for Doors
+##Testing Parameters for Shooting
 ```python
-scenario = 'doors.cfg'
-model_weights = "double_dqlearn_DQNModel_doors.h5"
+scenario = 'shooting.cfg'
+model_weights = "double_dqlearn_DQNModel_shooting.h5"
 depth_radius = 1.0
-depth_contrast = 0.5
+depth_contrast = 0.75
 test_param = {
     'frame_skips' : 4,
     'nb_frames' : 3

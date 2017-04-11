@@ -30,7 +30,6 @@ class RLAgent:
 	* Deep Q-Learning					(learn_algo = dqlearn)
 	* Deep SARSA						(learn_algo = sarsa) ***Not Working
 	* Double Deep Q-Learning			(learn_algo = double_dqlearn)
-	* Dispersed Double Deep Q-Learning 	(learn_algo = dispersed_double_dqlearn) ***Not Working
 
 
 	The following are exploration policies implemented:
@@ -175,10 +174,7 @@ class RLAgent:
 				elif self.learn_algo == 'double_dqlearn':
 					batch = self.memory.get_batch_ddqlearn(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
 				elif self.learn_algo == 'dispersed_double_dqlearn':
-					if epoch >= self.state_predictor_watch:
-						batch = self.memory.get_batch_dddqlearn(model=self.model, batch_size=int(self.batch_size/self.model.nb_actions)+1, alpha=self.alpha, gamma=self.gamma)
-					else:
-						batch = self.memory.get_batch_ddqlearn(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
+					batch = self.memory.get_batch_ddqlearn(model=self.model, batch_size=self.batch_size, alpha=self.alpha, gamma=self.gamma)
 					self.state_predictor_batch = self.memory.get_batch_state_predictor(model=self.model, batch_size=10)
 
 				# Train model online network
@@ -224,7 +220,7 @@ class RLAgent:
 
 			# Save best weights
 			total_reward_avg = training_data[-1][1]
-			if best_score is None or (best_score and total_reward_avg > best_score):
+			if best_score is None or (best_score is not None and total_reward_avg > best_score):
 				self.model.save_weights(self.learn_algo+'_'+ self.model.__class__.__name__+'_'+ game.config_filename[:-4] + ".h5")
 				best_score = total_reward_avg
 
@@ -328,8 +324,8 @@ class RLAgent:
 
 			# Save best weights
 			total_reward_avg = training_data[-1][1]
-			if best_score is None or (best_score and total_reward_avg > best_score):
-				self.model.save_weights('distilled_'+ self.model.__class__.__name__+'_'+ game.config_filename[:-4] + ".h5")
+			if best_score is None or (best_score is not None and total_reward_avg > best_score):
+				student_agent.model.save_weights('distilled_'+ self.model.__class__.__name__+'_'+ game.config_filename[:-4] + ".h5")
 				best_score = total_reward_avg
 
 			# Print Epoch Summary
@@ -475,58 +471,6 @@ class ReplayMemory():
 
 		# Get target Q-Values
 		targets = ((1 - delta) * Y[:batch_size]) + ((alpha * ((delta * (r + (gamma * (1 - game_over) * Qsa))) - (delta * Y[:batch_size]))) + (delta * Y[:batch_size]))
-		return S, targets
-
-	def get_batch_dddqlearn(self, model, batch_size, alpha=0.01, gamma=0.9):
-		'''
-		Method generates batch for Dispersed Double Deep Q-learn training.
-
-		'''
-		nb_actions = model.online_network.output_shape[-1]
-		input_dim = np.prod(self.input_shape)
-
-		# Generate Sample
-		if len(self.memory) < batch_size:
-			batch_size = len(self.memory)
-		samples = np.array(sample(self.memory, batch_size))
-
-		# Restructure Data
-		S = samples[:, 0 : input_dim]
-		a = samples[:, input_dim]
-		r = samples[:, input_dim + 1]
-		S_prime = samples[:, input_dim + 2 : 2 * input_dim + 2]
-		a_prime = samples[:, 2 * input_dim + 2]
-		game_over = samples[:, 2 * input_dim + 3]
-		r = r.repeat(nb_actions).reshape((batch_size, nb_actions))
-		game_over = game_over.repeat(nb_actions).reshape((batch_size, nb_actions))
-		S = S.reshape((batch_size, ) + self.input_shape)
-		S_prime = S_prime.reshape((batch_size, ) + self.input_shape)
-
-		S_ = S.repeat(nb_actions).reshape((batch_size*nb_actions, S.shape[1], S.shape[2], S.shape[3]))
-		acts = np.zeros((batch_size*nb_actions, nb_actions))
-		acts[np.arange(batch_size*nb_actions), np.arange(batch_size*nb_actions)%nb_actions] = 1
-		inputs = [S_, acts]
-		pred = model.state_predictor.autoencoder_network.predict(inputs)
-		S_ = np.concatenate([S_, pred], axis=1)
-		S_ = np.delete(S_, 0, 1)
-		mask = np.arange(batch_size) * nb_actions + a
-		mask = np.cast['int'](mask)
-		S_[mask] = S_prime
-
-		# Predict Q-Values
-		X = np.concatenate([S, S_], axis=0)
-		Y = model.online_network.predict(X)
-		best = np.argmax(Y[batch_size:], axis = 1)
-		YY = model.target_network.predict(S_)
-
-		# Get max Q-value
-		Qsa = YY.flatten()[np.arange(batch_size*nb_actions)*nb_actions + best].reshape((batch_size, nb_actions))
-		delta = np.zeros((batch_size, nb_actions))
-		a = np.cast['int'](a)
-		delta[np.arange(batch_size), a] = 1
-
-		# Get target Q-Values
-		targets = Y[:batch_size] + (alpha * (((delta * r) + (gamma * (1 - (delta * game_over)) * Qsa)) - Y[:batch_size]))
 		return S, targets
 
 	def get_batch_state_predictor(self, model, batch_size):

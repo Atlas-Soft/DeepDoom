@@ -102,7 +102,7 @@ class DoomScenario:
         # Initiate New Instance
         self.game.close()
         self.game.set_window_visible(False)
-        self.game.add_game_args("+vid_forcesurface 1 -nomonsters")
+        self.game.add_game_args("+vid_forcesurface 1 ")
         self.game.init()
         if save_replay != '': self.game.new_episode("../data/replay_data/" + save_replay)
         else: self.game.new_episode()
@@ -139,7 +139,7 @@ class DoomScenario:
             return [data_S, data_a]
         return score
 
-    def replay(self, filename, verbose=False):
+    def replay(self, filename, verbose=False, doom_like=False):
         '''
         Method runs a replay of the simulations at 800 x 600 resolution.
 
@@ -150,8 +150,14 @@ class DoomScenario:
         self.game.close()
         self.game.set_screen_resolution(ScreenResolution.RES_800X600)
         self.game.set_window_visible(True)
-        self.game.set_ticrate(60)
+        self.game.set_ticrate(30)
         self.game.add_game_args("+vid_forcesurface 1")
+        if doom_like:
+            self.game.set_render_hud(True)
+            self.game.set_render_minimal_hud(False)
+            self.game.set_render_crosshair(False)
+            self.game.set_render_weapon(True)
+            self.game.set_render_particles(True)
         self.game.init()
         self.game.replay_episode("../data/replay_data/" + filename)
 

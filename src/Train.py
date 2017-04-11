@@ -11,12 +11,10 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 from RLAgent import RLAgent
 from DoomScenario import DoomScenario
-from Models import DQNModel, HDQNModel
+from Models import DQNModel, HDQNModel, all_skills_HDQN
 from keras.optimizers import RMSprop, SGD, Adadelta
 import keras.backend as K
-import matplotlib.pyplot as plt
 import numpy as np
-import itertools as it
 
 """
 This script is used to train DQN models and Hierarchical-DQN models.
@@ -35,7 +33,6 @@ learn_param = {
     'nb_epoch' : 100,
     'steps' : 5000,
     'batch_size' : 40,
-    'state_predictor_watch' : 15,
     'memory_size' : 10000,
     'nb_frames' : 3,
     'alpha' : [1.0, 0.1],
@@ -43,11 +40,11 @@ learn_param = {
     'alpha_wait' : 10,
     'gamma' : 0.9,
     'epsilon' : [1.0, 0.1],
-    'epsilon_rate' : 0.7,
+    'epsilon_rate' : 0.35,
     'epislon_wait' : 10,
     'nb_tests' : 20,
 }
-training = 'HDQN'
+training = 'Distilled-HDQN'
 training_arg = [4,]
 
 
@@ -74,22 +71,10 @@ def train_heirarchical_model():
     '''
     # Initiates VizDoom Scenario
     doom = DoomScenario(scenario)
+    resolution = doom.get_processed_state(depth_radius, depth_contrast).shape[-2:]
 
     # Initiates Hierarchical-DQN model and loads Sub-models
-    acts = [list(a) for a in it.product([0, 1], repeat=5)]
-    actions_1 = []
-    actions_2 = []
-    for i in range(len(acts)):
-        if i < 16: actions_1.append(acts[i])
-        if i % 8 == 0: actions_2.append(acts[i])
-    model_rigid_turning = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], actions=actions_1, depth_radius=1.0, depth_contrast=0.9)
-    model_rigid_turning.load_weights('double_dqlearn_DQNModel_rigid_turning.h5')
-    model_exit_finding = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], actions=actions_1, depth_radius=1.0, depth_contrast=0.9)
-    model_exit_finding.load_weights('double_dqlearn_DQNModel_exit_finding.h5')
-    model_doors = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], actions=actions_2, depth_radius=1.0, depth_contrast=0.1)
-    model_doors.load_weights('double_dqlearn_DQNModel_doors.h5')
-    models = [model_rigid_turning, model_exit_finding, model_doors]
-    model = HDQNModel(sub_models=models, skill_frame_skip=training_arg[0], resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], actions=[], depth_radius=depth_radius, depth_contrast=depth_contrast)
+    model = all_skills_HDQN(resolution, training_arg[0], depth_radius, depth_contrast, learn_param)
     if model_weights: model.load_weights(model_weights)
     agent = RLAgent(model, **learn_param)
 
@@ -103,32 +88,16 @@ def train_distilled_model():
     '''
     # Initiates VizDoom Scenario
     doom = DoomScenario(scenario)
+    resolution = doom.get_processed_state(depth_radius, depth_contrast).shape[-2:]
 
     # Load Hierarchical-DQN and Sub-models
-    acts = [list(a) for a in it.product([0, 1], repeat=5)]
-    actions_1 = []
-    actions_2 = []
-    for i in range(len(acts)):
-        if i < 16: actions_1.append(acts[i])
-        if i % 8 == 0: actions_2.append(acts[i])
-    model_rigid_turning = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], actions=actions_1, depth_radius=1.0, depth_contrast=0.9)
-    model_rigid_turning.load_weights('double_dqlearn_DQNModel_rigid_turning.h5')
-    model_exit_finding = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], actions=actions_1, depth_radius=1.0, depth_contrast=0.9)
-    model_exit_finding.load_weights('double_dqlearn_DQNModel_exit_finding.h5')
-    model_doors = DQNModel(resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], actions=actions_2, depth_radius=1.0, depth_contrast=0.1)
-    model_doors.load_weights('double_dqlearn_DQNModel_doors.h5')
-    models = [model_rigid_turning, model_exit_finding, model_doors]
-    teacher_model = HDQNModel(sub_models=models, skill_frame_skip=training_arg[0], resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], actions=[], depth_radius=1.0, depth_contrast=0.5)
+    teacher_model = all_skills_HDQN(resolution, training_arg[0], depth_radius, depth_contrast, learn_param)
     teacher_model.load_weights('double_dqlearn_HDQNModel_all_skills.h5')
     teacher_agent = RLAgent(teacher_model, **learn_param)
 
     # Initiate Distilled Model
-    student_model = DQNModel(distilled=True, resolution=doom.get_processed_state(depth_radius, depth_contrast).shape[-2:], nb_frames=learn_param['nb_frames'], actions=doom.actions, depth_radius=depth_radius, depth_contrast=depth_contrast)
-    def cat_cross_loss(y_true, y_pred):
-        y_true = K.clip(y_true, K.epsilon(), 1)
-        y_pred = K.clip(y_pred, K.epsilon(), 1)
-        return K.sum(y_true * K.log(y_true / y_pred), axis=-1)
-    student_model.online_network.compile(optimizer=Adadelta(), loss=cat_cross_loss)
+    student_model = DQNModel(distilled=True, resolution=resolution, nb_frames=learn_param['nb_frames'], actions=doom.actions, depth_radius=depth_radius, depth_contrast=depth_contrast)
+    student_model.online_network.compile(optimizer='adagrad', loss='kullback_leibler_divergence')
     student_agent = RLAgent(student_model, **learn_param)
 
     # Preform Transfer Learning on Scenario by distilling Hierarchical-DQN model
