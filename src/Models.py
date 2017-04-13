@@ -363,12 +363,12 @@ def all_skills_shooting_HDQN(resolution, skill_frame_skips, depth_radius, depth_
     actions_1 = []
     actions_2 = []
     for i in range(len(acts)):
-        if i < 32: actions_1.append(acts[i])
+        if acts[i][0] != 1: actions_1.append(acts[i])
         if acts[i][1] != 1 and acts[i][2] != 1 and acts[i][3] != 1: actions_2.append(acts[i])
     model_all_skills = DQNModel(resolution=resolution, nb_frames=param['nb_frames'], actions=actions_1, depth_radius=1.0, depth_contrast=0.5)
     model_all_skills.load_weights('distilled_HDQNModel_all_skills.h5')
     model_shooting = DQNModel(resolution=resolution, nb_frames=param['nb_frames'], actions=actions_2, depth_radius=1.0, depth_contrast=0.75)
     model_shooting.load_weights('double_dqlearn_DQNModel_shooting.h5')
-    models = [model_all_skills, model_shooting]
+    models = [model_shooting, model_all_skills]
     model = HDQNModel(sub_models=models, skill_frame_skip=skill_frame_skips, resolution=resolution, nb_frames=param['nb_frames'], actions=[], depth_radius=depth_radius, depth_contrast=depth_contrast)
     return model

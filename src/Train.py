@@ -12,7 +12,6 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 from RLAgent import RLAgent
 from DoomScenario import DoomScenario
 from Models import DQNModel, HDQNModel, all_skills_HDQN
-from keras.optimizers import RMSprop, SGD, Adadelta
 import keras.backend as K
 import numpy as np
 
@@ -44,8 +43,8 @@ learn_param = {
     'epislon_wait' : 10,
     'nb_tests' : 20,
 }
-training = 'Distilled-HDQN'
-training_arg = [4,]
+training = 'HDQN'
+training_arg = [4,'all_skills_shooting']
 
 
 def train_model():
@@ -74,7 +73,10 @@ def train_heirarchical_model():
     resolution = doom.get_processed_state(depth_radius, depth_contrast).shape[-2:]
 
     # Initiates Hierarchical-DQN model and loads Sub-models
-    model = all_skills_HDQN(resolution, training_arg[0], depth_radius, depth_contrast, learn_param)
+    if training_arg[1] == 'all_skills_shooting':
+        model = all_skills_shooting_HDQN(resolution, training_arg[0], depth_radius, depth_contrast, learn_param)
+    else:
+        model = all_skills_HDQN(resolution, training_arg[0], depth_radius, depth_contrast, learn_param)
     if model_weights: model.load_weights(model_weights)
     agent = RLAgent(model, **learn_param)
 
@@ -97,7 +99,7 @@ def train_distilled_model():
 
     # Initiate Distilled Model
     student_model = DQNModel(distilled=True, resolution=resolution, nb_frames=learn_param['nb_frames'], actions=doom.actions, depth_radius=depth_radius, depth_contrast=depth_contrast)
-    student_model.online_network.compile(optimizer='adagrad', loss='kullback_leibler_divergence')
+    student_model.online_network.compile(optimizer='adadelta', loss='kullback_leibler_divergence')
     student_agent = RLAgent(student_model, **learn_param)
 
     # Preform Transfer Learning on Scenario by distilling Hierarchical-DQN model

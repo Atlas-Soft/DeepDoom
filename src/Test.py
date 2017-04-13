@@ -13,7 +13,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from RLAgent import RLAgent
 from DoomScenario import DoomScenario
-from Models import DQNModel, HDQNModel, StatePredictionModel, all_skills_HDQN
+from Models import DQNModel, HDQNModel, StatePredictionModel, all_skills_HDQN, all_skills_shooting_HDQN
 
 """
 This script is used to run test on trained DQN models, trained Hierarchical-DQN models,
@@ -22,7 +22,7 @@ and allow human play to test out scenarios.
 """
 
 # Testing Parameters
-scenario = 'all_skills.cfg'
+scenario = 'all_skills_shooting.cfg'
 model_weights = "distilled_HDQNModel_all_skills.h5"
 depth_radius = 1.0
 depth_contrast = 0.5
@@ -31,7 +31,7 @@ test_param = {
     'nb_frames' : 3
 }
 nb_runs = 5
-testing = 'DQN'
+testing = 'HDQN'
 
 def test_model(runs=1):
     '''
@@ -74,8 +74,8 @@ def test_heirarchical_model(runs=1):
     resolution = doom.get_processed_state(depth_radius, depth_contrast).shape[-2:]
 
     # Load Hierarchical-DQN and Sub-models
-    model = all_skills_HDQN(resolution, 4, depth_radius, depth_contrast, test_param)
-    model.load_weights(model_weights)
+    model = all_skills_shooting_HDQN(resolution, 4, depth_radius, depth_contrast, test_param)
+    #model.load_weights(model_weights)
     agent = RLAgent(model, **test_param)
 
     # Run Scenario and play replay using Hierarchical-DQN
