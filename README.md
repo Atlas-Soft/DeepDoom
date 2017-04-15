@@ -27,7 +27,7 @@ Despite improvements to game-playing Artificial Intelligence (AI), game AI rely 
 “under the hood” of their respective games in order to gain access to the various internal variables,
 thus holding an unfair advantage over their human counterparts. However, ally and enemy NPCs (non-playable characters)
 are typically designed to keep the human player engaged with a fair challenge. When set on easier difficulty settings,
-AIs are typically considered “pushovers,” while on harder difficulty settings, AIs are capable of playing near “perfect.”
+AI are typically considered “pushovers,” while on harder difficulty settings, they are capable of playing near “perfect.”
 In order to design a more balanced and enjoyable experience, it may be more suitable for agents to behave similar to
 a human player using the same available environmental information.
 
