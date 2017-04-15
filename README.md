@@ -1,4 +1,4 @@
-# DeepDoom: Navigating 3D Environments Visually Using Hierarchical Deep Q-Networks and Distilled Knowledge
+# DeepDoom: Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks
 
 ![Current Version](https://img.shields.io/badge/build-alpha-orange.svg)
 ![License](https://badges.frapsoft.com/os/mit/mit.svg?v=102)
