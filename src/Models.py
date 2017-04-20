@@ -15,6 +15,7 @@ Keras uses TensorFlow and Theano as back-ends.
 import itertools as it
 import numpy as np
 np.set_printoptions(precision=3)
+import keras.callbacks as KC
 import keras.backend as K
 K.set_image_data_format("channels_first")
 from keras.models import Model
@@ -75,6 +76,8 @@ class DQNModel:
         self.target_network = None
         self.state_predictor = None
         #self.online_network.summary()
+        tbcall = KC.TensorBoard(log_dir="../doc/logs", histogram_freq=0, write_graph=True, write_images=True)
+        tbcall.set_model(self)
 
     def predict(self, game, q):
         '''
@@ -185,6 +188,8 @@ class HDQNModel:
         self.target_network = None
         self.state_predictor = None
         #self.online_network.summary()
+        tbcall = KC.TensorBoard(log_dir="../doc/logs", histogram_freq=0, write_graph=True, write_images=True)
+        tbcall.set_model(self)
 
     def update_submodel_frames(self, game):
         # Keep track of sub-model frames for predictions
@@ -323,6 +328,9 @@ class StatePredictionModel:
 
         self.autoencoder_network = Model(input=[x0, x1], output=[y0,])
         self.autoencoder_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
+        
+        tbcall = KC.TensorBoard(log_dir="../doc/logs", histogram_freq=0, write_graph=True, write_images=True)
+        tbcall.set_model(self)
 
     def load_weights(self, filename):
         '''
