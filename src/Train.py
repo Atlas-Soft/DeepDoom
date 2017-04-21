@@ -11,7 +11,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 from RLAgent import RLAgent
 from DoomScenario import DoomScenario
-from Models import DQNModel, HDQNModel, all_skills_HDQN
+from Models import DQNModel, HDQNModel, all_skills_HDQN, all_skills_shooting_HDQN
 import keras.backend as K
 import numpy as np
 
@@ -21,7 +21,7 @@ This script is used to train DQN models and Hierarchical-DQN models.
 """
 
 # Training Parameters
-scenario = 'all_skills.cfg'
+scenario = 'all_skills_shooting.cfg'
 model_weights = None
 depth_radius = 1.0
 depth_contrast = 0.5

@@ -20,6 +20,7 @@ K.set_image_data_format("channels_first")
 from keras.models import Model
 from keras.layers import *
 from keras.optimizers import RMSprop, SGD
+from keras.utils import plot_model
 from sklearn.preprocessing import normalize
 
 class DQNModel:
@@ -75,6 +76,7 @@ class DQNModel:
         self.target_network = None
         self.state_predictor = None
         #self.online_network.summary()
+        #plot_model(self.online_network, to_file='../doc/model.png', show_shapes=True, show_layer_names=False)
 
     def predict(self, game, q):
         '''
@@ -366,7 +368,7 @@ def all_skills_shooting_HDQN(resolution, skill_frame_skips, depth_radius, depth_
         if acts[i][0] != 1: actions_1.append(acts[i])
         if acts[i][1] != 1 and acts[i][2] != 1 and acts[i][3] != 1: actions_2.append(acts[i])
     model_all_skills = DQNModel(resolution=resolution, nb_frames=param['nb_frames'], actions=actions_1, depth_radius=1.0, depth_contrast=0.5)
-    model_all_skills.load_weights('distilled_HDQNModel_all_skills.h5')
+    model_all_skills.load_weights('distilled_HDQNModel_all_skills_ui.h5')
     model_shooting = DQNModel(resolution=resolution, nb_frames=param['nb_frames'], actions=actions_2, depth_radius=1.0, depth_contrast=0.75)
     model_shooting.load_weights('double_dqlearn_DQNModel_shooting.h5')
     models = [model_shooting, model_all_skills]
