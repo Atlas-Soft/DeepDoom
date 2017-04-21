@@ -77,12 +77,9 @@ class DQNModel:
         self.target_network = None
         self.state_predictor = None
         #self.online_network.summary()
-<<<<<<< HEAD
         #plot_model(self.online_network, to_file='../doc/model.png', show_shapes=True, show_layer_names=False)
-=======
         tbcall = KC.TensorBoard(log_dir="../doc/logs", histogram_freq=0, write_graph=True, write_images=True)
         tbcall.set_model(self)
->>>>>>> e75eb090d6cdfd79c5d821fe6ca634b08ac4cc65
 
     def predict(self, game, q):
         '''
@@ -333,7 +330,7 @@ class StatePredictionModel:
 
         self.autoencoder_network = Model(input=[x0, x1], output=[y0,])
         self.autoencoder_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
-        
+
         tbcall = KC.TensorBoard(log_dir="../doc/logs", histogram_freq=0, write_graph=True, write_images=True)
         tbcall.set_model(self)
 
