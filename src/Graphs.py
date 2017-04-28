@@ -14,7 +14,7 @@ if __name__ == '__main__':
         plt.plot(max_, color='#e6e6e6')
         plt.fill_between(list(range(len(avg_))), min_,max_,interpolate=True,color='#e6e6e6')
         plt.plot(avg_, color='blue')
-        if filename == 'double-dqlearn_HDQNModel_all-skills.csv':
+        if filename == 'distilled_HDQNModel_all-skills.csv':
             plt.title('Distilled h-DQN on Composite Scenario', fontsize=16)
         else:
             plt.title('Training Reward, Algo: ' + labels[0] + ', Model: '  + labels[1] + ', Config: ' + labels[2], fontsize=10)
