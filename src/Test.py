@@ -22,10 +22,10 @@ and allow human play to test out scenarios.
 """
 
 # Testing Parameters
-scenario = 'all_skills.cfg'
-model_weights = "distilled_HDQNModel_all_skills.h5"
+scenario = 'shooting.cfg'
+model_weights = "double_dqlearn_DQNModel_shooting.h5"
 depth_radius = 1.0
-depth_contrast = 0.5
+depth_contrast = 0.75
 test_param = {
     'frame_skips' : 4,
     'nb_frames' : 3
@@ -74,7 +74,7 @@ def test_heirarchical_model(runs=1):
     resolution = doom.get_processed_state(depth_radius, depth_contrast).shape[-2:]
 
     # Load Hierarchical-DQN and Sub-models
-    model = all_skills_shooting_HDQN(resolution, 4, depth_radius, depth_contrast, test_param)
+    model = all_skills_HDQN(resolution, 4, depth_radius, depth_contrast, test_param)
     model.load_weights(model_weights)
     agent = RLAgent(model, **test_param)
 
