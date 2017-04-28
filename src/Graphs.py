@@ -14,8 +14,10 @@ if __name__ == '__main__':
         plt.plot(max_, color='#e6e6e6')
         plt.fill_between(list(range(len(avg_))), min_,max_,interpolate=True,color='#e6e6e6')
         plt.plot(avg_, color='blue')
-        if filename == 'double-dqlearn_HDQNModel_all-skills.csv'
-        plt.title('Training Reward, Algo: ' + labels[0] + ', Model: '  + labels[1] + ', Config: ' + labels[2], fontsize=10)
+        if filename == 'double-dqlearn_HDQNModel_all-skills.csv':
+            plt.title('Distilled h-DQN on Composite Scenario', fontsize=16)
+        else:
+            plt.title('Training Reward, Algo: ' + labels[0] + ', Model: '  + labels[1] + ', Config: ' + labels[2], fontsize=10)
         plt.ylabel('Average Reward Per Epoch')
         plt.xlabel('Training Epochs')
         plt.savefig("../doc/figures/" + filename[:-4] + "_training_results.png")
@@ -31,8 +33,8 @@ if __name__ == '__main__':
     plt.fill_between(list(range(len(avg_))), min_,max_,interpolate=True,color='#e6e6e6')
     line1, = plt.plot(avg_, color='blue', label='h-DQN')
     line2, = plt.plot(data_0[:,1], color='red', label='DQN')
-    plt.legend(handles=[line1, line2])
-    plt.title('Training Reward, DQN vs h-DQN, Config: All-Skills', fontsize=10)
+    plt.legend(handles=[line1, line2], loc='center left', bbox_to_anchor=(0.775, 0.2))
+    plt.title('h-DQN vs DQN on Composite Scenario', fontsize=16)
     plt.ylabel('Average Reward Per Epoch')
     plt.xlabel('Training Epochs')
     plt.savefig("../doc/figures/all_skills_HDQNvsDQN_training_results.png")
