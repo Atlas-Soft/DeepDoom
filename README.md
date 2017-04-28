@@ -32,25 +32,25 @@ they utilize the same available environmental information. While this does not r
 AIs, this design may provide a more balanced and enjoyable experience for players while challenging the possibilities of a 
 human-like behaving agents.
 
-Google DeepMind’s paper, Playing Atari with Deep Reinforcement Learning [1](https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf), showed the feasibility of game playing using only 
-visual input. This was done by combining Deep Convolutional Neural Networks (CNNs) with Q-Learning, forming Deep Q-Networks \
-(DQNs). Agents trained via DQNs were able to learn and play two-dimensional (2D) Atari 2600 games such as Pong, Breakout, and 
-Space Invaders. In other words, DQNs guided the agent towards the best policy using positive or negative responses from the \
-game’s respective environment. Since then, there has been an interest in researching the applications of these same 
-reinforcement learning techniques to train agents within three-dimensional (3D) environments such as Doom and Minecraft [2](https://www.ijcai.org/Proceedings/16/Papers/643.pdf).
+Google DeepMind’s paper, [Playing Atari with Deep Reinforcement Learning](https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf), showed the 
+feasibility of game playing using only visual input. This was done by combining Deep Convolutional Neural Networks (CNNs) with Q-Learning, 
+forming Deep Q-Networks (DQNs). Agents trained via DQNs were able to learn and play two-dimensional (2D) Atari 2600 games such as Pong, 
+Breakout, and Space Invaders. In other words, DQNs guided the agent towards the best policy using positive or negative responses from the
+game’s respective environment. Since then, there has been an interest in researching the applications of these same reinforcement learning 
+techniques to train agents within three-dimensional (3D) environments such as Doom and [Minecraft](https://www.ijcai.org/Proceedings/16/Papers/643.pdf).
 
-The Doom series [3] began in 1993 with the release of the first game, DOOM, and it has since sparked countless adaptations of 
+The Doom series began in 1993 with the release of the first game, DOOM, and it has since sparked countless adaptations of 
 3D first-person shooter (FPS) games. These environments heightened the video game complexity with the incorporation of depth, 
 providing another factor when designing agents. The relevancy of Doom to Artificial Intelligence can be contributed to the AI 
-research platform ViZDoom [4](https://arxiv.org/pdf/1605.02097.pdf) alongside the scenario customization software Doom Builder [5] and Slade, which are both 
-compilers for the ACS (Action Code Script) scripting language used by ViZDoom. ViZDoom allows programmers to test reinforcement 
-learning techniques within the environment of Doom. Its Visual Doom AI Competitions [6], as well as previous research [7](https://arxiv.org/pdf/1609.05521.pdf), 
+research platform [ViZDoom](https://arxiv.org/pdf/1605.02097.pdf) alongside the scenario customization software Doom Builder and Slade, which 
+are both compilers for the ACS (Action Code Script) scripting language used by ViZDoom. ViZDoom allows programmers to test reinforcement 
+learning techniques within the environment of Doom. Its Visual Doom AI Competitions, as well as [previous research](https://arxiv.org/pdf/1609.05521.pdf), 
 proved the feasibility of teaching agents to sufficiently play Doom using DQNs. However, they mainly focused on the combat 
 aspect of Doom, with only a minor focus on the navigation aspect (via item and health pickups).
 
-For this project, we propose to create an agent capable of solving complex navigational problems using a hierarchical 
-implementation of the Deep Q-Networks [8](https://arxiv.org/pdf/1604.07255.pdf), expanding on ViZDoom’s experimentations but heavily focusing on navigation. We will 
-first utilize DQN models to separately train simple tasks and then integrate these as sub-models in a Hierarchical Deep 
+For this project, we propose to create an agent capable of solving complex navigational problems using a [hierarchical 
+implementation of the Deep Q-Networks](https://arxiv.org/pdf/1604.07255.pdf), expanding on ViZDoom’s experimentations but heavily focusing on 
+navigation. We will first utilize DQN models to separately train simple tasks and then integrate these as sub-models in a Hierarchical Deep 
 Q-Network (h-DQN). In addition, we will investigate distilling trained h-DQNs into the simple DQN architecture for a more 
 resource-efficient execution. Increasingly-complex behaviors can then be achieved by incrementally aggregating distilled h-DQNs 
 with more skills into separate Hierarchical-DQNs, thus reflecting our goal of developing a more proficient Doom-playing 
