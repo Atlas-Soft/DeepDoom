@@ -1,9 +1,9 @@
-# DeepDoom: Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks
+# DeepDoom: Visually Navigating 3D Environments Using Distilled Hierarchical Deep Q-Networks
 
 ![Current Version](https://img.shields.io/badge/build-alpha-orange.svg)
 ![License](https://badges.frapsoft.com/os/mit/mit.svg?v=102)
 
-**Last Updated: April 2, 2016**
+**Last Updated: April 28, 2017**
 
 **DeepDoom Team:**
 
@@ -22,6 +22,7 @@
 4. [Getting Started](#getting-started)
 
 ## Introduction
+
 The design of Artificial Intelligence (AI) within video games is continually
 evolving alongside improvements to video games themselves. However, while ally
 and enemy NPCs (non-playable characters) are typically designed to keep the human
@@ -69,7 +70,7 @@ the number of resources—or separately-skilled sub-models—needed is significa
 reduced, the distillation process retains key behavioral information to run
 comparably to its hierarchical counterpart.
 
-For more information, [DeepDoom: Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks](DeepDoom_Paper.pdf)
+For more information, please read our full project report [DeepDoom: Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks](DeepDoom_Paper.pdf)
 
 For a demo of the project, [![DeepDoom_demo](http://img.youtube.com/vi/2nkxgygqjKg/0.jpg)](http://www.youtube.com/watch?v=2nkxgygqjKg)
 
@@ -120,6 +121,7 @@ The following are descriptions of the scenarios:
 ### Scenario 2 : Exit Finding
 
 ![exit_finding_map](doc/figures/exit_finding.PNG)
+
 #### Description:
  - The purpose of this scenario is to train the agent how to locate an exit from a room and move towards that exit, which is merely a long hallway branching off of the room.
  - The map is a square room with a long 128-unit-wide corridor leading out of it and randomly determined ceiling, floor, and wall textures at the time of loading the map.
