@@ -18,6 +18,14 @@ import numpy as np
 np.seterr(divide='ignore', invalid='ignore')
 from tqdm import tqdm
 
+def softmax(x, t):
+    '''
+    Method defines softmax function
+
+    '''
+    e_x = np.exp(x - np.max(x))/t
+    return e_x / e_x.sum(axis=0)
+
 class DoomScenario:
     """
     DoomScenario class runs instances of Vizdoom according to scenario
@@ -111,7 +119,9 @@ class DoomScenario:
         while not self.game.is_episode_finished():
             S = agent.get_state_data(self)
             q = agent.model.online_network.predict(S)
-            q = int(np.argmax(q[0]))
+            if np.random.random() < 0.1:
+                q = np.random.choice(len(q[0]), 1, p=softmax(q[0], 1))[0]
+            else: q = int(np.argmax(q[0]))
             a = agent.model.predict(self, q)
             if return_data:
                 delta = np.zeros((len(self.actions)))
@@ -119,12 +129,15 @@ class DoomScenario:
                 delta[a_] = 1
                 data_S.append(S.reshape(S.shape[1], S.shape[2], S.shape[3]))
                 data_a.append(delta)
-            if not self.game.is_episode_finished(): self.play(a, agent.frame_skips+1)
-            if agent.model.__class__.__name__ == 'HDQNModel':
+            if not self.game.is_episode_finished():
+                self.play(a, agent.frame_skips+1)
+            if agent.model.__class__.__name__ == 'HDQNModel' and not self.game.is_episode_finished():
                 if q >= len(agent.model.actions):
                     for i in range(agent.model.skill_frame_skip):
-                        a = agent.model.predict(self, q)
-                        if not self.game.is_episode_finished(): self.play(a, agent.frame_skips+1)
+                        if not self.game.is_episode_finished():
+                            a = agent.model.predict(self, q)
+                            self.play(a, agent.frame_skips+1)
+                        else: break
 
         # Reset Agent and Return Score
         agent.frames = None
@@ -150,7 +163,6 @@ class DoomScenario:
         self.game.close()
         self.game.set_screen_resolution(ScreenResolution.RES_800X600)
         self.game.set_window_visible(True)
-        self.game.set_ticrate(30)
         self.game.add_game_args("+vid_forcesurface 1")
         if doom_like:
             self.game.set_render_hud(True)

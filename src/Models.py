@@ -72,14 +72,14 @@ class DQNModel:
         else:
             self.y0 = Dense(self.nb_actions)(m)
 
-        self.online_network = Model(input=self.x0, output=self.y0)
+        self.online_network = Model(inputs=self.x0, outputs=self.y0)
         self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
         self.target_network = None
         self.state_predictor = None
         #self.online_network.summary()
         #plot_model(self.online_network, to_file='../doc/model.png', show_shapes=True, show_layer_names=False)
-        tbcall = KC.TensorBoard(log_dir="../doc/logs", histogram_freq=0, write_graph=True, write_images=True)
-        tbcall.set_model(self)
+        #tbcall = KC.TensorBoard(log_dir="../doc/logs", histogram_freq=0, write_graph=True, write_images=True)
+        #tbcall.set_model(self)
 
     def predict(self, game, q):
         '''
@@ -185,13 +185,13 @@ class HDQNModel:
         # Output Layer
         self.y0 = Dense(self.nb_actions)(m)
 
-        self.online_network = Model(input=self.x0, output=self.y0)
+        self.online_network = Model(inputs=self.x0, outputs=self.y0)
         self.online_network.compile(optimizer=self.optimizer, loss=self.loss_fun)
         self.target_network = None
         self.state_predictor = None
         #self.online_network.summary()
-        tbcall = KC.TensorBoard(log_dir="../doc/logs", histogram_freq=0, write_graph=True, write_images=True)
-        tbcall.set_model(self)
+        #tbcall = KC.TensorBoard(log_dir="../doc/logs", histogram_freq=0, write_graph=True, write_images=True)
+        #tbcall.set_model(self)
 
     def update_submodel_frames(self, game):
         # Keep track of sub-model frames for predictions

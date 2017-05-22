@@ -76,7 +76,7 @@ class RLAgent:
 
 		# Set Double Deep Q-Learning parameters
 		if self.learn_algo == "double_dqlearn" or self.learn_algo == "dispersed_double_dqlearn":
-			self.model.target_network = Model(input=self.model.x0, output=self.model.y0)
+			self.model.target_network = Model(inputs=self.model.x0, outputs=self.model.y0)
 			self.model.target_network.set_weights(self.model.online_network.get_weights())
 			self.model.target_network.compile(optimizer=self.model.optimizer, loss=self.model.loss_fun)
 			self.target_update = target_update

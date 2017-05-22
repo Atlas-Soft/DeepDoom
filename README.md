@@ -15,50 +15,63 @@
 ### Table of Contents:
 1. [Introduction](#introduction)
 2. [Scenarios](#scenarios)
- - [Rigid Turning](#scenario-1--rigid-turning)
- - [Exit Finding](#scenario-2--exit-finding)
- - [Doors](#scenario-3--doors)
+  - [Rigid Turning](#scenario-1--rigid-turning)
+  - [Exit Finding](#scenario-2--exit-finding)
+  - [Doors](#scenario-3--doors)
 3. [Results](#results)
 4. [Getting Started](#getting-started)
 
 ## Introduction
-
-Despite improvements to game-playing Artificial Intelligence (AI), game AI rely on looking
-“under the hood” of their respective games in order to gain access to the various internal variables,
-thus holding an unfair advantage over their human counterparts. However, ally and enemy NPCs (non-playable characters)
-are typically designed to keep the human player engaged with a fair challenge. When set on easier difficulty settings,
-AI are typically considered “pushovers,” while on harder difficulty settings, they are capable of playing near “perfect.”
-In order to design a more balanced and enjoyable experience, it may be more suitable for agents to behave similar to
-a human player using the same available environmental information.
+The design of Artificial Intelligence (AI) within video games is continually
+evolving alongside improvements to video games themselves. However, while ally
+and enemy NPCs (non-playable characters) are typically designed to keep the human
+player engaged with a fair challenge, their behaviors can differ drastically from
+that of human players, namely due to their reliance on “under the hood” data and
+access to internal game variables. This holds an unfair advantage over their human
+counterparts, who may identify this behavior as unnatural or unfair. We believe
+that AIs may behave with greater similarity to human player behavior if they make
+judgements based upon the same available environmental information. While this does
+not represent the immediate future for game-playing AIs, this design may provide
+a more balanced and enjoyable experience for players while challenging the
+possibilities of human-like behaving agents.
 
 Google DeepMind’s paper, [Playing Atari With Deep Reinforcement Learning](https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf),
-shows the feasibility of game playing using only visual input. This was done by combining Deep Convolutional Neural
-Networks (CNNs) with Q-Learning, forming Deep Q-Networks (DQNs). Agents trained via DQNs were able to learn and play
-two-dimensional (2D) Atari 2600 games such as Pong, Breakout, and Space Invaders. In other words, DQNs guided the agent
-towards the best policy using positive or negative responses from the game’s respective environments. Since then, there
-has been an ample amount of research into applying these same reinforcement learning techniques to train agents within
-three-dimensional (3D) environments such as [Minecraft](https://www.ijcai.org/Proceedings/16/Papers/643.pdf) and Doom.
+showed the feasibility of game playing using only visual input. This was done by
+combining Deep Convolutional Neural Networks (CNNs) with Q-Learning, forming Deep
+Q-Networks (DQNs). Agents trained via DQNs were able to learn and play two-dimensional
+(2D) Atari 2600 games such as Pong, Breakout, and Space Invaders. In other words,
+DQNs guided the agent towards the best policy using positive or negative responses
+from the game’s respective environments. Since then, there has been an interest in
+researching the applications of these same reinforcement learning techniques to
+train agents within three-dimensional (3D) environments such as Doom and
+[Minecraft](https://www.ijcai.org/Proceedings/16/Papers/643.pdf).
 
-The Doom series began in 1993 with the release of the first game, DOOM, and it has since sparked
-countless adaptations of 3D first-person shooter (FPS) games. These environments heightened the level design complexity
-with the incorporation of depth, providing another factor when designing agents. The relevancy of Doom with Artificial
-Intelligence can be contributed to the AI research platform [ViZDoom](https://arxiv.org/pdf/1605.02097.pdf) alongside
-the scenario customization software Doom Builder and Slade (of which we used Doom Builder). ViZDoom allows programmers
-to test reinforcement learning techniques within the environment of Doom. Its Visual Doom AI Competitions, as well as
-[previous research](https://arxiv.org/pdf/1609.05521.pdf), proved the feasibility of teaching agents to sufficiently
-play Doom using DQNs. However, they mainly focused on the combat aspect of Doom, with only a minor focus on the
-navigation aspect (via item and health pickups).
+The Doom series began in 1993 with the release of the first game, DOOM, and it
+has since sparked countless adaptations of 3D first-person shooter (FPS) games.
+These environments heightened the level design complexity with the incorporation
+of depth, providing another factor when designing agents. The relevancy of Doom
+with Artificial Intelligence can be contributed to the AI research platform
+[ViZDoom](https://arxiv.org/pdf/1605.02097.pdf) alongside the scenario customization
+software Doom Builder and Slade, which are both compilers for the ACS (Action Code Script)
+scripting language used by ViZDoom. ViZDoom allows programmersto test reinforcement
+learning techniques within the environment of Doom. Its Visual Doom AI Competitions,
+as well as [previous research](https://arxiv.org/pdf/1609.05521.pdf), proved the
+feasibility of teaching agents to sufficiently play Doom using DQNs.
 
-For our capstone project, we created an agent capable of solving complex navigational problems using a
-[hierarchical implementation](https://arxiv.org/pdf/1604.07255.pdf) of the Deep Q-Networks, expanding on ViZDoom’s
-experimentations except with a heavier focus on navigation. We first utilized DQN models to separately train
-simple tasks (such as turning and finding exits) and then integrated these as sub-models in a Hierarchical
-Deep Q-Network (h-DQN) model. In addition, we distilled, or compressed, trained h-DQN models
-into the simple DQN architecture for a more resource-efficient execution. Increasingly-complex behaviors were achieved 
-by incrementally-aggregating distilled h-DQN models with other skills into other Hierarchical-DQN models,
-reflecting our goal of developing a more visually fit Doom-playing Artificial Intelligence.
+For this project, we created an agent capable of solving complex navigational problems
+using a [hierarchical implementation](https://arxiv.org/pdf/1604.07255.pdf) of the
+Deep Q-Networks, expanding on ViZDoom’s experimentations, butheavily focusing on
+navigation. We first utilized DQN models to separately train simple tasks (such
+as turning and finding exits) and then integrated these as sub-models in a Hierarchical
+Deep Q-Network (h-DQN) model. In addition, we investigated distilling trained h-DQNs
+into the simple DQN architecture for a more resource-efficient execution. While
+the number of resources—or separately-skilled sub-models—needed is significantly
+reduced, the distillation process retains key behavioral information to run
+comparably to its hierarchical counterpart.
 
 For more information, [DeepDoom: Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks](DeepDoom_Paper.pdf)
+
+For a demo of the project, [![DeepDoom_demo](http://img.youtube.com/vi/2nkxgygqjKg/0.jpg)](http://www.youtube.com/watch?v=2nkxgygqjKg)
 
 ## Scenarios
 
@@ -106,7 +119,7 @@ The following are descriptions of the scenarios:
 
 ### Scenario 2 : Exit Finding
 
-![exit_finding_map](webPhotos/exit_finding.PNG)
+![exit_finding_map](doc/figures/exit_finding.PNG)
 #### Description:
  - The purpose of this scenario is to train the agent how to locate an exit from a room and move towards that exit, which is merely a long hallway branching off of the room.
  - The map is a square room with a long 128-unit-wide corridor leading out of it and randomly determined ceiling, floor, and wall textures at the time of loading the map.
@@ -138,7 +151,7 @@ The following are descriptions of the scenarios:
 
 ### Scenario 3 : Doors
 
-![doors_map](webPhotos/Doors.PNG)
+![doors_map](doc/figures/Doors.PNG)
 #### Description:
  - The purpose of this scenario is to train the agent how to recognize and open doors.
  - The map is a straight rectangular corridor with 9 doors placed inside it and randomly determined ceiling, floor, and wall textures at the time of loading the map.
@@ -168,8 +181,6 @@ The following are descriptions of the scenarios:
 
 ## Results
 
-> Under Construction
-
 The DQN and HDQN models were trained on a machine with the following specs:
 
 ```
@@ -180,7 +191,7 @@ Nvidia GTX 750 Ti (2 GB VRAM)
 SanDisk SSD Plus 240GB
 ```
 
-The performance of the models are measured by averaging the total reward over 100 test runs after each training
+The performance of the models are measured by averaging the total reward over 50 test runs after each training
 epoch. A demonstration of each trained model in their respective training scenario is also provided.
 
 #### Comments and Observations:
@@ -241,6 +252,7 @@ All Navigation Skills training parameters can be found [here](doc/parameters/all
 ![all_skills_total_reward](doc/figures/double-dqlearn_HDQNModel_all-skills_training_results.png)
 
 #### Demo:
+[![All Skills Demo](http://img.youtube.com/vi/kxn1rogD3sI/0.jpg)](http://www.youtube.com/watch?v=kxn1rogD3sI)
 
 ---
 
@@ -252,8 +264,6 @@ Distilled All Navigation Skills training parameters can be found [here](doc/para
 
 ![distilled_all_skills_total_reward](doc/figures/distilled_HDQNModel_all-skills_training_results.png)
 
-#### Demo:
-
 ---
 
 ### Shooting
@@ -263,8 +273,6 @@ Shooting training parameters can be found [here](doc/parameters/shooting.md).
 #### Average Total Reward Per Epoch:
 
 ![shooting_total_reward](doc/figures/double-dqlearn_DQNModel_shooting_training_results.png)
-
-#### Demo:
 
 ## Getting Started
 
@@ -330,7 +338,7 @@ Total Score: 1209.0
 ```
 The following is the ViZDoom `test.lmp` replay:
 
-![replay_gif](webPhotos/DeepDoom_Rigid_Turning_Demo.gif)
+![replay_gif](doc/figures/DeepDoom_Rigid_Turning_Demo.gif)
 
 
 ### Wads, ViZdoom Configs, and Model Weights:
