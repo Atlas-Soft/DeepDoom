@@ -3,7 +3,7 @@
 ![Current Version](https://img.shields.io/badge/build-alpha-orange.svg)
 ![License](https://badges.frapsoft.com/os/mit/mit.svg?v=102)
 
-**Last Updated: April 28, 2017**
+**Last Updated: May 22, 2017**
 
 **DeepDoom Team:**
 
@@ -70,9 +70,10 @@ the number of resources—or separately-skilled sub-models—needed is significa
 reduced, the distillation process retains key behavioral information to run
 comparably to its hierarchical counterpart.
 
-For more information, please read our full project report [DeepDoom: Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks](DeepDoom_Paper.pdf)
+For more information, please read our full project report: 
+[DeepDoom: Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks](DeepDoom_Paper.pdf)
 
-For a demo of the project, [DeepDoom Demo](http://www.youtube.com/watch?v=2nkxgygqjKg)
+For a demo of the project, please watch: [DeepDoom Demo](http://www.youtube.com/watch?v=2nkxgygqjKg)
 
 ## Scenarios
 
@@ -89,7 +90,7 @@ The following are descriptions of the scenarios:
 
 ### Scenario 1 : Rigid Turning
 
-![rigid_turning_map](webPhotos/rigid_turning.PNG)
+![rigid_turning_map](doc/figures/rigid_turning.PNG)
 #### Description:
  - The purpose of this scenario is to train the agent how to navigate through corridors with sharp 90° turns.
  - The map is a rigid 2-shape, with randomly determined ceiling, floor, and wall textures at the time of loading the map.
@@ -299,8 +300,6 @@ Requires the following Python Packages:
 Download or clone repository and install required packages.
 
 ### Testing Models:
-
->*Model Weights currently unavailable*
 
 You can test out the different trained models by changing the testing parameters
 in [`Test.py`](src/Test.py):
