@@ -72,7 +72,7 @@ comparably to its hierarchical counterpart.
 
 For more information, please read our full project report [DeepDoom: Navigating 3D Environments Visually Using Distilled Hierarchical Deep Q-Networks](DeepDoom_Paper.pdf)
 
-For a demo of the project, [![DeepDoom_demo](http://img.youtube.com/vi/2nkxgygqjKg/0.jpg)](http://www.youtube.com/watch?v=2nkxgygqjKg)
+For a demo of the project, [DeepDoom Demo](http://www.youtube.com/watch?v=2nkxgygqjKg)
 
 ## Scenarios
 
